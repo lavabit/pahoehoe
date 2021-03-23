@@ -770,9 +770,9 @@ AuthorizeOrderLoop:
 		}
 		// Remove all hanging authorizations to reduce rate limit quotas
 		// after we're done.
-		defer func(urls []string) {
-			go m.deactivatePendingAuthz(urls)
-		}(o.AuthzURLs)
+		defer func() {
+			go m.deactivatePendingAuthz(o.AuthzURLs)
+		}()
 
 		// Check if there's actually anything we need to do.
 		switch o.Status {
@@ -1133,11 +1133,11 @@ func (s *certState) tlscert() (*tls.Certificate, error) {
 	}, nil
 }
 
-// certRequest generates a CSR for the given common name.
-func certRequest(key crypto.Signer, name string, ext []pkix.Extension) ([]byte, error) {
+// certRequest generates a CSR for the given common name cn and optional SANs.
+func certRequest(key crypto.Signer, cn string, ext []pkix.Extension, san ...string) ([]byte, error) {
 	req := &x509.CertificateRequest{
-		Subject:         pkix.Name{CommonName: name},
-		DNSNames:        []string{name},
+		Subject:         pkix.Name{CommonName: cn},
+		DNSNames:        san,
 		ExtraExtensions: ext,
 	}
 	return x509.CreateCertificateRequest(rand.Reader, req, key)

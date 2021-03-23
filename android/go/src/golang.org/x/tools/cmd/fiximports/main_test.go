@@ -4,7 +4,6 @@
 
 // No testdata on Android.
 
-//go:build !android
 // +build !android
 
 package main
@@ -213,7 +212,6 @@ import (
 			test.wantStderr = strings.Replace(test.wantStderr, `testdata/src/old.com/bad/bad.go`, `testdata\src\old.com\bad\bad.go`, -1)
 			test.wantStderr = strings.Replace(test.wantStderr, `testdata/src/fruit.io/banana/banana.go`, `testdata\src\fruit.io\banana\banana.go`, -1)
 		}
-		test.wantStderr = strings.TrimSpace(test.wantStderr)
 
 		// Check status code.
 		if fiximports(test.packages...) != test.wantOK {
@@ -221,12 +219,12 @@ import (
 		}
 
 		// Compare stderr output.
-		if got := strings.TrimSpace(stderr.(*bytes.Buffer).String()); got != test.wantStderr {
+		if got := stderr.(*bytes.Buffer).String(); got != test.wantStderr {
 			if strings.Contains(got, "vendor/golang_org/x/text/unicode/norm") {
 				t.Skip("skipping known-broken test; see golang.org/issue/17417")
 			}
-			t.Errorf("#%d. stderr: got <<\n%s\n>>, want <<\n%s\n>>",
-				i, got, test.wantStderr)
+			t.Errorf("#%d. stderr: got <<%s>>, want <<%s>>",
+				i, stderr, test.wantStderr)
 		}
 
 		// Compare rewrites.

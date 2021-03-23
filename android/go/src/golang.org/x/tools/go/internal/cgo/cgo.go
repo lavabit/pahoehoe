@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package cgo handles cgo preprocessing of files containing `import "C"`.
+package cgo
+
+// This file handles cgo preprocessing of files containing `import "C"`.
 //
 // DESIGN
 //
@@ -49,8 +51,6 @@
 // its handling of function calls, analogous to the treatment of map
 // lookups in which y=m[k] and y,ok=m[k] are both legal.
 
-package cgo
-
 import (
 	"fmt"
 	"go/ast"
@@ -60,11 +60,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	exec "golang.org/x/sys/execabs"
 )
 
 // ProcessFiles invokes the cgo preprocessor on bp.CgoFiles, parses
@@ -160,13 +159,14 @@ func Run(bp *build.Package, pkgdir, tmpdir string, useabs bool) (files, displayF
 	}
 
 	args := stringList(
-		"go", "tool", "cgo", "-srcdir", pkgdir, "-objdir", tmpdir, cgoflags, "--",
+		"go", "tool", "cgo", "-objdir", tmpdir, cgoflags, "--",
 		cgoCPPFLAGS, cgoexeCFLAGS, cgoFiles,
 	)
 	if false {
-		log.Printf("Running cgo for package %q: %s", bp.ImportPath, args)
+		log.Printf("Running cgo for package %q: %s (dir=%s)", bp.ImportPath, args, pkgdir)
 	}
 	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Dir = pkgdir
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {

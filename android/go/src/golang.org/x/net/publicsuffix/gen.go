@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build ignore
 // +build ignore
 
 package main
@@ -150,7 +149,7 @@ func main1() error {
 			return err
 		}
 		if res.StatusCode != http.StatusOK {
-			return fmt.Errorf("bad GET status for %s: %s", *url, res.Status)
+			return fmt.Errorf("bad GET status for %s: %d", *url, res.Status)
 		}
 		r = res.Body
 		defer res.Body.Close()
@@ -271,7 +270,7 @@ func gitCommit() (sha, date string, retErr error) {
 		return "", "", err
 	}
 	if res.StatusCode != http.StatusOK {
-		return "", "", fmt.Errorf("bad GET status for %s: %s", gitCommitURL, res.Status)
+		return "", "", fmt.Errorf("bad GET status for %s: %d", gitCommitURL, res.Status)
 	}
 	defer res.Body.Close()
 	b, err := ioutil.ReadAll(res.Body)

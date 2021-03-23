@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris windows
 
 /*
@@ -36,9 +35,9 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/hpack"
-	"golang.org/x/term"
 )
 
 // Flags
@@ -103,7 +102,7 @@ type h2i struct {
 	host   string
 	tc     *tls.Conn
 	framer *http2.Framer
-	term   *term.Terminal
+	term   *terminal.Terminal
 
 	// owned by the command loop:
 	streamID uint32
@@ -181,18 +180,18 @@ func (app *h2i) Main() error {
 
 	app.framer = http2.NewFramer(tc, tc)
 
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
 		return err
 	}
-	defer term.Restore(0, oldState)
+	defer terminal.Restore(0, oldState)
 
 	var screen = struct {
 		io.Reader
 		io.Writer
 	}{os.Stdin, os.Stdout}
 
-	app.term = term.NewTerminal(screen, "h2i> ")
+	app.term = terminal.NewTerminal(screen, "h2i> ")
 	lastWord := regexp.MustCompile(`.+\W(\w+)$`)
 	app.term.AutoCompleteCallback = func(line string, pos int, key rune) (newLine string, newPos int, ok bool) {
 		if key != '\t' {
@@ -273,7 +272,7 @@ func (app *h2i) readConsole() error {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("term.ReadLine: %v", err)
+			return fmt.Errorf("terminal.ReadLine: %v", err)
 		}
 		f := strings.Fields(line)
 		if len(f) == 0 {

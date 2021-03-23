@@ -46,7 +46,7 @@ import (
 	"golang.org/x/crypto/curve25519"
 	"golang.org/x/crypto/hkdf"
 
-	"github.com/OperatorFoundation/ed25519/extra25519"
+	"github.com/agl/ed25519/extra25519"
 
 	"github.com/OperatorFoundation/obfs4/common/csrand"
 )

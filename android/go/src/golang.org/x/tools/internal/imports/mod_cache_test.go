@@ -1,12 +1,7 @@
-// Copyright 2019 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package imports
 
 import (
 	"fmt"
-	"reflect"
 	"sort"
 	"testing"
 )
@@ -72,6 +67,7 @@ func TestModCacheInfo(t *testing.T) {
 				status:                 directoryScanned,
 				dir:                    "mypackage",
 				nonCanonicalImportPath: "example.com/mypackage",
+				needsReplace:           false,
 			},
 		},
 		{
@@ -86,6 +82,7 @@ func TestModCacheInfo(t *testing.T) {
 			info: directoryPackageInfo{
 				dir:                    "mypackage/other",
 				nonCanonicalImportPath: "example.com/mypackage/other",
+				needsReplace:           false,
 			},
 		},
 	}
@@ -100,7 +97,7 @@ func TestModCacheInfo(t *testing.T) {
 			t.Errorf("directory not loaded: %s", d.dir)
 		}
 
-		if !reflect.DeepEqual(d.info, val) {
+		if val != d.info {
 			t.Errorf("expected: %v, got: %v", d.info, val)
 		}
 	}

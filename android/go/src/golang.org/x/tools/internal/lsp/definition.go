@@ -9,44 +9,40 @@ import (
 
 	"golang.org/x/tools/internal/lsp/protocol"
 	"golang.org/x/tools/internal/lsp/source"
+	"golang.org/x/tools/internal/span"
 )
 
 func (s *Server) definition(ctx context.Context, params *protocol.DefinitionParams) ([]protocol.Location, error) {
-	snapshot, fh, ok, release, err := s.beginFileRequest(ctx, params.TextDocument.URI, source.Go)
-	defer release()
-	if !ok {
-		return nil, err
-	}
-	ident, err := source.Identifier(ctx, snapshot, fh, params.Position)
+	uri := span.NewURI(params.TextDocument.URI)
+	view := s.session.ViewOf(uri)
+	f, err := view.GetFile(ctx, uri)
 	if err != nil {
 		return nil, err
 	}
-	if !snapshot.View().Options().ImportShortcut.ShowDefinition() {
-		return nil, nil
+	ident, err := source.Identifier(ctx, view, f, params.Position)
+	if err != nil {
+		return nil, err
 	}
-	var locations []protocol.Location
-	for _, ref := range ident.Declaration.MappedRange {
-		decRange, err := ref.Range()
-		if err != nil {
-			return nil, err
-		}
-
-		locations = append(locations, protocol.Location{
-			URI:   protocol.URIFromSpanURI(ref.URI()),
+	decRange, err := ident.Declaration.Range()
+	if err != nil {
+		return nil, err
+	}
+	return []protocol.Location{
+		{
+			URI:   protocol.NewURI(ident.Declaration.URI()),
 			Range: decRange,
-		})
-	}
-
-	return locations, nil
+		},
+	}, nil
 }
 
 func (s *Server) typeDefinition(ctx context.Context, params *protocol.TypeDefinitionParams) ([]protocol.Location, error) {
-	snapshot, fh, ok, release, err := s.beginFileRequest(ctx, params.TextDocument.URI, source.Go)
-	defer release()
-	if !ok {
+	uri := span.NewURI(params.TextDocument.URI)
+	view := s.session.ViewOf(uri)
+	f, err := view.GetFile(ctx, uri)
+	if err != nil {
 		return nil, err
 	}
-	ident, err := source.Identifier(ctx, snapshot, fh, params.Position)
+	ident, err := source.Identifier(ctx, view, f, params.Position)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +52,7 @@ func (s *Server) typeDefinition(ctx context.Context, params *protocol.TypeDefini
 	}
 	return []protocol.Location{
 		{
-			URI:   protocol.URIFromSpanURI(ident.Type.URI()),
+			URI:   protocol.NewURI(ident.Type.URI()),
 			Range: identRange,
 		},
 	}, nil

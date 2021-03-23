@@ -288,7 +288,7 @@ func foreachLine(in []byte, fn func(line []byte)) {
 var commentPrefix = []byte(`<span class="comment">// `)
 
 // linkedField determines whether the given line starts with an
-// identifier in the provided ids map (mapping from identifier to the
+// identifer in the provided ids map (mapping from identifier to the
 // same identifier). The line can start with either an identifier or
 // an identifier in a comment. If one matches, it returns the
 // identifier that matched. Otherwise it returns the empty string.
@@ -312,7 +312,9 @@ func linkedField(line []byte, ids map[string]string) string {
 	//
 	// TODO: do this better, so it works for all
 	// comments, including unconventional ones.
-	line = bytes.TrimPrefix(line, commentPrefix)
+	if bytes.HasPrefix(line, commentPrefix) {
+		line = line[len(commentPrefix):]
+	}
 	id := scanIdentifier(line)
 	if len(id) == 0 {
 		// No leading identifier. Avoid map lookup for
@@ -398,8 +400,9 @@ func sanitizeFunc(src string) string {
 }
 
 type PageInfo struct {
-	Dirname string // directory containing the package
-	Err     error  // error or nil
+	Dirname  string // directory containing the package
+	Err      error  // error or nil
+	GoogleCN bool   // page is being served from golang.google.cn
 
 	Mode PageInfoMode // display metadata from query string
 
@@ -613,7 +616,8 @@ func (p *Presentation) example_htmlFunc(info *PageInfo, funcName string) string 
 
 		err := p.ExampleHTML.Execute(&buf, struct {
 			Name, Doc, Code, Play, Output string
-		}{eg.Name, eg.Doc, code, play, out})
+			GoogleCN                      bool
+		}{eg.Name, eg.Doc, code, play, out, info.GoogleCN})
 		if err != nil {
 			log.Print(err)
 		}

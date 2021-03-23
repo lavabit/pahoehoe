@@ -211,7 +211,7 @@ func ExampleRawConn_advertisingOSPFHello() {
 
 	var cm *ipv4.ControlMessage
 	switch runtime.GOOS {
-	case "darwin", "ios", "linux":
+	case "darwin", "linux":
 		cm = &ipv4.ControlMessage{IfIndex: en0.Index}
 	default:
 		if err := r.SetMulticastInterface(en0); err != nil {

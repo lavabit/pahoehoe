@@ -5,9 +5,8 @@
 package debug
 
 import (
-	"golang.org/x/tools/internal/event/export/metric"
-	"golang.org/x/tools/internal/event/label"
-	"golang.org/x/tools/internal/lsp/debug/tag"
+	"golang.org/x/tools/internal/lsp/telemetry"
+	"golang.org/x/tools/internal/telemetry/metric"
 )
 
 var (
@@ -18,41 +17,33 @@ var (
 	receivedBytes = metric.HistogramInt64{
 		Name:        "received_bytes",
 		Description: "Distribution of received bytes, by method.",
-		Keys:        []label.Key{tag.RPCDirection, tag.Method},
+		Keys:        []interface{}{telemetry.RPCDirection, telemetry.Method},
 		Buckets:     bytesDistribution,
-	}
+	}.Record(telemetry.ReceivedBytes)
 
 	sentBytes = metric.HistogramInt64{
 		Name:        "sent_bytes",
 		Description: "Distribution of sent bytes, by method.",
-		Keys:        []label.Key{tag.RPCDirection, tag.Method},
+		Keys:        []interface{}{telemetry.RPCDirection, telemetry.Method},
 		Buckets:     bytesDistribution,
-	}
+	}.Record(telemetry.SentBytes)
 
 	latency = metric.HistogramFloat64{
 		Name:        "latency",
 		Description: "Distribution of latency in milliseconds, by method.",
-		Keys:        []label.Key{tag.RPCDirection, tag.Method},
+		Keys:        []interface{}{telemetry.RPCDirection, telemetry.Method},
 		Buckets:     millisecondsDistribution,
-	}
+	}.Record(telemetry.Latency)
 
 	started = metric.Scalar{
 		Name:        "started",
 		Description: "Count of RPCs started by method.",
-		Keys:        []label.Key{tag.RPCDirection, tag.Method},
-	}
+		Keys:        []interface{}{telemetry.RPCDirection, telemetry.Method},
+	}.CountInt64(telemetry.Started)
 
 	completed = metric.Scalar{
 		Name:        "completed",
 		Description: "Count of RPCs completed by method and status.",
-		Keys:        []label.Key{tag.RPCDirection, tag.Method, tag.StatusCode},
-	}
+		Keys:        []interface{}{telemetry.RPCDirection, telemetry.Method, telemetry.StatusCode},
+	}.CountFloat64(telemetry.Latency)
 )
-
-func registerMetrics(m *metric.Config) {
-	receivedBytes.Record(m, tag.ReceivedBytes)
-	sentBytes.Record(m, tag.SentBytes)
-	latency.Record(m, tag.Latency)
-	started.Count(m, tag.Started)
-	completed.Count(m, tag.Latency)
-}

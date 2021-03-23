@@ -1,3 +1,5 @@
+// +build ignore
+
 package F1
 
 import "sync"

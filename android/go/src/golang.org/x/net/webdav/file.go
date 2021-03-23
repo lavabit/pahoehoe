@@ -12,7 +12,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -273,14 +272,8 @@ func (fs *memFS) OpenFile(ctx context.Context, name string, flag int, perm os.Fi
 	var n *memFSNode
 	if dir == nil {
 		// We're opening the root.
-		if runtime.GOOS == "zos" {
-			if flag&os.O_WRONLY != 0 {
-				return nil, os.ErrPermission
-			}
-		} else {
-			if flag&(os.O_WRONLY|os.O_RDWR) != 0 {
-				return nil, os.ErrPermission
-			}
+		if flag&(os.O_WRONLY|os.O_RDWR) != 0 {
+			return nil, os.ErrPermission
 		}
 		n, frag = &fs.root, "/"
 

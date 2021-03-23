@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build ignore
 // +build ignore
 
 /*
@@ -159,8 +158,6 @@ type Msghdr C.struct_msghdr
 
 type Cmsghdr C.struct_cmsghdr
 
-type Inet4Pktinfo C.struct_in_pktinfo
-
 type Inet6Pktinfo C.struct_in6_pktinfo
 
 type IPv6MTUInfo C.struct_ip6_mtuinfo
@@ -174,12 +171,10 @@ const (
 	SizeofSockaddrUnix     = C.sizeof_struct_sockaddr_un
 	SizeofSockaddrDatalink = C.sizeof_struct_sockaddr_dl
 	SizeofLinger           = C.sizeof_struct_linger
-	SizeofIovec            = C.sizeof_struct_iovec
 	SizeofIPMreq           = C.sizeof_struct_ip_mreq
 	SizeofIPv6Mreq         = C.sizeof_struct_ipv6_mreq
 	SizeofMsghdr           = C.sizeof_struct_msghdr
 	SizeofCmsghdr          = C.sizeof_struct_cmsghdr
-	SizeofInet4Pktinfo     = C.sizeof_struct_in_pktinfo
 	SizeofInet6Pktinfo     = C.sizeof_struct_in6_pktinfo
 	SizeofIPv6MTUInfo      = C.sizeof_struct_ip6_mtuinfo
 	SizeofICMPv6Filter     = C.sizeof_struct_icmp6_filter

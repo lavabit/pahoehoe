@@ -1,7 +1,3 @@
-// Copyright 2019 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package source
 
 import (
@@ -35,7 +31,7 @@ func CommentToMarkdown(text string) string {
 var (
 	mdNewline   = []byte("\n")
 	mdHeader    = []byte("### ")
-	mdIndent    = []byte("    ")
+	mdIndent    = []byte("&nbsp;&nbsp;&nbsp;&nbsp;")
 	mdLinkStart = []byte("[")
 	mdLinkDiv   = []byte("](")
 	mdLinkEnd   = []byte(")")
@@ -307,6 +303,13 @@ const (
 type block struct {
 	op    op
 	lines []string
+}
+
+var nonAlphaNumRx = regexp.MustCompile(`[^a-zA-Z0-9]`)
+
+func anchorID(line string) string {
+	// Add a "hdr-" prefix to avoid conflicting with IDs used for package symbols.
+	return "hdr-" + nonAlphaNumRx.ReplaceAllString(line, "_")
 }
 
 func blocks(text string) []block {

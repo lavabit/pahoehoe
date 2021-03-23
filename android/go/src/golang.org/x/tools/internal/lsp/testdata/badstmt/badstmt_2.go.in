@@ -5,5 +5,5 @@ import (
 )
 
 func _() {
-	defer func() { foo. } //@rank(" }", Foo)
+	defer func() { foo. } //@complete(" }", Foo, IntFoo, StructFoo)
 }

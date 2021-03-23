@@ -13,5 +13,5 @@ import (
 
 func Test(t *testing.T) {
 	testdata := analysistest.TestData()
-	analysistest.RunWithSuggestedFixes(t, testdata, assign.Analyzer, "a")
+	analysistest.Run(t, testdata, assign.Analyzer, "a")
 }

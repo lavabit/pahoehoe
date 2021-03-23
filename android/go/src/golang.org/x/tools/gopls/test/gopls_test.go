@@ -8,9 +8,9 @@ import (
 	"os"
 	"testing"
 
+	"golang.org/x/tools/go/packages/packagestest"
 	"golang.org/x/tools/gopls/internal/hooks"
 	cmdtest "golang.org/x/tools/internal/lsp/cmd/test"
-	"golang.org/x/tools/internal/lsp/source"
 	"golang.org/x/tools/internal/lsp/tests"
 	"golang.org/x/tools/internal/testenv"
 )
@@ -21,12 +21,15 @@ func TestMain(m *testing.M) {
 }
 
 func TestCommandLine(t *testing.T) {
-	cmdtest.TestCommandLine(t, "../../internal/lsp/testdata", commandLineOptions)
+	packagestest.TestAll(t, testCommandLine)
 }
 
-func commandLineOptions(options *source.Options) {
-	options.Staticcheck = true
-	options.GoDiff = false
-	tests.DefaultOptions(options)
-	hooks.Options(options)
+func testCommandLine(t *testing.T, exporter packagestest.Exporter) {
+	const testdata = "../../internal/lsp/testdata"
+	if stat, err := os.Stat(testdata); err != nil || !stat.IsDir() {
+		t.Skip("testdata directory not present")
+	}
+	data := tests.Load(t, exporter, testdata)
+	defer data.Exported.Cleanup()
+	tests.Run(t, cmdtest.NewRunner(exporter, data, tests.Context(t), hooks.Options), data)
 }

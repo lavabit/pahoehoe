@@ -4,7 +4,6 @@
 
 // No testdata on Android.
 
-//go:build !android
 // +build !android
 
 package cha_test

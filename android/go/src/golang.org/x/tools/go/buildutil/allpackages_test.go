@@ -4,7 +4,6 @@
 
 // Incomplete source tree on Android.
 
-//go:build !android
 // +build !android
 
 package buildutil_test

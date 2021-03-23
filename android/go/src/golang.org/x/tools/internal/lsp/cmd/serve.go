@@ -6,20 +6,22 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
-	"strings"
+	"path/filepath"
 	"time"
 
-	"golang.org/x/tools/internal/fakenet"
 	"golang.org/x/tools/internal/jsonrpc2"
-	"golang.org/x/tools/internal/lsp/cache"
+	"golang.org/x/tools/internal/lsp"
 	"golang.org/x/tools/internal/lsp/debug"
-	"golang.org/x/tools/internal/lsp/lsprpc"
 	"golang.org/x/tools/internal/lsp/protocol"
+	"golang.org/x/tools/internal/lsp/telemetry"
+	"golang.org/x/tools/internal/telemetry/trace"
 	"golang.org/x/tools/internal/tool"
 	errors "golang.org/x/xerrors"
 )
@@ -27,17 +29,12 @@ import (
 // Serve is a struct that exposes the configurable parts of the LSP server as
 // flags, in the right form for tool.Main to consume.
 type Serve struct {
-	Logfile     string        `flag:"logfile" help:"filename to log to. if value is \"auto\", then logging to a default output file is enabled"`
-	Mode        string        `flag:"mode" help:"no effect"`
-	Port        int           `flag:"port" help:"port on which to run gopls for debugging purposes"`
-	Address     string        `flag:"listen" help:"address on which to listen for remote connections. If prefixed by 'unix;', the subsequent address is assumed to be a unix domain socket. Otherwise, TCP is used."`
-	IdleTimeout time.Duration `flag:"listen.timeout" help:"when used with -listen, shut down the server when there are no connected clients for this duration"`
-	Trace       bool          `flag:"rpc.trace" help:"print the full rpc trace in lsp inspector format"`
-	Debug       string        `flag:"debug" help:"serve debug information on the supplied address"`
-
-	RemoteListenTimeout time.Duration `flag:"remote.listen.timeout" help:"when used with -remote=auto, the -listen.timeout value used to start the daemon"`
-	RemoteDebug         string        `flag:"remote.debug" help:"when used with -remote=auto, the -debug value used to start the daemon"`
-	RemoteLogfile       string        `flag:"remote.logfile" help:"when used with -remote=auto, the -logfile value used to start the daemon"`
+	Logfile string `flag:"logfile" help:"filename to log to. if value is \"auto\", then logging to a default output file is enabled"`
+	Mode    string `flag:"mode" help:"no effect"`
+	Port    int    `flag:"port" help:"port on which to run gopls for debugging purposes"`
+	Address string `flag:"listen" help:"address on which to listen for remote connections"`
+	Trace   bool   `flag:"rpc.trace" help:"Print the full rpc trace in lsp inspector format"`
+	Debug   string `flag:"debug" help:"Serve debug information on the supplied address"`
 
 	app *Application
 }
@@ -63,66 +60,163 @@ func (s *Serve) Run(ctx context.Context, args ...string) error {
 	if len(args) > 0 {
 		return tool.CommandLineErrorf("server does not take arguments, got %v", args)
 	}
-
-	di := debug.GetInstance(ctx)
-	isDaemon := s.Address != "" || s.Port != 0
-	if di != nil {
-		closeLog, err := di.SetLogFile(s.Logfile, isDaemon)
-		if err != nil {
-			return err
+	out := os.Stderr
+	if s.Logfile != "" {
+		filename := s.Logfile
+		if filename == "auto" {
+			filename = filepath.Join(os.TempDir(), fmt.Sprintf("gopls-%d.log", os.Getpid()))
 		}
-		defer closeLog()
-		di.ServerAddress = s.Address
-		di.DebugAddress = s.Debug
-		di.Serve(ctx)
-		di.MonitorMemory(ctx)
-	}
-	var ss jsonrpc2.StreamServer
-	if s.app.Remote != "" {
-		network, addr := parseAddr(s.app.Remote)
-		ss = lsprpc.NewForwarder(network, addr,
-			lsprpc.RemoteDebugAddress(s.RemoteDebug),
-			lsprpc.RemoteListenTimeout(s.RemoteListenTimeout),
-			lsprpc.RemoteLogfile(s.RemoteLogfile),
-		)
-	} else {
-		ss = lsprpc.NewStreamServer(cache.New(ctx, s.app.options), isDaemon)
+		f, err := os.Create(filename)
+		if err != nil {
+			return errors.Errorf("Unable to create log file: %v", err)
+		}
+		defer f.Close()
+		log.SetOutput(io.MultiWriter(os.Stderr, f))
+		out = f
 	}
 
-	var network, addr string
+	debug.Serve(ctx, s.Debug)
+
+	if s.app.Remote != "" {
+		return s.forward()
+	}
+
+	// For debugging purposes only.
+	run := func(ctx context.Context, srv *lsp.Server) {
+		go srv.Run(ctx)
+	}
 	if s.Address != "" {
-		network, addr = parseAddr(s.Address)
+		return lsp.RunServerOnAddress(ctx, s.app.cache, s.Address, run)
 	}
 	if s.Port != 0 {
-		network = "tcp"
-		addr = fmt.Sprintf(":%v", s.Port)
+		return lsp.RunServerOnPort(ctx, s.app.cache, s.Port, run)
 	}
-	if addr != "" {
-		log.Printf("Gopls daemon: listening on %s network, address %s...", network, addr)
-		defer log.Printf("Gopls daemon: exiting")
-		return jsonrpc2.ListenAndServe(ctx, network, addr, ss, s.IdleTimeout)
+	stream := jsonrpc2.NewHeaderStream(os.Stdin, os.Stdout)
+	if s.Trace {
+		stream = protocol.LoggingStream(stream, out)
 	}
-	stream := jsonrpc2.NewHeaderStream(fakenet.NewConn("stdio", os.Stdin, os.Stdout))
-	if s.Trace && di != nil {
-		stream = protocol.LoggingStream(stream, di.LogWriter)
-	}
-	conn := jsonrpc2.NewConn(stream)
-	err := ss.ServeStream(ctx, conn)
-	if errors.Is(err, io.EOF) {
-		return nil
-	}
-	return err
+	ctx, srv := lsp.NewServer(ctx, s.app.cache, stream)
+	return srv.Run(ctx)
 }
 
-// parseAddr parses the -listen flag in to a network, and address.
-func parseAddr(listen string) (network string, address string) {
-	// Allow passing just -remote=auto, as a shorthand for using automatic remote
-	// resolution.
-	if listen == lsprpc.AutoNetwork {
-		return lsprpc.AutoNetwork, ""
+func (s *Serve) forward() error {
+	conn, err := net.Dial("tcp", s.app.Remote)
+	if err != nil {
+		return err
 	}
-	if parts := strings.SplitN(listen, ";", 2); len(parts) == 2 {
-		return parts[0], parts[1]
+	errc := make(chan error)
+
+	go func(conn net.Conn) {
+		_, err := io.Copy(conn, os.Stdin)
+		errc <- err
+	}(conn)
+
+	go func(conn net.Conn) {
+		_, err := io.Copy(os.Stdout, conn)
+		errc <- err
+	}(conn)
+
+	return <-errc
+}
+
+type handler struct {
+	out io.Writer
+}
+
+type rpcStats struct {
+	method     string
+	direction  jsonrpc2.Direction
+	id         *jsonrpc2.ID
+	payload    *json.RawMessage
+	start      time.Time
+	delivering func()
+	close      func()
+}
+
+type statsKeyType int
+
+const statsKey = statsKeyType(0)
+
+func (h *handler) Deliver(ctx context.Context, r *jsonrpc2.Request, delivered bool) bool {
+	stats := h.getStats(ctx)
+	if stats != nil {
+		stats.delivering()
 	}
-	return "tcp", listen
+	return false
+}
+
+func (h *handler) Cancel(ctx context.Context, conn *jsonrpc2.Conn, id jsonrpc2.ID, cancelled bool) bool {
+	return false
+}
+
+func (h *handler) Request(ctx context.Context, conn *jsonrpc2.Conn, direction jsonrpc2.Direction, r *jsonrpc2.WireRequest) context.Context {
+	if r.Method == "" {
+		panic("no method in rpc stats")
+	}
+	stats := &rpcStats{
+		method:    r.Method,
+		start:     time.Now(),
+		direction: direction,
+		payload:   r.Params,
+	}
+	ctx = context.WithValue(ctx, statsKey, stats)
+	mode := telemetry.Outbound
+	if direction == jsonrpc2.Receive {
+		mode = telemetry.Inbound
+	}
+	ctx, stats.close = trace.StartSpan(ctx, r.Method,
+		telemetry.Method.Of(r.Method),
+		telemetry.RPCDirection.Of(mode),
+		telemetry.RPCID.Of(r.ID),
+	)
+	telemetry.Started.Record(ctx, 1)
+	_, stats.delivering = trace.StartSpan(ctx, "queued")
+	return ctx
+}
+
+func (h *handler) Response(ctx context.Context, conn *jsonrpc2.Conn, direction jsonrpc2.Direction, r *jsonrpc2.WireResponse) context.Context {
+	return ctx
+}
+
+func (h *handler) Done(ctx context.Context, err error) {
+	stats := h.getStats(ctx)
+	if err != nil {
+		ctx = telemetry.StatusCode.With(ctx, "ERROR")
+	} else {
+		ctx = telemetry.StatusCode.With(ctx, "OK")
+	}
+	elapsedTime := time.Since(stats.start)
+	latencyMillis := float64(elapsedTime) / float64(time.Millisecond)
+	telemetry.Latency.Record(ctx, latencyMillis)
+	stats.close()
+}
+
+func (h *handler) Read(ctx context.Context, bytes int64) context.Context {
+	telemetry.SentBytes.Record(ctx, bytes)
+	return ctx
+}
+
+func (h *handler) Wrote(ctx context.Context, bytes int64) context.Context {
+	telemetry.ReceivedBytes.Record(ctx, bytes)
+	return ctx
+}
+
+const eol = "\r\n\r\n\r\n"
+
+func (h *handler) Error(ctx context.Context, err error) {
+}
+
+func (h *handler) getStats(ctx context.Context) *rpcStats {
+	stats, ok := ctx.Value(statsKey).(*rpcStats)
+	if !ok || stats == nil {
+		method, ok := ctx.Value(telemetry.Method).(string)
+		if !ok {
+			method = "???"
+		}
+		stats = &rpcStats{
+			method: method,
+			close:  func() {},
+		}
+	}
+	return stats
 }

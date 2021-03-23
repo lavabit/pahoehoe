@@ -27,17 +27,15 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/OperatorFoundation/shapeshifter-transports/transports/obfs2/v2"
 	"os"
+	"net"
+
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/obfs2"
 )
 
 func main() {
 	var transport = obfs2.NewObfs2Transport()
-	var conn, connErr = transport.Dial("127.0.0.1:1234")
-	if connErr != nil {
-		println("Error creating obfs2 connection:", connErr.Error())
-		return
-	}
+	var conn net.Conn = transport.Dial("127.0.0.1:1234")
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -47,7 +45,7 @@ func main() {
 			return
 		}
 
-		var buffer = []byte(text)
+		var buffer []byte = []byte(text)
 		bytesWritten, writeErr := conn.Write(buffer)
 		if writeErr != nil {
 			return

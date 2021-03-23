@@ -22,11 +22,9 @@ import (
 	"golang.org/x/tools/go/analysis/passes/internal/analysisutil"
 )
 
-const Doc = "report mismatches between assembly files and Go declarations"
-
 var Analyzer = &analysis.Analyzer{
 	Name: "asmdecl",
-	Doc:  Doc,
+	Doc:  "report mismatches between assembly files and Go declarations",
 	Run:  run,
 }
 
@@ -87,7 +85,6 @@ var (
 	asmArchMips64LE = asmArch{name: "mips64le", bigEndian: false, stack: "R29", lr: true}
 	asmArchPpc64    = asmArch{name: "ppc64", bigEndian: true, stack: "R1", lr: true}
 	asmArchPpc64LE  = asmArch{name: "ppc64le", bigEndian: false, stack: "R1", lr: true}
-	asmArchRISCV64  = asmArch{name: "riscv64", bigEndian: false, stack: "SP", lr: true}
 	asmArchS390X    = asmArch{name: "s390x", bigEndian: true, stack: "R15", lr: true}
 	asmArchWasm     = asmArch{name: "wasm", bigEndian: false, stack: "SP", lr: false}
 
@@ -102,7 +99,6 @@ var (
 		&asmArchMips64LE,
 		&asmArchPpc64,
 		&asmArchPpc64LE,
-		&asmArchRISCV64,
 		&asmArchS390X,
 		&asmArchWasm,
 	}
@@ -137,7 +133,6 @@ var (
 	asmSP        = re(`[^+\-0-9](([0-9]+)\(([A-Z0-9]+)\))`)
 	asmOpcode    = re(`^\s*(?:[A-Z0-9a-z_]+:)?\s*([A-Z]+)\s*([^,]*)(?:,\s*(.*))?`)
 	ppc64Suff    = re(`([BHWD])(ZU|Z|U|BR)?$`)
-	abiSuff      = re(`^(.+)<ABI.+>$`)
 )
 
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -200,13 +195,6 @@ Files:
 				}
 			}
 			retLine = nil
-		}
-		trimABI := func(fnName string) string {
-			m := abiSuff.FindStringSubmatch(fnName)
-			if m != nil {
-				return m[1]
-			}
-			return fnName
 		}
 		for lineno, line := range lines {
 			lineno++
@@ -276,8 +264,6 @@ Files:
 						continue
 					}
 				}
-				// Trim off optional ABI selector.
-				fnName := trimABI(fnName)
 				flag := m[3]
 				fn = knownFunc[fnName][arch]
 				if fn != nil {
@@ -308,8 +294,7 @@ Files:
 				continue
 			}
 
-			if strings.Contains(line, "RET") && !strings.Contains(line, "(SB)") {
-				// RET f(SB) is a tail call. It is okay to not write the results.
+			if strings.Contains(line, "RET") {
 				retLine = append(retLine, lineno)
 			}
 
@@ -676,10 +661,6 @@ func asmCheckVar(badf func(string, ...interface{}), fn *asmFunc, line, expr stri
 				src = 4
 				break
 			}
-			if op == "MOVO" || op == "MOVOU" {
-				src = 16
-				break
-			}
 			if strings.HasPrefix(op, "SET") {
 				// SETEQ, etc
 				src = 1
@@ -755,11 +736,6 @@ func asmCheckVar(badf func(string, ...interface{}), fn *asmFunc, line, expr stri
 		vk = v.inner[0].kind
 		vs = v.inner[0].size
 		vt = v.inner[0].typ
-	case asmComplex:
-		// Allow a single instruction to load both parts of a complex.
-		if int(kind) == vs {
-			kind = asmComplex
-		}
 	}
 	if addr {
 		vk = asmKind(archDef.ptrSize)

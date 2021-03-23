@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-# Usage: script/get_dependencies
-#
-# Downloads dependencies
-
-set -e
-go get ./...
-go get golang.org/x/tools/cmd/cover
-go get github.com/mattn/goveralls

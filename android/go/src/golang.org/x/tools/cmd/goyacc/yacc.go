@@ -60,9 +60,9 @@ import (
 // the following are adjustable
 // according to memory size
 const (
-	ACTSIZE  = 240000
-	NSTATES  = 16000
-	TEMPSIZE = 16000
+	ACTSIZE  = 120000
+	NSTATES  = 8000
+	TEMPSIZE = 8000
 
 	SYMINC   = 50  // increase for non-term or term
 	RULEINC  = 50  // increase for max rule length prodptr[i]
@@ -712,8 +712,7 @@ outer:
 	// put out names of states.
 	// commented out to avoid a huge table just for debugging.
 	// re-enable to have the names in the binary.
-	ftable.WriteRune('\n')
-	fmt.Fprintf(ftable, "var %sStatenames = [...]string{\n", prefix)
+	fmt.Fprintf(ftable, "var %sStatenames = [...]string{", prefix)
 	//	for i:=TOKSTART; i<=ntokens; i++ {
 	//		fmt.Fprintf(ftable, "\t%q,\n", tokset[i].name);
 	//	}
@@ -2820,7 +2819,7 @@ nextn:
 //
 func aoutput() {
 	ftable.WriteRune('\n')
-	fmt.Fprintf(ftable, "const %sLast = %v\n", prefix, maxa+1)
+	fmt.Fprintf(ftable, "const %sLast = %v\n\n", prefix, maxa+1)
 	arout("Act", amem, maxa+1)
 	arout("Pact", indgo, nstate)
 	arout("Pgo", pgo, nnonter+1)
@@ -2902,7 +2901,6 @@ func others() {
 	arout("Tok2", temp1, c+1)
 
 	// table 3 has everything else
-	ftable.WriteRune('\n')
 	fmt.Fprintf(ftable, "var %sTok3 = [...]int{\n\t", prefix)
 	c = 0
 	for i = 1; i <= ntokens; i++ {
@@ -3015,8 +3013,7 @@ Loop:
 
 func arout(s string, v []int, n int) {
 	s = prefix + s
-	ftable.WriteRune('\n')
-	fmt.Fprintf(ftable, "var %v = [...]int{", s)
+	fmt.Fprintf(ftable, "var %v = [...]int{\n", s)
 	for i := 0; i < n; i++ {
 		if i%10 == 0 {
 			fmt.Fprintf(ftable, "\n\t")

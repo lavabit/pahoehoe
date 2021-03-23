@@ -1,8 +1,3 @@
-// Copyright 2018 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-//go:build go1.12
 // +build go1.12
 
 package multichecker_test
@@ -12,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"testing"
 
 	"golang.org/x/tools/go/analysis"
@@ -34,9 +30,15 @@ func main() {
 	multichecker.Main(findcall.Analyzer, fail)
 }
 
+var race = false
+
 // TestExitCode ensures that analysis failures are reported correctly.
 // This test fork/execs the main function above.
 func TestExitCode(t *testing.T) {
+	if v := runtime.Version(); strings.Contains(v, "devel") && race {
+		t.Skip("golang.org/issue/31749: This test is broken on tip in race mode. Skip until it's fixed.")
+	}
+
 	if runtime.GOOS != "linux" {
 		t.Skipf("skipping fork/exec test on this platform")
 	}

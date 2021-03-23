@@ -1,7 +1,6 @@
 #data
 FOO<script>'Hello'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -14,7 +13,6 @@ FOO<script>'Hello'</script>BAR
 #data
 FOO<script></script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -26,7 +24,6 @@ FOO<script></script>BAR
 #data
 FOO<script></script >BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -38,10 +35,6 @@ FOO<script></script >BAR
 #data
 FOO<script></script/>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,21): self-closing-flag-on-end-tag
-#new-errors
-(1:21) end-tag-with-trailing-solidus
 #document
 | <html>
 |   <head>
@@ -53,10 +46,6 @@ FOO<script></script/>BAR
 #data
 FOO<script></script/ >BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,20): unexpected-character-after-solidus-in-tag
-#new-errors
-(1:21) unexpected-solidus-in-tag
 #document
 | <html>
 |   <head>
@@ -68,8 +57,6 @@ FOO<script></script/ >BAR
 #data
 FOO<script type="text/plain"></scriptx>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,42): expected-named-closing-tag-but-got-eof
 #document
 | <html>
 |   <head>
@@ -82,10 +69,6 @@ FOO<script type="text/plain"></scriptx>BAR
 #data
 FOO<script></script foo=">" dd>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,31): attributes-in-end-tag
-#new-errors
-(1:31) end-tag-with-attributes
 #document
 | <html>
 |   <head>
@@ -97,7 +80,6 @@ FOO<script></script foo=">" dd>BAR
 #data
 FOO<script>'<'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -110,7 +92,6 @@ FOO<script>'<'</script>BAR
 #data
 FOO<script>'<!'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -123,7 +104,6 @@ FOO<script>'<!'</script>BAR
 #data
 FOO<script>'<!-'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -136,7 +116,6 @@ FOO<script>'<!-'</script>BAR
 #data
 FOO<script>'<!--'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -149,7 +128,6 @@ FOO<script>'<!--'</script>BAR
 #data
 FOO<script>'<!---'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -162,7 +140,6 @@ FOO<script>'<!---'</script>BAR
 #data
 FOO<script>'<!-->'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -175,7 +152,6 @@ FOO<script>'<!-->'</script>BAR
 #data
 FOO<script>'<!-->'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -188,7 +164,6 @@ FOO<script>'<!-->'</script>BAR
 #data
 FOO<script>'<!-- potato'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -201,7 +176,6 @@ FOO<script>'<!-- potato'</script>BAR
 #data
 FOO<script>'<!-- <sCrIpt'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -214,11 +188,6 @@ FOO<script>'<!-- <sCrIpt'</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt>'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,56): expected-script-data-but-got-eof
-(1,56): expected-named-closing-tag-but-got-eof
-#new-errors
-(1:57) eof-in-script-html-comment-like-text
 #document
 | <html>
 |   <head>
@@ -231,11 +200,6 @@ FOO<script type="text/plain">'<!-- <sCrIpt>'</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt> -'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,58): expected-script-data-but-got-eof
-(1,58): expected-named-closing-tag-but-got-eof
-#new-errors
-(1:59) eof-in-script-html-comment-like-text
 #document
 | <html>
 |   <head>
@@ -248,11 +212,6 @@ FOO<script type="text/plain">'<!-- <sCrIpt> -'</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt> --'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,59): expected-script-data-but-got-eof
-(1,59): expected-named-closing-tag-but-got-eof
-#new-errors
-(1:60) eof-in-script-html-comment-like-text
 #document
 | <html>
 |   <head>
@@ -265,7 +224,6 @@ FOO<script type="text/plain">'<!-- <sCrIpt> --'</script>BAR
 #data
 FOO<script>'<!-- <sCrIpt> -->'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -278,11 +236,6 @@ FOO<script>'<!-- <sCrIpt> -->'</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt> --!>'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,61): expected-script-data-but-got-eof
-(1,61): expected-named-closing-tag-but-got-eof
-#new-errors
-(1:62) eof-in-script-html-comment-like-text
 #document
 | <html>
 |   <head>
@@ -295,11 +248,6 @@ FOO<script type="text/plain">'<!-- <sCrIpt> --!>'</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt> -- >'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,61): expected-script-data-but-got-eof
-(1,61): expected-named-closing-tag-but-got-eof
-#new-errors
-(1:62) eof-in-script-html-comment-like-text
 #document
 | <html>
 |   <head>
@@ -312,11 +260,6 @@ FOO<script type="text/plain">'<!-- <sCrIpt> -- >'</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt '</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,56): expected-script-data-but-got-eof
-(1,56): expected-named-closing-tag-but-got-eof
-#new-errors
-(1:57) eof-in-script-html-comment-like-text
 #document
 | <html>
 |   <head>
@@ -329,11 +272,6 @@ FOO<script type="text/plain">'<!-- <sCrIpt '</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt/'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
-(1,56): expected-script-data-but-got-eof
-(1,56): expected-named-closing-tag-but-got-eof
-#new-errors
-(1:57) eof-in-script-html-comment-like-text
 #document
 | <html>
 |   <head>
@@ -346,7 +284,6 @@ FOO<script type="text/plain">'<!-- <sCrIpt/'</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt\'</script>BAR
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -360,7 +297,6 @@ FOO<script type="text/plain">'<!-- <sCrIpt\'</script>BAR
 #data
 FOO<script type="text/plain">'<!-- <sCrIpt/'</script>BAR</script>QUX
 #errors
-(1,3): expected-doctype-but-got-chars
 #document
 | <html>
 |   <head>
@@ -369,17 +305,4 @@ FOO<script type="text/plain">'<!-- <sCrIpt/'</script>BAR</script>QUX
 |     <script>
 |       type="text/plain"
 |       "'<!-- <sCrIpt/'</script>BAR"
-|     "QUX"
-
-#data
-FOO<script><!--<script>-></script>--></script>QUX
-#errors
-(1,3): expected-doctype-but-got-chars
-#document
-| <html>
-|   <head>
-|   <body>
-|     "FOO"
-|     <script>
-|       "<!--<script>-></script>-->"
 |     "QUX"

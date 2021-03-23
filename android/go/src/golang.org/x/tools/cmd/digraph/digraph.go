@@ -35,8 +35,6 @@ The support commands are:
 		all strongly connected components (one per line)
 	scc <node>
 		the set of nodes nodes strongly connected to the specified one
-	focus <node>
-		the subgraph containing all directed paths that pass through the specified node
 
 Input format:
 
@@ -93,7 +91,6 @@ import (
 	"os"
 	"sort"
 	"strconv"
-	"strings"
 	"unicode"
 	"unicode/utf8"
 )
@@ -124,8 +121,6 @@ The support commands are:
 		all strongly connected components (one per line)
 	scc <node>
 		the set of nodes nodes strongly connected to the specified one
-	focus <node>
-		the subgraph containing all directed paths that pass through the specified node
 `)
 	os.Exit(2)
 }
@@ -148,42 +143,42 @@ func main() {
 type nodelist []string
 
 func (l nodelist) println(sep string) {
-	for i, node := range l {
+	for i, label := range l {
 		if i > 0 {
 			fmt.Fprint(stdout, sep)
 		}
-		fmt.Fprint(stdout, node)
+		fmt.Fprint(stdout, label)
 	}
 	fmt.Fprintln(stdout)
 }
 
-type nodeset map[string]bool // TODO(deklerk): change bool to struct to reduce memory footprint
+type nodeset map[string]bool
 
 func (s nodeset) sort() nodelist {
-	nodes := make(nodelist, len(s))
+	labels := make(nodelist, len(s))
 	var i int
-	for node := range s {
-		nodes[i] = node
+	for label := range s {
+		labels[i] = label
 		i++
 	}
-	sort.Strings(nodes)
-	return nodes
+	sort.Strings(labels)
+	return labels
 }
 
 func (s nodeset) addAll(x nodeset) {
-	for node := range x {
-		s[node] = true
+	for label := range x {
+		s[label] = true
 	}
 }
 
 // A graph maps nodes to the non-nil set of their immediate successors.
 type graph map[string]nodeset
 
-func (g graph) addNode(node string) nodeset {
-	edges := g[node]
+func (g graph) addNode(label string) nodeset {
+	edges := g[label]
 	if edges == nil {
 		edges = make(nodeset)
-		g[node] = edges
+		g[label] = edges
 	}
 	return edges
 }
@@ -198,11 +193,11 @@ func (g graph) addEdges(from string, to ...string) {
 
 func (g graph) reachableFrom(roots nodeset) nodeset {
 	seen := make(nodeset)
-	var visit func(node string)
-	visit = func(node string) {
-		if !seen[node] {
-			seen[node] = true
-			for e := range g[node] {
+	var visit func(label string)
+	visit = func(label string) {
+		if !seen[label] {
+			seen[label] = true
+			for e := range g[label] {
 				visit(e)
 			}
 		}
@@ -215,10 +210,10 @@ func (g graph) reachableFrom(roots nodeset) nodeset {
 
 func (g graph) transpose() graph {
 	rev := make(graph)
-	for node, edges := range g {
-		rev.addNode(node)
+	for label, edges := range g {
+		rev.addNode(label)
 		for succ := range edges {
-			rev.addEdges(succ, node)
+			rev.addEdges(succ, label)
 		}
 	}
 	return rev
@@ -230,30 +225,30 @@ func (g graph) sccs() []nodeset {
 	// Forward pass.
 	S := make(nodelist, 0, len(g)) // postorder stack
 	seen := make(nodeset)
-	var visit func(node string)
-	visit = func(node string) {
-		if !seen[node] {
-			seen[node] = true
-			for e := range g[node] {
+	var visit func(label string)
+	visit = func(label string) {
+		if !seen[label] {
+			seen[label] = true
+			for e := range g[label] {
 				visit(e)
 			}
-			S = append(S, node)
+			S = append(S, label)
 		}
 	}
-	for node := range g {
-		visit(node)
+	for label := range g {
+		visit(label)
 	}
 
 	// Reverse pass.
 	rev := g.transpose()
 	var scc nodeset
 	seen = make(nodeset)
-	var rvisit func(node string)
-	rvisit = func(node string) {
-		if !seen[node] {
-			seen[node] = true
-			scc[node] = true
-			for e := range rev[node] {
+	var rvisit func(label string)
+	rvisit = func(label string) {
+		if !seen[label] {
+			seen[label] = true
+			scc[label] = true
+			for e := range rev[label] {
 				rvisit(e)
 			}
 		}
@@ -382,8 +377,8 @@ func digraph(cmd string, args []string) error {
 			return fmt.Errorf("usage: digraph nodes")
 		}
 		nodes := make(nodeset)
-		for node := range g {
-			nodes[node] = true
+		for label := range g {
+			nodes[label] = true
 		}
 		nodes.sort().println("\n")
 
@@ -392,12 +387,12 @@ func digraph(cmd string, args []string) error {
 			return fmt.Errorf("usage: digraph degree")
 		}
 		nodes := make(nodeset)
-		for node := range g {
-			nodes[node] = true
+		for label := range g {
+			nodes[label] = true
 		}
 		rev := g.transpose()
-		for _, node := range nodes.sort() {
-			fmt.Fprintf(stdout, "%d\t%d\t%s\n", len(rev[node]), len(g[node]), node)
+		for _, label := range nodes.sort() {
+			fmt.Fprintf(stdout, "%d\t%d\t%s\n", len(rev[label]), len(g[label]), label)
 		}
 
 	case "transpose":
@@ -417,7 +412,7 @@ func digraph(cmd string, args []string) error {
 
 	case "succs", "preds":
 		if len(args) == 0 {
-			return fmt.Errorf("usage: digraph %s <node> ... ", cmd)
+			return fmt.Errorf("usage: digraph %s <label> ...", cmd)
 		}
 		g := g
 		if cmd == "preds" {
@@ -435,7 +430,7 @@ func digraph(cmd string, args []string) error {
 
 	case "forward", "reverse":
 		if len(args) == 0 {
-			return fmt.Errorf("usage: digraph %s <node> ... ", cmd)
+			return fmt.Errorf("usage: digraph %s <label> ...", cmd)
 		}
 		roots := make(nodeset)
 		for _, root := range args {
@@ -490,48 +485,18 @@ func digraph(cmd string, args []string) error {
 
 	case "scc":
 		if len(args) != 1 {
-			return fmt.Errorf("usage: digraph scc <node>")
+			return fmt.Errorf("usage: digraph scc <label>")
 		}
-		node := args[0]
-		if g[node] == nil {
-			return fmt.Errorf("no such node %q", node)
+		label := args[0]
+		if g[label] == nil {
+			return fmt.Errorf("no such node %q", label)
 		}
 		for _, scc := range g.sccs() {
-			if scc[node] {
+			if scc[label] {
 				scc.sort().println("\n")
 				break
 			}
 		}
-
-	case "focus":
-		if len(args) != 1 {
-			return fmt.Errorf("usage: digraph focus <node>")
-		}
-		node := args[0]
-		if g[node] == nil {
-			return fmt.Errorf("no such node %q", node)
-		}
-
-		edges := make(map[string]struct{})
-		for from := range g.reachableFrom(nodeset{node: true}) {
-			for to := range g[from] {
-				edges[fmt.Sprintf("%s %s", from, to)] = struct{}{}
-			}
-		}
-
-		gtrans := g.transpose()
-		for from := range gtrans.reachableFrom(nodeset{node: true}) {
-			for to := range gtrans[from] {
-				edges[fmt.Sprintf("%s %s", to, from)] = struct{}{}
-			}
-		}
-
-		edgesSorted := make([]string, 0, len(edges))
-		for e := range edges {
-			edgesSorted = append(edgesSorted, e)
-		}
-		sort.Strings(edgesSorted)
-		fmt.Fprintln(stdout, strings.Join(edgesSorted, "\n"))
 
 	default:
 		return fmt.Errorf("no such command %q", cmd)

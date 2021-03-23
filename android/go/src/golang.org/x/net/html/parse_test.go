@@ -21,105 +21,66 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-type testAttrs struct {
-	text, want, context string
-	scripting           bool
-}
-
 // readParseTest reads a single test case from r.
-func readParseTest(r *bufio.Reader) (*testAttrs, error) {
-	ta := &testAttrs{scripting: true}
+func readParseTest(r *bufio.Reader) (text, want, context string, err error) {
 	line, err := r.ReadSlice('\n')
 	if err != nil {
-		return nil, err
+		return "", "", "", err
 	}
 	var b []byte
 
 	// Read the HTML.
 	if string(line) != "#data\n" {
-		return nil, fmt.Errorf(`got %q want "#data\n"`, line)
+		return "", "", "", fmt.Errorf(`got %q want "#data\n"`, line)
 	}
 	for {
 		line, err = r.ReadSlice('\n')
 		if err != nil {
-			return nil, err
+			return "", "", "", err
 		}
 		if line[0] == '#' {
 			break
 		}
 		b = append(b, line...)
 	}
-	ta.text = strings.TrimSuffix(string(b), "\n")
+	text = strings.TrimSuffix(string(b), "\n")
 	b = b[:0]
 
 	// Skip the error list.
 	if string(line) != "#errors\n" {
-		return nil, fmt.Errorf(`got %q want "#errors\n"`, line)
+		return "", "", "", fmt.Errorf(`got %q want "#errors\n"`, line)
 	}
 	for {
 		line, err = r.ReadSlice('\n')
 		if err != nil {
-			return nil, err
+			return "", "", "", err
 		}
 		if line[0] == '#' {
 			break
 		}
 	}
 
-	// Skip the new-errors list.
-	if string(line) == "#new-errors\n" {
-		for {
-			line, err = r.ReadSlice('\n')
-			if err != nil {
-				return nil, err
-			}
-			if line[0] == '#' {
-				break
-			}
-		}
-	}
-
-	if ls := string(line); strings.HasPrefix(ls, "#script-") {
-		switch {
-		case strings.HasSuffix(ls, "-on\n"):
-			ta.scripting = true
-		case strings.HasSuffix(ls, "-off\n"):
-			ta.scripting = false
-		default:
-			return nil, fmt.Errorf(`got %q, want "#script-on" or "#script-off"`, line)
-		}
-		for {
-			line, err = r.ReadSlice('\n')
-			if err != nil {
-				return nil, err
-			}
-			if line[0] == '#' {
-				break
-			}
-		}
-	}
-
 	if string(line) == "#document-fragment\n" {
 		line, err = r.ReadSlice('\n')
 		if err != nil {
-			return nil, err
+			return "", "", "", err
 		}
-		ta.context = strings.TrimSpace(string(line))
+		context = strings.TrimSpace(string(line))
 		line, err = r.ReadSlice('\n')
 		if err != nil {
-			return nil, err
+			return "", "", "", err
 		}
 	}
 
 	// Read the dump of what the parse tree should be.
 	if string(line) != "#document\n" {
-		return nil, fmt.Errorf(`got %q want "#document\n"`, line)
+		return "", "", "", fmt.Errorf(`got %q want "#document\n"`, line)
 	}
 	inQuote := false
 	for {
 		line, err = r.ReadSlice('\n')
 		if err != nil && err != io.EOF {
-			return nil, err
+			return "", "", "", err
 		}
 		trimmed := bytes.Trim(line, "| \n")
 		if len(trimmed) > 0 {
@@ -135,8 +96,7 @@ func readParseTest(r *bufio.Reader) (*testAttrs, error) {
 		}
 		b = append(b, line...)
 	}
-	ta.want = string(b)
-	return ta, nil
+	return text, string(b), context, nil
 }
 
 func dumpIndent(w io.Writer, level int) {
@@ -260,7 +220,7 @@ func TestParser(t *testing.T) {
 			r := bufio.NewReader(f)
 
 			for i := 0; ; i++ {
-				ta, err := readParseTest(r)
+				text, want, context, err := readParseTest(r)
 				if err == io.EOF {
 					break
 				}
@@ -268,10 +228,10 @@ func TestParser(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				err = testParseCase(ta.text, ta.want, ta.context, ParseOptionEnableScripting(ta.scripting))
+				err = testParseCase(text, want, context)
 
 				if err != nil {
-					t.Errorf("%s test #%d %q, %s", tf, i, ta.text, err)
+					t.Errorf("%s test #%d %q, %s", tf, i, text, err)
 				}
 			}
 		}
@@ -285,14 +245,14 @@ func TestParserWithoutScripting(t *testing.T) {
 |   <head>
 |     <noscript>
 |   <body>
-|     <img>
-|       src="https://golang.org/doc/gopher/frontpage.png"
+|     "<img src='https://golang.org/doc/gopher/frontpage.png' />"
 |     <p>
 |       <img>
 |         src="https://golang.org/doc/gopher/doc.png"
 `
+	err := testParseCase(text, want, "", ParseOptionEnableScripting(false))
 
-	if err := testParseCase(text, want, "", ParseOptionEnableScripting(false)); err != nil {
+	if err != nil {
 		t.Errorf("test with scripting is disabled, %q, %s", text, err)
 	}
 }
@@ -320,15 +280,10 @@ func testParseCase(text, want, context string, opts ...ParseOption) (err error) 
 			return err
 		}
 	} else {
-		namespace := ""
-		if i := strings.IndexByte(context, ' '); i >= 0 {
-			namespace, context = context[:i], context[i+1:]
-		}
 		contextNode := &Node{
-			Data:      context,
-			DataAtom:  atom.Lookup([]byte(context)),
-			Namespace: namespace,
-			Type:      ElementNode,
+			Type:     ElementNode,
+			DataAtom: atom.Lookup([]byte(context)),
+			Data:     context,
 		}
 		nodes, err := ParseFragmentWithOptions(strings.NewReader(text), contextNode, opts...)
 		if err != nil {
@@ -364,7 +319,7 @@ func testParseCase(text, want, context string, opts ...ParseOption) (err error) 
 	go func() {
 		pw.CloseWithError(Render(pw, doc))
 	}()
-	doc1, err := ParseWithOptions(pr, opts...)
+	doc1, err := Parse(pr)
 	if err != nil {
 		return err
 	}
@@ -431,10 +386,8 @@ var renderTestBlacklist = map[string]bool{
 	`<script><!--<script </s`:                      true,
 	// Reconstructing the active formatting elements results in a <plaintext>
 	// element that contains an <a> element.
-	`<!doctype html><p><a><plaintext>b`:                       true,
-	`<table><math><select><mi><select></table>`:               true,
-	`<!doctype html><table><colgroup><plaintext></plaintext>`: true,
-	`<!doctype html><svg><plaintext>a</plaintext>b`:           true,
+	`<!doctype html><p><a><plaintext>b`:         true,
+	`<table><math><select><mi><select></table>`: true,
 }
 
 func TestNodeConsistency(t *testing.T) {
@@ -444,7 +397,8 @@ func TestNodeConsistency(t *testing.T) {
 		DataAtom: atom.Frameset,
 		Data:     "table",
 	}
-	if _, err := ParseFragment(strings.NewReader("<p>hello</p>"), inconsistentNode); err == nil {
+	_, err := ParseFragment(strings.NewReader("<p>hello</p>"), inconsistentNode)
+	if err == nil {
 		t.Errorf("got nil error, want non-nil")
 	}
 }

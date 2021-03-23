@@ -869,35 +869,10 @@ func (imp *importer) findPackage(importPath, fromDir string, mode build.ImportMo
 // caused these imports.
 //
 func (imp *importer) importAll(fromPath, fromDir string, imports map[string]bool, mode build.ImportMode) (infos []*PackageInfo, errors []importError) {
-	if fromPath != "" {
-		// We're loading a set of imports.
-		//
-		// We must record graph edges from the importing package
-		// to its dependencies, and check for cycles.
-		imp.graphMu.Lock()
-		deps, ok := imp.graph[fromPath]
-		if !ok {
-			deps = make(map[string]bool)
-			imp.graph[fromPath] = deps
-		}
-		for importPath := range imports {
-			deps[importPath] = true
-		}
-		imp.graphMu.Unlock()
-	}
-
+	// TODO(adonovan): opt: do the loop in parallel once
+	// findPackage is non-blocking.
 	var pending []*importInfo
 	for importPath := range imports {
-		if fromPath != "" {
-			if cycle := imp.findPath(importPath, fromPath); cycle != nil {
-				// Cycle-forming import: we must not check it
-				// since it would deadlock.
-				if trace {
-					fmt.Fprintf(os.Stderr, "import cycle: %q\n", cycle)
-				}
-				continue
-			}
-		}
 		bp, err := imp.findPackage(importPath, fromDir, mode)
 		if err != nil {
 			errors = append(errors, importError{
@@ -909,7 +884,40 @@ func (imp *importer) importAll(fromPath, fromDir string, imports map[string]bool
 		pending = append(pending, imp.startLoad(bp))
 	}
 
+	if fromPath != "" {
+		// We're loading a set of imports.
+		//
+		// We must record graph edges from the importing package
+		// to its dependencies, and check for cycles.
+		imp.graphMu.Lock()
+		deps, ok := imp.graph[fromPath]
+		if !ok {
+			deps = make(map[string]bool)
+			imp.graph[fromPath] = deps
+		}
+		for _, ii := range pending {
+			deps[ii.path] = true
+		}
+		imp.graphMu.Unlock()
+	}
+
 	for _, ii := range pending {
+		if fromPath != "" {
+			if cycle := imp.findPath(ii.path, fromPath); cycle != nil {
+				// Cycle-forming import: we must not await its
+				// completion since it would deadlock.
+				//
+				// We don't record the error in ii since
+				// the error is really associated with the
+				// cycle-forming edge, not the package itself.
+				// (Also it would complicate the
+				// invariants of importPath completion.)
+				if trace {
+					fmt.Fprintf(os.Stderr, "import cycle: %q\n", cycle)
+				}
+				continue
+			}
+		}
 		ii.awaitCompletion()
 		infos = append(infos, ii.info)
 	}

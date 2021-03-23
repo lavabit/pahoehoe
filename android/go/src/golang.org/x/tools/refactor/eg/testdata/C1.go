@@ -1,3 +1,5 @@
+// +build ignore
+
 package C1
 
 import "strings"

@@ -40,8 +40,6 @@ func testFastWalk(t *testing.T, files map[string]string, callback func(path stri
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tempdir)
-
-	symlinks := map[string]string{}
 	for path, contents := range files {
 		file := filepath.Join(tempdir, "/src", path)
 		if err := os.MkdirAll(filepath.Dir(file), 0755); err != nil {
@@ -49,7 +47,7 @@ func testFastWalk(t *testing.T, files map[string]string, callback func(path stri
 		}
 		var err error
 		if strings.HasPrefix(contents, "LINK:") {
-			symlinks[file] = filepath.FromSlash(strings.TrimPrefix(contents, "LINK:"))
+			err = os.Symlink(strings.TrimPrefix(contents, "LINK:"), file)
 		} else {
 			err = ioutil.WriteFile(file, []byte(contents), 0644)
 		}
@@ -57,38 +55,21 @@ func testFastWalk(t *testing.T, files map[string]string, callback func(path stri
 			t.Fatal(err)
 		}
 	}
-
-	// Create symlinks after all other files. Otherwise, directory symlinks on
-	// Windows are unusable (see https://golang.org/issue/39183).
-	for file, dst := range symlinks {
-		err = os.Symlink(dst, file)
-		if err != nil {
-			if writeErr := ioutil.WriteFile(file, []byte(dst), 0644); writeErr == nil {
-				// Couldn't create symlink, but could write the file.
-				// Probably this filesystem doesn't support symlinks.
-				// (Perhaps we are on an older Windows and not running as administrator.)
-				t.Skipf("skipping because symlinks appear to be unsupported: %v", err)
-			}
-		}
-	}
-
 	got := map[string]os.FileMode{}
 	var mu sync.Mutex
-	err = fastwalk.Walk(tempdir, func(path string, typ os.FileMode) error {
+	if err := fastwalk.Walk(tempdir, func(path string, typ os.FileMode) error {
 		mu.Lock()
 		defer mu.Unlock()
 		if !strings.HasPrefix(path, tempdir) {
-			t.Errorf("bogus prefix on %q, expect %q", path, tempdir)
+			t.Fatalf("bogus prefix on %q, expect %q", path, tempdir)
 		}
 		key := filepath.ToSlash(strings.TrimPrefix(path, tempdir))
 		if old, dup := got[key]; dup {
-			t.Errorf("callback called twice for key %q: %v -> %v", key, old, typ)
+			t.Fatalf("callback called twice for key %q: %v -> %v", key, old, typ)
 		}
 		got[key] = typ
 		return callback(path, typ)
-	})
-
-	if err != nil {
+	}); err != nil {
 		t.Fatalf("callback returned: %v", err)
 	}
 	if !reflect.DeepEqual(got, want) {
@@ -135,25 +116,26 @@ func TestFastWalk_LongFileName(t *testing.T) {
 }
 
 func TestFastWalk_Symlink(t *testing.T) {
+	switch runtime.GOOS {
+	case "windows", "plan9":
+		t.Skipf("skipping on %s", runtime.GOOS)
+	}
 	testFastWalk(t, map[string]string{
-		"foo/foo.go":       "one",
-		"bar/bar.go":       "LINK:../foo/foo.go",
-		"symdir":           "LINK:foo",
-		"broken/broken.go": "LINK:../nonexistent",
+		"foo/foo.go": "one",
+		"bar/bar.go": "LINK:../foo.go",
+		"symdir":     "LINK:foo",
 	},
 		func(path string, typ os.FileMode) error {
 			return nil
 		},
 		map[string]os.FileMode{
-			"":                      os.ModeDir,
-			"/src":                  os.ModeDir,
-			"/src/bar":              os.ModeDir,
-			"/src/bar/bar.go":       os.ModeSymlink,
-			"/src/foo":              os.ModeDir,
-			"/src/foo/foo.go":       0,
-			"/src/symdir":           os.ModeSymlink,
-			"/src/broken":           os.ModeDir,
-			"/src/broken/broken.go": os.ModeSymlink,
+			"":                os.ModeDir,
+			"/src":            os.ModeDir,
+			"/src/bar":        os.ModeDir,
+			"/src/bar/bar.go": os.ModeSymlink,
+			"/src/foo":        os.ModeDir,
+			"/src/foo/foo.go": 0,
+			"/src/symdir":     os.ModeSymlink,
 		})
 }
 
@@ -202,7 +184,7 @@ func TestFastWalk_SkipFiles(t *testing.T) {
 				mu.Lock()
 				defer mu.Unlock()
 				want["/src/"+filepath.Base(path)] = 0
-				return fastwalk.ErrSkipFiles
+				return fastwalk.SkipFiles
 			}
 			return nil
 		},
@@ -213,6 +195,11 @@ func TestFastWalk_SkipFiles(t *testing.T) {
 }
 
 func TestFastWalk_TraverseSymlink(t *testing.T) {
+	switch runtime.GOOS {
+	case "windows", "plan9":
+		t.Skipf("skipping on %s", runtime.GOOS)
+	}
+
 	testFastWalk(t, map[string]string{
 		"foo/foo.go":   "one",
 		"bar/bar.go":   "two",
@@ -221,7 +208,7 @@ func TestFastWalk_TraverseSymlink(t *testing.T) {
 	},
 		func(path string, typ os.FileMode) error {
 			if typ == os.ModeSymlink {
-				return fastwalk.ErrTraverseLink
+				return fastwalk.TraverseLink
 			}
 			return nil
 		},

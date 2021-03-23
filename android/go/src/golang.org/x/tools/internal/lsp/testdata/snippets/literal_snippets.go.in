@@ -1,8 +1,6 @@
 package snippets
 
 import (
-	"bytes"
-	"go/ast"
 	"net/http"
 	"sort"
 
@@ -11,11 +9,7 @@ import (
 
 func _() {
 	[]int{}        //@item(litIntSlice, "[]int{}", "", "var")
-	&[]int{}       //@item(litIntSliceAddr, "&[]int{}", "", "var")
 	make([]int, 0) //@item(makeIntSlice, "make([]int, 0)", "", "func")
-
-	var _ *[]int = in //@snippet(" //", litIntSliceAddr, "&[]int{$0\\}", "&[]int{$0\\}")
-	var _ **[]int = in //@complete(" //")
 
 	var slice []int
 	slice = i //@snippet(" //", litIntSlice, "[]int{$0\\}", "[]int{$0\\}")
@@ -111,35 +105,19 @@ func _() {
 }
 
 func _() {
-	type myStruct struct{ i int } //@item(litMyStructType, "myStruct", "struct{...}", "struct")
-	myStruct{} //@item(litMyStruct, "myStruct{}", "", "var")
+	type myStruct struct{ i int } //@item(litStructType, "myStruct", "struct{...}", "struct")
 
 	foo := func(s string, args ...myStruct) {}
 	// Don't give literal slice candidate for variadic arg.
-	// Do give literal candidates for variadic element.
-	foo("", myStruct) //@complete(")", litMyStruct, litMyStructType)
-}
-
-func _() {
-	Buffer{} //@item(litBuffer, "Buffer{}", "", "var")
-
-	var b *bytes.Buffer
-	b = bytes.Bu //@snippet(" //", litBuffer, "Buffer{\\}", "Buffer{\\}")
+	foo("", myStruct) //@complete(")", litStructType)
 }
 
 func _() {
 	_ = "func(...) {}" //@item(litFunc, "func(...) {}", "", "var")
 
-	sort.Slice(nil, fun) //@complete(")", litFunc),snippet(")", litFunc, "func(i, j int) bool {$0\\}", "func(i, j int) bool {$0\\}")
+	sort.Slice(nil, f) //@snippet(")", litFunc, "func(i, j int) bool {$0\\}", "func(i, j int) bool {$0\\}")
 
-	http.HandleFunc("", f) //@snippet(")", litFunc, "func(rw http.ResponseWriter, r *http.Request) {$0\\}", "func(${1:rw} http.ResponseWriter, ${2:r} *http.Request) {$0\\}")
-
-	// no literal "func" completions
-	http.Handle("", fun) //@complete(")")
-
-	http.HandlerFunc() //@item(handlerFunc, "http.HandlerFunc()", "", "var")
-	http.Handle("", h) //@snippet(")", handlerFunc, "http.HandlerFunc($0)", "http.HandlerFunc($0)")
-	http.Handle("", http.HandlerFunc()) //@snippet("))", litFunc, "func(rw http.ResponseWriter, r *http.Request) {$0\\}", "func(${1:rw} http.ResponseWriter, ${2:r} *http.Request) {$0\\}")
+	http.HandleFunc("", f) //@snippet(")", litFunc, "", "func(${1:rw} http.ResponseWriter, ${2:r} *http.Request) {$0\\}")
 
 	var namedReturn func(s string) (b bool)
 	namedReturn = f //@snippet(" //", litFunc, "func(s string) (b bool) {$0\\}", "func(s string) (b bool) {$0\\}")
@@ -151,17 +129,7 @@ func _() {
 	multiNamedReturn = f //@snippet(" //", litFunc, "func() (b bool, i int) {$0\\}", "func() (b bool, i int) {$0\\}")
 
 	var duplicateParams func(myImpl, int, myImpl)
-	duplicateParams = f //@snippet(" //", litFunc, "func(mi1 myImpl, i int, mi2 myImpl) {$0\\}", "func(${1:mi1} myImpl, ${2:i} int, ${3:mi2} myImpl) {$0\\}")
-
-	type aliasImpl = myImpl
-	var aliasParams func(aliasImpl) aliasImpl
-	aliasParams = f //@snippet(" //", litFunc, "func(ai aliasImpl) aliasImpl {$0\\}", "func(${1:ai} aliasImpl) aliasImpl {$0\\}")
-
-	const two = 2
-	var builtinTypes func([]int, [two]bool, map[string]string, struct{ i int }, interface{ foo() }, <-chan int)
-	builtinTypes = f //@snippet(" //", litFunc, "func(i1 []int, b [two]bool, m map[string]string, s struct{ i int \\}, i2 interface{ foo() \\}, c <-chan int) {$0\\}", "func(${1:i1} []int, ${2:b} [two]bool, ${3:m} map[string]string, ${4:s} struct{ i int \\}, ${5:i2} interface{ foo() \\}, ${6:c} <-chan int) {$0\\}")
-
-	var _ func(ast.Node) = f //@snippet(" //", litFunc, "func(n ast.Node) {$0\\}", "func(${1:n} ast.Node) {$0\\}")
+	duplicateParams = f //@snippet(" //", litFunc, "", "func(${1:mi} myImpl, ${2:_} int, ${3:_} myImpl) {$0\\}")
 }
 
 func _() {
@@ -174,43 +142,4 @@ func _() {
 	var sf foo.StructFoo
 	sf = foo.Str //@snippet(" //", litStructFoo, "StructFoo{$0\\}", "StructFoo{$0\\}")
 	sf = foo. //@snippet(" //", litStructFoo, "StructFoo{$0\\}", "StructFoo{$0\\}")
-}
-
-func _() {
-	float64() //@item(litFloat64, "float64()", "float64", "var")
-
-	// don't complete to "&float64()"
-	var _ *float64 = float64 //@complete(" //")
-
-	var f float64
-	f = fl //@complete(" //", litFloat64),snippet(" //", litFloat64, "float64($0)", "float64($0)")
-
-	type myInt int
-	myInt() //@item(litMyInt, "myInt()", "", "var")
-
-	var mi myInt
-	mi = my //@snippet(" //", litMyInt, "myInt($0)", "myInt($0)")
-}
-
-func _() {
-	type ptrStruct struct {
-		p *ptrStruct
-	}
-
-	ptrStruct{} //@item(litPtrStruct, "ptrStruct{}", "", "var")
-
-	ptrStruct{
-		p: &ptrSt, //@rank(",", litPtrStruct)
-	}
-
-	&ptrStruct{} //@item(litPtrStructPtr, "&ptrStruct{}", "", "var")
-
-	&ptrStruct{
-		p: ptrSt, //@rank(",", litPtrStructPtr)
-	}
-}
-
-func _() {
-	f := func(...[]int) {}
-	f() //@snippet(")", litIntSlice, "[]int{$0\\}", "[]int{$0\\}")
 }

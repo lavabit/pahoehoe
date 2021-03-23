@@ -36,11 +36,11 @@ func usage(errmsg string) {
 func main() {
 	const svcName = "myservice"
 
-	inService, err := svc.IsWindowsService()
+	isIntSess, err := svc.IsAnInteractiveSession()
 	if err != nil {
-		log.Fatalf("failed to determine if we are running in service: %v", err)
+		log.Fatalf("failed to determine if we are running in an interactive session: %v", err)
 	}
-	if inService {
+	if !isIntSess {
 		runService(svcName, false)
 		return
 	}

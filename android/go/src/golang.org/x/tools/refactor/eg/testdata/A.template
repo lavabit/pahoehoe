@@ -1,3 +1,5 @@
+// +build ignore
+
 package template
 
 // Basic test of type-aware expression refactoring.

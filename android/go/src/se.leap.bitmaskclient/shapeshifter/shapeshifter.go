@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/OperatorFoundation/obfs4/common/ntor"
-	"github.com/OperatorFoundation/shapeshifter-transports/transports/obfs4/v2"
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/obfs4"
 	"golang.org/x/net/proxy"
 )
 

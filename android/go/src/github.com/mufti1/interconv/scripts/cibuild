@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-# Usage: script/cibuild
-#
-# run tests
-
-set -e
-scripts/goget
-scripts/gocover

@@ -30,12 +30,17 @@ package pt_extras
 import (
 	"errors"
 	"fmt"
+	"github.com/OperatorFoundation/shapeshifter-dispatcher/common/log"
+	"github.com/OperatorFoundation/shapeshifter-dispatcher/transports"
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/Optimizer"
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/obfs2"
+	"golang.org/x/net/proxy"
 	"net"
 	"net/url"
 	"os"
 	"strconv"
 
-	"github.com/OperatorFoundation/shapeshifter-ipc/v2"
+	"github.com/OperatorFoundation/shapeshifter-ipc"
 )
 
 // This file contains things that probably should be in goptlib but are not
@@ -115,7 +120,7 @@ func PtGetProxy(proxy *string) (*url.URL, error) {
 
 	case "socks5":
 		if spec.User != nil {
-			// USER/PASSWD both must be between 1 and 255 bytes long. (RFC1929)
+			// UNAME/PASSWD both must be between 1 and 255 bytes long. (RFC1929)
 			user := spec.User.Username()
 			passwd, isSet := spec.User.Password()
 			if len(user) < 1 || len(user) > 255 {
@@ -138,7 +143,7 @@ func PtGetProxy(proxy *string) (*url.URL, error) {
 	return spec, nil
 }
 
-// Sigh, pt.resolveAddr() isn't exported.  Include our own ghetto version that
+// Sigh, pt.resolveAddr() isn't exported.  Include our own getto version that
 // doesn't work around #7011, because we don't work with pre-0.2.5.x tor, and
 // all we care about is validation anyway.
 func resolveAddrStr(addrStr string) (*net.TCPAddr, error) {
@@ -165,3 +170,64 @@ func resolveAddrStr(addrStr string) (*net.TCPAddr, error) {
 	return &net.TCPAddr{IP: ip, Port: int(port), Zone: ""}, nil
 }
 
+// target is the server address string
+func ArgsToDialer(target string, name string, args map[string]interface{}, dialer proxy.Dialer) (Optimizer.Transport, error) {
+	switch name {
+	case "obfs2":
+		transport := obfs2.New(target, dialer)
+		return transport, nil
+	case "obfs4":
+		//refactor starts here
+		transport, err := transports.ParseArgsObfs4(args, target, dialer)
+		if err != nil {
+			log.Errorf("Could not parse options %s", err.Error())
+			return nil, err
+		} else {
+			return transport, nil
+		}
+	case "shadow":
+		transport, err := transports.ParseArgsShadow(args, target, dialer)
+		if err != nil {
+			log.Errorf("Could not parse options %s", err.Error())
+			return nil, err
+		} else {
+			return transport, nil
+		}
+	case "Optimizer":
+		transport, err := transports.ParseArgsOptimizer(args, dialer)
+		if err != nil {
+			log.Errorf("Could not parse options %s", err.Error())
+			return nil, err
+		} else {
+			return transport, nil
+		}
+	case "Dust":
+		transport, err := transports.ParseArgsDust(args, target, dialer)
+		if err != nil {
+			log.Errorf("Could not parse options %s", err.Error())
+			return nil, err
+		} else {
+			return transport, nil
+		}
+	case "meeklite":
+		transport, err := transports.ParseArgsMeeklite(args, target, dialer)
+		if err != nil {
+			log.Errorf("Could not parse options %s", err.Error())
+			return nil, err
+		} else {
+			return transport, nil
+		}
+	case "Replicant":
+		transport, err := transports.ParseArgsReplicantClient(args, target, dialer)
+		if err != nil {
+			log.Errorf("Could not parse options %s", err.Error())
+			return nil, err
+		} else {
+			return transport, nil
+		}
+
+	default:
+		log.Errorf("Unknown transport: %s", name)
+		return nil, errors.New("unknown transport")
+	}
+}

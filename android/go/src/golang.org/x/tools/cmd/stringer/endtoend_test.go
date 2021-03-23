@@ -4,7 +4,6 @@
 
 // go command is not available on android
 
-//go:build !android
 // +build !android
 
 package main

@@ -1,11 +1,6 @@
 -- Member-definition --
-godef/a/d.go:6:2-8: defined here as ```go
+godef/a/d.go:6:2-8: defined here as @Member
 field Member string
-```
-
-[`(a.Thing).Member` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Thing.Member)
-
-\@Member
 -- Member-definition-json --
 {
 	"span": {
@@ -13,33 +8,22 @@ field Member string
 		"start": {
 			"line": 6,
 			"column": 2,
-			"offset": 87
+			"offset": 55
 		},
 		"end": {
 			"line": 6,
 			"column": 8,
-			"offset": 93
+			"offset": 61
 		}
 	},
-	"description": "```go\nfield Member string\n```\n\n[`(a.Thing).Member` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Thing.Member)\n\n\\@Member"
+	"description": "@Member\nfield Member string"
 }
 
 -- Member-hover --
-```go
+@Member
 field Member string
-```
-
-[`(a.Thing).Member` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Thing.Member)
-
-\@Member
 -- Other-definition --
-godef/a/d.go:9:5-10: defined here as ```go
-var a.Other a.Thing
-```
-
-[`a.Other` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Other)
-
-\@Other
+godef/a/d.go:9:5-10: defined here as var a.Other a.Thing
 -- Other-definition-json --
 {
 	"span": {
@@ -47,33 +31,23 @@ var a.Other a.Thing
 		"start": {
 			"line": 9,
 			"column": 5,
-			"offset": 118
+			"offset": 86
 		},
 		"end": {
 			"line": 9,
 			"column": 10,
-			"offset": 123
+			"offset": 91
 		}
 	},
-	"description": "```go\nvar a.Other a.Thing\n```\n\n[`a.Other` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Other)\n\n\\@Other"
+	"description": "var a.Other a.Thing"
 }
 
 -- Other-hover --
-```go
 var a.Other a.Thing
-```
-
-[`a.Other` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Other)
-
-\@Other
 -- Thing-definition --
-godef/a/d.go:5:6-11: defined here as ```go
-type Thing struct {
+godef/a/d.go:5:6-11: defined here as Thing struct {
 	Member string //@Member
 }
-```
-
-[`a.Thing` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Thing)
 -- Thing-definition-json --
 {
 	"span": {
@@ -81,31 +55,23 @@ type Thing struct {
 		"start": {
 			"line": 5,
 			"column": 6,
-			"offset": 62
+			"offset": 30
 		},
 		"end": {
 			"line": 5,
 			"column": 11,
-			"offset": 67
+			"offset": 35
 		}
 	},
-	"description": "```go\ntype Thing struct {\n\tMember string //@Member\n}\n```\n\n[`a.Thing` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Thing)"
+	"description": "Thing struct {\n\tMember string //@Member\n}"
 }
 
 -- Thing-hover --
-```go
-type Thing struct {
+Thing struct {
 	Member string //@Member
 }
-```
-
-[`a.Thing` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Thing)
 -- Things-definition --
-godef/a/d.go:11:6-12: defined here as ```go
-func a.Things(val []string) []a.Thing
-```
-
-[`a.Things` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Things)
+godef/a/d.go:11:6-12: defined here as func a.Things(val []string) []a.Thing
 -- Things-definition-json --
 {
 	"span": {
@@ -113,32 +79,16 @@ func a.Things(val []string) []a.Thing
 		"start": {
 			"line": 11,
 			"column": 6,
-			"offset": 145
+			"offset": 113
 		},
 		"end": {
 			"line": 11,
 			"column": 12,
-			"offset": 151
+			"offset": 119
 		}
 	},
-	"description": "```go\nfunc a.Things(val []string) []a.Thing\n```\n\n[`a.Things` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Things)"
+	"description": "func a.Things(val []string) []a.Thing"
 }
 
 -- Things-hover --
-```go
 func a.Things(val []string) []a.Thing
-```
-
-[`a.Things` on pkg.go.dev](https://pkg.go.dev/golang.org/x/tools/internal/lsp/godef/a?utm_source=gopls#Things)
--- eInt-hover --
-```go
-var x int
-```
--- eInterface-hover --
-```go
-var x interface{}
-```
--- eString-hover --
-```go
-var x string
-```

@@ -8,13 +8,21 @@ package loopclosure
 
 import (
 	"go/ast"
-	"go/types"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
-	"golang.org/x/tools/go/types/typeutil"
 )
+
+// TODO(adonovan): also report an error for the following structure,
+// which is often used to ensure that deferred calls do not accumulate
+// in a loop:
+//
+//	for i, x := range c {
+//		func() {
+//			...reference to i or x...
+//		}()
+//	}
 
 const Doc = `check references to loop variables from within nested functions
 
@@ -87,19 +95,16 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		if len(body.List) == 0 {
 			return
 		}
-		// The function invoked in the last return statement.
-		var fun ast.Expr
+		var last *ast.CallExpr
 		switch s := body.List[len(body.List)-1].(type) {
 		case *ast.GoStmt:
-			fun = s.Call.Fun
+			last = s.Call
 		case *ast.DeferStmt:
-			fun = s.Call.Fun
-		case *ast.ExprStmt: // check for errgroup.Group.Go()
-			if call, ok := s.X.(*ast.CallExpr); ok {
-				fun = goInvokes(pass.TypesInfo, call)
-			}
+			last = s.Call
+		default:
+			return
 		}
-		lit, ok := fun.(*ast.FuncLit)
+		lit, ok := last.Fun.(*ast.FuncLit)
 		if !ok {
 			return
 		}
@@ -114,7 +119,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 			for _, v := range vars {
 				if v.Obj == id.Obj {
-					pass.ReportRangef(id, "loop variable %s captured by func literal",
+					pass.Reportf(id.Pos(), "loop variable %s captured by func literal",
 						id.Name)
 				}
 			}
@@ -122,44 +127,4 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		})
 	})
 	return nil, nil
-}
-
-// goInvokes returns a function expression that would be called asynchronously
-// (but not awaited) in another goroutine as a consequence of the call.
-// For example, given the g.Go call below, it returns the function literal expression.
-//
-//   import "sync/errgroup"
-//   var g errgroup.Group
-//   g.Go(func() error { ... })
-//
-// Currently only "golang.org/x/sync/errgroup.Group()" is considered.
-func goInvokes(info *types.Info, call *ast.CallExpr) ast.Expr {
-	f := typeutil.StaticCallee(info, call)
-	// Note: Currently only supports: golang.org/x/sync/errgroup.Go.
-	if f == nil || f.Name() != "Go" {
-		return nil
-	}
-	recv := f.Type().(*types.Signature).Recv()
-	if recv == nil {
-		return nil
-	}
-	rtype, ok := recv.Type().(*types.Pointer)
-	if !ok {
-		return nil
-	}
-	named, ok := rtype.Elem().(*types.Named)
-	if !ok {
-		return nil
-	}
-	if named.Obj().Name() != "Group" {
-		return nil
-	}
-	pkg := f.Pkg()
-	if pkg == nil {
-		return nil
-	}
-	if pkg.Path() != "golang.org/x/sync/errgroup" {
-		return nil
-	}
-	return call.Args[0]
 }

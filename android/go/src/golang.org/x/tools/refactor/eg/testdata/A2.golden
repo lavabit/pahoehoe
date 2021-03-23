@@ -1,3 +1,5 @@
+// +build ignore
+
 package A2
 
 // This refactoring causes addition of "errors" import.

@@ -4,7 +4,6 @@
 
 // No testdata on Android.
 
-//go:build !android
 // +build !android
 
 package loader_test
@@ -263,7 +262,13 @@ func TestLoad_FromSource_Success(t *testing.T) {
 	}
 }
 
+var race = false
+
 func TestLoad_FromImports_Success(t *testing.T) {
+	if v := runtime.Version(); strings.Contains(v, "devel") && race {
+		t.Skip("golang.org/issue/31749: This test is broken on tip in race mode. Skip until it's fixed.")
+	}
+
 	if runtime.Compiler == "gccgo" {
 		t.Skip("gccgo has no standard library test files")
 	}
@@ -646,11 +651,8 @@ func TestErrorReporting(t *testing.T) {
 	for pkg, info := range prog.AllPackages {
 		switch pkg.Path() {
 		case "a":
-			// The match below is unfortunately vague, because in go1.16 the error
-			// message in go/types changed from "cannot convert ..." to "cannot use
-			// ... as ... in assignment".
-			if !hasError(info.Errors, "cannot") {
-				t.Errorf("a.Errors = %v, want bool assignment (type) error", info.Errors)
+			if !hasError(info.Errors, "cannot convert false") {
+				t.Errorf("a.Errors = %v, want bool conversion (type) error", info.Errors)
 			}
 			if !hasError(info.Errors, "could not import c") {
 				t.Errorf("a.Errors = %v, want import (loader) error", info.Errors)
@@ -663,7 +665,7 @@ func TestErrorReporting(t *testing.T) {
 	}
 
 	// Check errors reported via error handler.
-	if !hasError(allErrors, "cannot") ||
+	if !hasError(allErrors, "cannot convert false") ||
 		!hasError(allErrors, "rune literal not terminated") ||
 		!hasError(allErrors, "could not import c") {
 		t.Errorf("allErrors = %v, want syntax, type and loader errors", allErrors)

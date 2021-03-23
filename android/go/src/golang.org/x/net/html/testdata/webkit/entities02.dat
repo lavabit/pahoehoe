@@ -1,7 +1,6 @@
 #data
 <div bar="ZZ&gt;YY"></div>
 #errors
-(1,20): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -12,7 +11,6 @@
 #data
 <div bar="ZZ&"></div>
 #errors
-(1,15): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -23,7 +21,6 @@
 #data
 <div bar='ZZ&'></div>
 #errors
-(1,15): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -34,7 +31,6 @@
 #data
 <div bar=ZZ&></div>
 #errors
-(1,13): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -45,8 +41,6 @@
 #data
 <div bar="ZZ&gt=YY"></div>
 #errors
-(1,15): named-entity-without-semicolon
-(1,20): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -57,7 +51,6 @@
 #data
 <div bar="ZZ&gt0YY"></div>
 #errors
-(1,20): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -68,7 +61,6 @@
 #data
 <div bar="ZZ&gt9YY"></div>
 #errors
-(1,20): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -79,7 +71,6 @@
 #data
 <div bar="ZZ&gtaYY"></div>
 #errors
-(1,20): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -90,7 +81,6 @@
 #data
 <div bar="ZZ&gtZYY"></div>
 #errors
-(1,20): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -101,10 +91,6 @@
 #data
 <div bar="ZZ&gt YY"></div>
 #errors
-(1,15): named-entity-without-semicolon
-(1,20): expected-doctype-but-got-start-tag
-#new-errors
-(1:16) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -115,10 +101,6 @@
 #data
 <div bar="ZZ&gt"></div>
 #errors
-(1,15): named-entity-without-semicolon
-(1,17): expected-doctype-but-got-start-tag
-#new-errors
-(1:16) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -129,10 +111,6 @@
 #data
 <div bar='ZZ&gt'></div>
 #errors
-(1,15): named-entity-without-semicolon
-(1,17): expected-doctype-but-got-start-tag
-#new-errors
-(1:16) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -143,10 +121,6 @@
 #data
 <div bar=ZZ&gt></div>
 #errors
-(1,14): named-entity-without-semicolon
-(1,15): expected-doctype-but-got-start-tag
-#new-errors
-(1:15) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -157,10 +131,6 @@
 #data
 <div bar="ZZ&pound_id=23"></div>
 #errors
-(1,18): named-entity-without-semicolon
-(1,26): expected-doctype-but-got-start-tag
-#new-errors
-(1:19) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -171,7 +141,6 @@
 #data
 <div bar="ZZ&prod_id=23"></div>
 #errors
-(1,25): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -182,7 +151,6 @@
 #data
 <div bar="ZZ&pound;_id=23"></div>
 #errors
-(1,27): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -193,7 +161,6 @@
 #data
 <div bar="ZZ&prod;_id=23"></div>
 #errors
-(1,26): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -204,8 +171,6 @@
 #data
 <div bar="ZZ&pound=23"></div>
 #errors
-(1,18): named-entity-without-semicolon
-(1,23): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -216,7 +181,6 @@
 #data
 <div bar="ZZ&prod=23"></div>
 #errors
-(1,22): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -227,10 +191,6 @@
 #data
 <div>ZZ&pound_id=23</div>
 #errors
-(1,5): expected-doctype-but-got-start-tag
-(1,13): named-entity-without-semicolon
-#new-errors
-(1:14) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -241,7 +201,6 @@
 #data
 <div>ZZ&prod_id=23</div>
 #errors
-(1,5): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -252,7 +211,6 @@
 #data
 <div>ZZ&pound;_id=23</div>
 #errors
-(1,5): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -263,7 +221,6 @@
 #data
 <div>ZZ&prod;_id=23</div>
 #errors
-(1,5): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
@@ -274,10 +231,6 @@
 #data
 <div>ZZ&pound=23</div>
 #errors
-(1,5): expected-doctype-but-got-start-tag
-(1,13): named-entity-without-semicolon
-#new-errors
-(1:14) missing-semicolon-after-character-reference
 #document
 | <html>
 |   <head>
@@ -288,22 +241,9 @@
 #data
 <div>ZZ&prod=23</div>
 #errors
-(1,5): expected-doctype-but-got-start-tag
 #document
 | <html>
 |   <head>
 |   <body>
 |     <div>
 |       "ZZ&prod=23"
-
-#data
-<div>ZZ&AElig=</div>
-#errors
-#new-errors
-(1:14) missing-semicolon-after-character-reference
-#document
-| <html>
-|   <head>
-|   <body>
-|     <div>
-|       "ZZÆ="

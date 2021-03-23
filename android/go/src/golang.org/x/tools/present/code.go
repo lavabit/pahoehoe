@@ -34,7 +34,6 @@ func init() {
 }
 
 type Code struct {
-	Cmd      string // original command from present source
 	Text     template.HTML
 	Play     bool   // runnable code
 	Edit     bool   // editable code
@@ -43,7 +42,6 @@ type Code struct {
 	Raw      []byte // content of the file
 }
 
-func (c Code) PresentCmd() string   { return c.Cmd }
 func (c Code) TemplateName() string { return "code" }
 
 // The input line is a .code or .play entry with a file name and an optional HLfoo marker on the end.
@@ -60,7 +58,6 @@ var (
 // The directive may also be ".play" if the snippet is executable.
 func parseCode(ctx *Context, sourceFile string, sourceLine int, cmd string) (Elem, error) {
 	cmd = strings.TrimSpace(cmd)
-	origCmd := cmd
 
 	// Pull off the HL, if any, from the end of the input line.
 	highlight := ""
@@ -132,7 +129,6 @@ func parseCode(ctx *Context, sourceFile string, sourceLine int, cmd string) (Ele
 		return nil, err
 	}
 	return Code{
-		Cmd:      origCmd,
 		Text:     template.HTML(buf.String()),
 		Play:     play,
 		Edit:     data.Edit,
@@ -187,7 +183,7 @@ var codeTemplate = template.Must(template.New("code").Funcs(template.FuncMap{
 }).Parse(codeTemplateHTML))
 
 const codeTemplateHTML = `
-{{with .Prefix}}<pre style="display: none"><span>{{printf "%s" .}}</span></pre>{{end -}}
+{{with .Prefix}}<pre style="display: none"><span>{{printf "%s" .}}</span></pre>{{end}}
 
 <pre{{if .Edit}} contenteditable="true" spellcheck="false"{{end}}{{if .Numbers}} class="numbers"{{end}}>{{/*
 	*/}}{{range .Lines}}<span num="{{.N}}">{{/*
@@ -195,7 +191,8 @@ const codeTemplateHTML = `
 	*/}}{{else}}{{.L}}{{end}}{{/*
 */}}</span>
 {{end}}</pre>
-{{with .Suffix}}<pre style="display: none"><span>{{printf "%s" .}}</span></pre>{{end -}}
+
+{{with .Suffix}}<pre style="display: none"><span>{{printf "%s" .}}</span></pre>{{end}}
 `
 
 // codeLine represents a line of code extracted from a source file.

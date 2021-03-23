@@ -11,7 +11,7 @@ type S struct {
 }
 
 func _() {
-	_ = S{}.; //@complete(";", Af, Bf, Cf)
+	_ = S{}.; //@complete(";", Bf, Af, Cf)
 }
 
 type bob struct { a int } //@item(a, "a", "int", "field")
@@ -27,7 +27,7 @@ func _() {
 	b := &bob{}
 	y := b.george().
 		jack();
-	y.; //@complete(";", c, jill)
+	y.; //@complete(";", jill, c)
 }
 
 func _() {
@@ -35,10 +35,10 @@ func _() {
 	x := 5
 
 	var b *bob
-	b. //@complete(" /", a, george)
+	b. //@complete(" /", george, a)
 	y, z := 5, 6
 
-	b. //@complete(" /", a, george)
+	b. //@complete(" /", george, a)
 	y, z, a, b, c := 5, 6
 }
 
@@ -52,15 +52,15 @@ func _() {
 
 func _() {
 	var b *bob
-	if y != b. //@complete(" /", a, george)
+	if y != b. //@complete(" /", george, a)
 	z := 5
 
-	if z + y + 1 + b. //@complete(" /", a, george)
+	if z + y + 1 + b. //@complete(" /", george, a)
 	r, s, t := 4, 5
 
-	if y != b. //@complete(" /", a, george)
+	if y != b. //@complete(" /", george, a)
 	z = 5
 
-	if z + y + 1 + b. //@complete(" /", a, george)
+	if z + y + 1 + b. //@complete(" /", george, a)
 	r = 4
 }

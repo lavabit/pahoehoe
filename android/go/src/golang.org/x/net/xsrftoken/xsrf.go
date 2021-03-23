@@ -54,19 +54,12 @@ func generateTokenAtTime(key, userID, actionID string, now time.Time) string {
 }
 
 // Valid reports whether a token is a valid, unexpired token returned by Generate.
-// The token is considered to be expired and invalid if it is older than the default Timeout.
 func Valid(token, key, userID, actionID string) bool {
-	return validTokenAtTime(token, key, userID, actionID, time.Now(), Timeout)
-}
-
-// ValidFor reports whether a token is a valid, unexpired token returned by Generate.
-// The token is considered to be expired and invalid if it is older than the timeout duration.
-func ValidFor(token, key, userID, actionID string, timeout time.Duration) bool {
-	return validTokenAtTime(token, key, userID, actionID, time.Now(), timeout)
+	return validTokenAtTime(token, key, userID, actionID, time.Now())
 }
 
 // validTokenAtTime reports whether a token is valid at the given time.
-func validTokenAtTime(token, key, userID, actionID string, now time.Time, timeout time.Duration) bool {
+func validTokenAtTime(token, key, userID, actionID string, now time.Time) bool {
 	if len(key) == 0 {
 		panic("zero length xsrf secret key")
 	}
@@ -82,7 +75,7 @@ func validTokenAtTime(token, key, userID, actionID string, now time.Time, timeou
 	issueTime := time.Unix(0, millis*1e6)
 
 	// Check that the token is not expired.
-	if now.Sub(issueTime) >= timeout {
+	if now.Sub(issueTime) >= Timeout {
 		return false
 	}
 

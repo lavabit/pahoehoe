@@ -1,7 +1,3 @@
-// Copyright 2018 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 // Package analysisutil defines various helper functions
 // used by two or more packages beneath go/analysis.
 package analysisutil
@@ -107,14 +103,4 @@ func LineStart(f *token.File, line int) token.Pos {
 			max = offset
 		}
 	}
-}
-
-// Imports returns true if path is imported by pkg.
-func Imports(pkg *types.Package, path string) bool {
-	for _, imp := range pkg.Imports() {
-		if imp.Path() == path {
-			return true
-		}
-	}
-	return false
 }

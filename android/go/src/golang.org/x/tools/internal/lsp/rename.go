@@ -9,45 +9,44 @@ import (
 
 	"golang.org/x/tools/internal/lsp/protocol"
 	"golang.org/x/tools/internal/lsp/source"
+	"golang.org/x/tools/internal/span"
 )
 
 func (s *Server) rename(ctx context.Context, params *protocol.RenameParams) (*protocol.WorkspaceEdit, error) {
-	snapshot, fh, ok, release, err := s.beginFileRequest(ctx, params.TextDocument.URI, source.Go)
-	defer release()
-	if !ok {
-		return nil, err
-	}
-	edits, err := source.Rename(ctx, snapshot, fh, params.Position, params.NewName)
+	uri := span.NewURI(params.TextDocument.URI)
+	view := s.session.ViewOf(uri)
+	f, err := view.GetFile(ctx, uri)
 	if err != nil {
 		return nil, err
 	}
-
-	var docChanges []protocol.TextDocumentEdit
-	for uri, e := range edits {
-		fh, err := snapshot.GetVersionedFile(ctx, uri)
-		if err != nil {
-			return nil, err
-		}
-		docChanges = append(docChanges, documentChanges(fh, e)...)
+	ident, err := source.Identifier(ctx, view, f, params.Position)
+	if err != nil {
+		return nil, err
 	}
-	return &protocol.WorkspaceEdit{
-		DocumentChanges: docChanges,
-	}, nil
+	edits, err := ident.Rename(ctx, view, params.NewName)
+	if err != nil {
+		return nil, err
+	}
+	changes := make(map[string][]protocol.TextEdit)
+	for uri, e := range edits {
+		changes[protocol.NewURI(uri)] = e
+	}
+
+	return &protocol.WorkspaceEdit{Changes: &changes}, nil
 }
 
 func (s *Server) prepareRename(ctx context.Context, params *protocol.PrepareRenameParams) (*protocol.Range, error) {
-	snapshot, fh, ok, release, err := s.beginFileRequest(ctx, params.TextDocument.URI, source.Go)
-	defer release()
-	if !ok {
+	uri := span.NewURI(params.TextDocument.URI)
+	view := s.session.ViewOf(uri)
+	f, err := view.GetFile(ctx, uri)
+	if err != nil {
 		return nil, err
 	}
 	// Do not return errors here, as it adds clutter.
 	// Returning a nil result means there is not a valid rename.
-	item, usererr, err := source.PrepareRename(ctx, snapshot, fh, params.Position)
+	item, err := source.PrepareRename(ctx, view, f, params.Position)
 	if err != nil {
-		// Return usererr here rather than err, to avoid cluttering the UI with
-		// internal error details.
-		return nil, usererr
+		return nil, nil
 	}
 	// TODO(suzmue): return ident.Name as the placeholder text.
 	return &item.Range, nil

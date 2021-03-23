@@ -52,7 +52,7 @@ func TestParseIPv4Header(t *testing.T) {
 			}
 			var wh []byte
 			switch runtime.GOOS {
-			case "darwin", "ios":
+			case "darwin":
 				wh = wireHeaderFromTradBSDKernel[:]
 			case "freebsd":
 				if freebsdVersion >= 1000000 {

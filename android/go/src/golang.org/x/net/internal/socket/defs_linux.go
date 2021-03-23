@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build ignore
 // +build ignore
 
 // +godefs map struct_in_addr [4]byte /* in_addr */
@@ -32,8 +31,9 @@ type sockaddrInet C.struct_sockaddr_in
 type sockaddrInet6 C.struct_sockaddr_in6
 
 const (
-	sizeofIovec  = C.sizeof_struct_iovec
-	sizeofMsghdr = C.sizeof_struct_msghdr
+	sizeofIovec   = C.sizeof_struct_iovec
+	sizeofMsghdr  = C.sizeof_struct_msghdr
+	sizeofCmsghdr = C.sizeof_struct_cmsghdr
 
 	sizeofSockaddrInet  = C.sizeof_struct_sockaddr_in
 	sizeofSockaddrInet6 = C.sizeof_struct_sockaddr_in6

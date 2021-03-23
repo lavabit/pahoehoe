@@ -1,0 +1,16 @@
+language: go
+go:
+  - "1.8.x"
+  - "1.9.x"
+  - "1.10.x"
+  - "1.11.x"
+install:
+  - go get golang.org/x/crypto/blowfish
+  - go get golang.org/x/crypto/cast5
+  - go get golang.org/x/crypto/salsa20
+  - go get github.com/aead/chacha20
+  - go install ./cmd/shadowsocks-local
+  - go install ./cmd/shadowsocks-server
+script:
+  - PATH=$PATH:$HOME/gopath/bin bash -x ./script/test.sh
+sudo: false

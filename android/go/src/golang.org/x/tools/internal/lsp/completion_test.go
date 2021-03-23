@@ -1,12 +1,9 @@
-// Copyright 2019 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package lsp
 
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/tools/internal/lsp/protocol"
 	"golang.org/x/tools/internal/lsp/source"
@@ -15,28 +12,26 @@ import (
 )
 
 func (r *runner) Completion(t *testing.T, src span.Span, test tests.Completion, items tests.CompletionItems) {
-	got := r.callCompletion(t, src, func(opts *source.Options) {
-		opts.DeepCompletion = false
-		opts.Matcher = source.CaseInsensitive
-		opts.CompleteUnimported = false
-		opts.InsertTextFormat = protocol.SnippetTextFormat
-		if !strings.Contains(string(src.URI()), "literal") {
-			opts.LiteralCompletions = false
-		}
+	got := r.callCompletion(t, src, source.CompletionOptions{
+		Deep:          false,
+		FuzzyMatching: false,
+		Documentation: true,
 	})
-	got = tests.FilterBuiltins(src, got)
+	if !strings.Contains(string(src.URI()), "builtins") {
+		got = tests.FilterBuiltins(got)
+	}
 	want := expected(t, test, items)
 	if diff := tests.DiffCompletionItems(want, got); diff != "" {
-		t.Errorf("%s", diff)
+		t.Errorf("%s: %s", src, diff)
 	}
 }
 
 func (r *runner) CompletionSnippet(t *testing.T, src span.Span, expected tests.CompletionSnippet, placeholders bool, items tests.CompletionItems) {
-	list := r.callCompletion(t, src, func(opts *source.Options) {
-		opts.UsePlaceholders = placeholders
-		opts.DeepCompletion = true
-		opts.Matcher = source.Fuzzy
-		opts.CompleteUnimported = false
+	list := r.callCompletion(t, src, source.CompletionOptions{
+		Placeholders:  placeholders,
+		Deep:          true,
+		Budget:        5 * time.Second,
+		FuzzyMatching: true,
 	})
 	got := tests.FindItem(list, *items[expected.CompletionItem])
 	want := expected.PlainSnippet
@@ -44,67 +39,75 @@ func (r *runner) CompletionSnippet(t *testing.T, src span.Span, expected tests.C
 		want = expected.PlaceholderSnippet
 	}
 	if diff := tests.DiffSnippets(want, got); diff != "" {
-		t.Errorf("%s", diff)
+		t.Errorf("%s: %v", src, diff)
 	}
 }
 
 func (r *runner) UnimportedCompletion(t *testing.T, src span.Span, test tests.Completion, items tests.CompletionItems) {
-	got := r.callCompletion(t, src, func(opts *source.Options) {})
-	got = tests.FilterBuiltins(src, got)
+	got := r.callCompletion(t, src, source.CompletionOptions{
+		Unimported: true,
+	})
+	if !strings.Contains(string(src.URI()), "builtins") {
+		got = tests.FilterBuiltins(got)
+	}
 	want := expected(t, test, items)
-	if diff := tests.CheckCompletionOrder(want, got, false); diff != "" {
-		t.Errorf("%s", diff)
+	if diff := tests.CheckCompletionOrder(want, got); diff != "" {
+		t.Errorf("%s: %s", src, diff)
 	}
 }
 
 func (r *runner) DeepCompletion(t *testing.T, src span.Span, test tests.Completion, items tests.CompletionItems) {
-	got := r.callCompletion(t, src, func(opts *source.Options) {
-		opts.DeepCompletion = true
-		opts.Matcher = source.CaseInsensitive
-		opts.CompleteUnimported = false
+	got := r.callCompletion(t, src, source.CompletionOptions{
+		Deep:          true,
+		Budget:        5 * time.Second,
+		Documentation: true,
 	})
-	got = tests.FilterBuiltins(src, got)
+	if !strings.Contains(string(src.URI()), "builtins") {
+		got = tests.FilterBuiltins(got)
+	}
 	want := expected(t, test, items)
 	if msg := tests.DiffCompletionItems(want, got); msg != "" {
-		t.Errorf("%s", msg)
+		t.Errorf("%s: %s", src, msg)
 	}
 }
 
 func (r *runner) FuzzyCompletion(t *testing.T, src span.Span, test tests.Completion, items tests.CompletionItems) {
-	got := r.callCompletion(t, src, func(opts *source.Options) {
-		opts.DeepCompletion = true
-		opts.Matcher = source.Fuzzy
-		opts.CompleteUnimported = false
+	got := r.callCompletion(t, src, source.CompletionOptions{
+		FuzzyMatching: true,
+		Deep:          true,
+		Budget:        5 * time.Second,
 	})
-	got = tests.FilterBuiltins(src, got)
+	if !strings.Contains(string(src.URI()), "builtins") {
+		got = tests.FilterBuiltins(got)
+	}
 	want := expected(t, test, items)
 	if msg := tests.DiffCompletionItems(want, got); msg != "" {
-		t.Errorf("%s", msg)
+		t.Errorf("%s: %s", src, msg)
 	}
 }
 
 func (r *runner) CaseSensitiveCompletion(t *testing.T, src span.Span, test tests.Completion, items tests.CompletionItems) {
-	got := r.callCompletion(t, src, func(opts *source.Options) {
-		opts.Matcher = source.CaseSensitive
-		opts.CompleteUnimported = false
+	got := r.callCompletion(t, src, source.CompletionOptions{
+		CaseSensitive: true,
 	})
-	got = tests.FilterBuiltins(src, got)
+	if !strings.Contains(string(src.URI()), "builtins") {
+		got = tests.FilterBuiltins(got)
+	}
 	want := expected(t, test, items)
 	if msg := tests.DiffCompletionItems(want, got); msg != "" {
-		t.Errorf("%s", msg)
+		t.Errorf("%s: %s", src, msg)
 	}
 }
 
 func (r *runner) RankCompletion(t *testing.T, src span.Span, test tests.Completion, items tests.CompletionItems) {
-	got := r.callCompletion(t, src, func(opts *source.Options) {
-		opts.DeepCompletion = true
-		opts.Matcher = source.Fuzzy
-		opts.CompleteUnimported = false
-		opts.LiteralCompletions = true
+	got := r.callCompletion(t, src, source.CompletionOptions{
+		FuzzyMatching: true,
+		Deep:          true,
+		Budget:        5 * time.Second,
 	})
 	want := expected(t, test, items)
-	if msg := tests.CheckCompletionOrder(want, got, true); msg != "" {
-		t.Errorf("%s", msg)
+	if msg := tests.CheckCompletionOrder(want, got); msg != "" {
+		t.Errorf("%s: %s", src, msg)
 	}
 }
 
@@ -118,32 +121,25 @@ func expected(t *testing.T, test tests.Completion, items tests.CompletionItems) 
 	}
 	return want
 }
-
-func (r *runner) callCompletion(t *testing.T, src span.Span, options func(*source.Options)) []protocol.CompletionItem {
+func (r *runner) callCompletion(t *testing.T, src span.Span, options source.CompletionOptions) []protocol.CompletionItem {
 	t.Helper()
 
-	view, err := r.server.session.ViewOf(src.URI())
-	if err != nil {
-		t.Fatal(err)
-	}
+	view := r.server.session.ViewOf(src.URI())
 	original := view.Options()
-	modified := view.Options().Clone()
-	options(modified)
-	view, err = view.SetOptions(r.ctx, modified)
-	if err != nil {
-		t.Error(err)
-		return nil
-	}
-	defer view.SetOptions(r.ctx, original)
+	modified := original
+	modified.InsertTextFormat = protocol.SnippetTextFormat
+	modified.Completion = options
+	view.SetOptions(modified)
+	defer view.SetOptions(original)
 
 	list, err := r.server.Completion(r.ctx, &protocol.CompletionParams{
 		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
 			TextDocument: protocol.TextDocumentIdentifier{
-				URI: protocol.URIFromSpanURI(src.URI()),
+				URI: protocol.NewURI(src.URI()),
 			},
 			Position: protocol.Position{
-				Line:      uint32(src.Start().Line() - 1),
-				Character: uint32(src.Start().Column() - 1),
+				Line:      float64(src.Start().Line() - 1),
+				Character: float64(src.Start().Column() - 1),
 			},
 		},
 	})

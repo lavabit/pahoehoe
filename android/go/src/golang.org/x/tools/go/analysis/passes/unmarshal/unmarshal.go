@@ -16,21 +16,21 @@ import (
 	"golang.org/x/tools/go/types/typeutil"
 )
 
-const Doc = `report passing non-pointer or non-interface values to unmarshal
+const doc = `report passing non-pointer or non-interface values to unmarshal
 
 The unmarshal analysis reports calls to functions such as json.Unmarshal
 in which the argument type is not a pointer or an interface.`
 
 var Analyzer = &analysis.Analyzer{
 	Name:     "unmarshal",
-	Doc:      Doc,
+	Doc:      doc,
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 	Run:      run,
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	switch pass.Pkg.Path() {
-	case "encoding/gob", "encoding/json", "encoding/xml", "encoding/asn1":
+	case "encoding/gob", "encoding/json", "encoding/xml":
 		// These packages know how to use their own APIs.
 		// Sometimes they are testing what happens to incorrect programs.
 		return nil, nil
@@ -53,10 +53,9 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		recv := fn.Type().(*types.Signature).Recv()
 		if fn.Name() == "Unmarshal" && recv == nil {
 			// "encoding/json".Unmarshal
-			// "encoding/xml".Unmarshal
-			// "encoding/asn1".Unmarshal
+			//  "encoding/xml".Unmarshal
 			switch fn.Pkg().Path() {
-			case "encoding/json", "encoding/xml", "encoding/asn1":
+			case "encoding/json", "encoding/xml":
 				argidx = 1 // func([]byte, interface{})
 			}
 		} else if fn.Name() == "Decode" && recv != nil {

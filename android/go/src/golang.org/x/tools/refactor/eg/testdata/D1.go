@@ -1,3 +1,5 @@
+// +build ignore
+
 package D1
 
 import "fmt"

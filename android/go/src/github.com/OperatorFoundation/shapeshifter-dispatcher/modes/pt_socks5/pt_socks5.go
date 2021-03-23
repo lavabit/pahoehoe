@@ -30,16 +30,24 @@
 package pt_socks5
 
 import (
-	"github.com/OperatorFoundation/obfs4/common/log"
-	commonLog "github.com/OperatorFoundation/shapeshifter-dispatcher/common/log"
+	"fmt"
+	options2 "github.com/OperatorFoundation/shapeshifter-dispatcher/common"
 	"github.com/OperatorFoundation/shapeshifter-dispatcher/common/pt_extras"
-	"github.com/OperatorFoundation/shapeshifter-dispatcher/common/socks5"
-	"github.com/OperatorFoundation/shapeshifter-dispatcher/modes"
-	"github.com/OperatorFoundation/shapeshifter-ipc/v2"
-
+	"github.com/OperatorFoundation/shapeshifter-dispatcher/transports"
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/Dust"
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/meeklite"
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/shadow"
 	"golang.org/x/net/proxy"
+	"io"
 	"net"
 	"net/url"
+	"sync"
+
+	"github.com/OperatorFoundation/shapeshifter-dispatcher/common/log"
+	"github.com/OperatorFoundation/shapeshifter-dispatcher/common/socks5"
+	"github.com/OperatorFoundation/shapeshifter-ipc"
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/obfs2"
+	"github.com/OperatorFoundation/shapeshifter-transports/transports/obfs4"
 )
 
 func ClientSetup(socksAddr string, ptClientProxy *url.URL, names []string, options string) (launched bool) {
@@ -87,12 +95,28 @@ func clientHandler(name string, conn net.Conn, proxyURI *url.URL, options string
 		log.Errorf("%s - client failed socks handshake: %s", name, err)
 		return
 	}
-	addrStr := commonLog.ElideAddr(socksReq.Target)
+	addrStr := log.ElideAddr(socksReq.Target)
 
-	var dialer proxy.Dialer = proxy.Direct
+	//var args pt.Args
+	//if needOptions {
+	//	args = socksReq.Args
+	//} else {
+	//	args, err = pt.ParsePT2ClientParameters(options)
+	//	if err != nil {
+	//		return
+	//	}
+	//}
+
+	args, argsErr := options2.ParseOptions(options)
+	if argsErr != nil {
+		log.Errorf("Error parsing transport options: %s", options)
+		return
+	}
+
+	var dialer proxy.Dialer
 
 	// Deal with arguments.
-	transport, argsToDialerErr := pt_extras.ArgsToDialer(socksReq.Target, name, options, dialer)
+	transport, argsToDialerErr := pt_extras.ArgsToDialer(socksReq.Target, name, args, dialer)
 	if argsToDialerErr != nil {
 		log.Errorf("Error creating a transport with the provided options: %s", options)
 		log.Errorf("Error: %s", argsToDialerErr)
@@ -105,26 +129,28 @@ func clientHandler(name string, conn net.Conn, proxyURI *url.URL, options string
 		if proxyErr != nil {
 			// This should basically never happen, since config protocol
 			// verifies this.
-			log.Errorf("%s(%s) - failed to obtain proxy dialer: %s", name, addrStr, commonLog.ElideError(err))
+			log.Errorf("%s(%s) - failed to obtain proxy dialer: %s", name, addrStr, log.ElideError(err))
 			_ = socksReq.Reply(socks5.ReplyGeneralFailure)
 			return
 		}
 	}
 
+	fmt.Println("Got dialer", dialer, proxyURI, proxy.Direct)
+
 	remote, err2 := transport.Dial()
 	if err2 != nil {
-		log.Errorf("%s(%s) - outgoing connection failed: %s", name, addrStr, commonLog.ElideError(err2))
-		_ = socksReq.Reply(socks5.ErrorToReplyCode(err2))
+		log.Errorf("%s(%s) - outgoing connection failed: %s", name, addrStr, log.ElideError(err))
+		_ = socksReq.Reply(socks5.ErrorToReplyCode(err))
 		return
 	}
 	err = socksReq.Reply(socks5.ReplySucceeded)
 	if err != nil {
-		log.Errorf("%s(%s) - SOCKS reply failed: %s", name, addrStr, commonLog.ElideError(err))
+		log.Errorf("%s(%s) - SOCKS reply failed: %s", name, addrStr, log.ElideError(err))
 		return
 	}
 
-	if err = modes.CopyLoop(conn, remote); err != nil {
-		log.Errorf("%s(%s) - closed connection: %s", name, addrStr, commonLog.ElideError(err))
+	if err = copyLoop(conn, remote); err != nil {
+		log.Warnf("%s(%s) - closed connection: %s", name, addrStr, log.ElideError(err))
 	} else {
 		log.Infof("%s(%s) - closed connection", name, addrStr)
 	}
@@ -132,25 +158,137 @@ func clientHandler(name string, conn net.Conn, proxyURI *url.URL, options string
 	return
 }
 
-func ServerSetup(ptServerInfo pt.ServerInfo, stateDir string, options string) (launched bool) {
+func ServerSetup(ptServerInfo pt.ServerInfo, statedir string, options string) (launched bool) {
 	for _, bindaddr := range ptServerInfo.Bindaddrs {
 		name := bindaddr.MethodName
 
-		// Deal with arguments.
-		listen, parseError := pt_extras.ArgsToListener(name, stateDir, options)
-		if parseError != nil {
-			return false
+		var listen func(address string) net.Listener
+
+		args, argsErr := options2.ParseServerOptions(options)
+		if argsErr != nil {
+			log.Errorf("Error parsing transport options: %s", options)
+			return
 		}
+
+		// Deal with arguments.
+		switch name {
+		case "obfs2":
+			transport := obfs2.NewObfs2Transport()
+			listen = transport.Listen
+		case "obfs4":
+			transport, err := obfs4.NewObfs4Server(statedir)
+			if err != nil {
+				log.Errorf("Can't start obfs4 transport: %v", err)
+				return
+			}
+
+			listen = transport.Listen
+		case "replicant":
+			shargs, aok := args["Replicant"]
+			if !aok {
+				return false
+			}
+
+			config, err := transports.ParseArgsReplicantServer(shargs)
+			if err != nil {
+				return false
+			}
+
+			//FIXME: Correct address for listen
+			config.Listen(bindaddr.Addr.String())
+			//var dialer proxy.Dialer
+			//transport := replicant.New(*config, dialer)
+			//listen = transport.Listen
+		case "Dust":
+			shargs, aok := args["Dust"]
+			if !aok {
+				return false
+			}
+
+			untypedIdPath, ok := shargs["Url"]
+			if !ok {
+				return false
+			}
+			idPath, err := options2.CoerceToString(untypedIdPath)
+			if err != nil {
+				log.Errorf("could not coerce Dust Url to string")
+				return false
+			}
+			transport := Dust.NewDustServer(idPath)
+			listen = transport.Listen
+		case "meeklite":
+			args, aok := args["meeklite"]
+			if !aok {
+				return false
+			}
+
+			untypedUrl, ok := args["Url"]
+			if !ok {
+				return false
+			}
+
+			Url, err := options2.CoerceToString(untypedUrl)
+			if err != nil {
+				log.Errorf("could not coerce meeklite Url to string")
+			}
+
+			untypedFront, ok := args["front"]
+			if !ok {
+				return false
+			}
+
+			front, err2 := options2.CoerceToString(untypedFront)
+			if err2 != nil {
+				log.Errorf("could not coerce meeklite front to string")
+			}
+			var dialer proxy.Dialer
+			transport := meeklite.NewMeekTransportWithFront(Url, front, dialer)
+			listen = transport.Listen
+		case "shadow":
+			args, aok := args["shadow"]
+			if !aok {
+				return false
+			}
+
+			untypedPassword, ok := args["password"]
+			if !ok {
+				return false
+			}
+
+			Password, err := options2.CoerceToString(untypedPassword)
+			if err != nil {
+				log.Errorf("could not coerce shadow password to string")
+			}
+
+			untypedCertString, ok := args["certString"]
+			if !ok {
+				return false
+			}
+
+			certString, err2 := options2.CoerceToString(untypedCertString)
+			if err2 != nil {
+				log.Errorf("could not coerce shadow certString to string")
+			}
+
+			transport := shadow.NewShadowServer(Password, certString)
+			listen = transport.Listen
+		default:
+			log.Errorf("Unknown transport: %s", name)
+			return
+		}
+
+		// if args := f.Args(); args != nil {
+		// 	pt.SmethodArgs(name, ln.Addr(), *args)
+		// } else {
+		// 	pt.SmethodArgs(name, ln.Addr(), nil)
+		// }
 
 		go func() {
 			for {
 				transportLn := listen(bindaddr.Addr.String())
 				log.Infof("%s - registered listener: %s", name, log.ElideAddr(bindaddr.Addr.String()))
-				modes.ServerAcceptLoop(name, transportLn, &ptServerInfo, serverHandler)
-				transportLnErr := transportLn.Close()
-				if transportLnErr != nil {
-					log.Errorf("Listener close error: %s", transportLnErr.Error())
-				}
+				serverAcceptLoop(name, transportLn, &ptServerInfo)
+				transportLn.Close()
 			}
 		}()
 
@@ -159,6 +297,19 @@ func ServerSetup(ptServerInfo pt.ServerInfo, stateDir string, options string) (l
 	pt.SmethodsDone()
 
 	return
+}
+
+func serverAcceptLoop(name string, ln net.Listener, info *pt.ServerInfo) {
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			if e, ok := err.(net.Error); ok && !e.Temporary() {
+				return
+			}
+			continue
+		}
+		go serverHandler(name, conn, info)
+	}
 }
 
 func serverHandler(name string, remote net.Conn, info *pt.ServerInfo) {
@@ -173,11 +324,41 @@ func serverHandler(name string, remote net.Conn, info *pt.ServerInfo) {
 		return
 	}
 
-	if err = modes.CopyLoop(orConn, remote); err != nil {
+	if err = copyLoop(orConn, remote); err != nil {
 		log.Warnf("%s(%s) - closed connection: %s", name, addrStr, log.ElideError(err))
 	} else {
 		log.Infof("%s(%s) - closed connection", name, addrStr)
 	}
 
 	return
+}
+
+func copyLoop(a net.Conn, b net.Conn) error {
+	// Note: b is always the pt connection.  a is the SOCKS/ORPort connection.
+	errChan := make(chan error, 2)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		_, err := io.Copy(b, a)
+		errChan <- err
+	}()
+	go func() {
+		defer wg.Done()
+		_, err := io.Copy(a, b)
+		errChan <- err
+	}()
+
+	// Wait for both upstream and downstream to close.  Since one side
+	// terminating closes the other, the second error in the channel will be
+	// something like EINVAL (though io.Copy() will swallow EOF), so only the
+	// first error is returned.
+	wg.Wait()
+	if len(errChan) > 0 {
+		return <-errChan
+	}
+
+	return nil
 }

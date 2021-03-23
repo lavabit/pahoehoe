@@ -587,7 +587,7 @@ func TestFailFastOnShallowCopy(t *testing.T) {
 			t.Errorf("shallow copy: recover() = %q, want %q", got, want)
 		}
 	}()
-	_ = y.String() // panics
+	y.String() // panics
 	t.Error("didn't panic as expected")
 }
 

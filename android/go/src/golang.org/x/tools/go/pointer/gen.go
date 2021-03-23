@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	tEface     = types.NewInterfaceType(nil, nil).Complete()
+	tEface     = types.NewInterface(nil, nil).Complete()
 	tInvalid   = types.Typ[types.Invalid]
 	tUnsafePtr = types.Typ[types.UnsafePointer]
 )
@@ -503,7 +503,8 @@ func (a *analysis) genAppend(instr *ssa.Call, cgn *cgnode) {
 	y := instr.Call.Args[1]
 	tArray := sliceToArray(instr.Call.Args[0].Type())
 
-	w := a.nextNode()
+	var w nodeid
+	w = a.nextNode()
 	a.addNodes(tArray, "append")
 	a.endObject(w, cgn, instr)
 

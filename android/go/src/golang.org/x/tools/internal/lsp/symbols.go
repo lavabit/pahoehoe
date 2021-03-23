@@ -7,45 +7,21 @@ package lsp
 import (
 	"context"
 
-	"golang.org/x/tools/internal/event"
-	"golang.org/x/tools/internal/lsp/debug/tag"
 	"golang.org/x/tools/internal/lsp/protocol"
 	"golang.org/x/tools/internal/lsp/source"
+	"golang.org/x/tools/internal/span"
+	"golang.org/x/tools/internal/telemetry/trace"
 )
 
-func (s *Server) documentSymbol(ctx context.Context, params *protocol.DocumentSymbolParams) ([]interface{}, error) {
-	ctx, done := event.Start(ctx, "lsp.Server.documentSymbol")
+func (s *Server) documentSymbol(ctx context.Context, params *protocol.DocumentSymbolParams) ([]protocol.DocumentSymbol, error) {
+	ctx, done := trace.StartSpan(ctx, "lsp.Server.documentSymbol")
 	defer done()
 
-	snapshot, fh, ok, release, err := s.beginFileRequest(ctx, params.TextDocument.URI, source.Go)
-	defer release()
-	if !ok {
-		return []interface{}{}, err
-	}
-	docSymbols, err := source.DocumentSymbols(ctx, snapshot, fh)
+	uri := span.NewURI(params.TextDocument.URI)
+	view := s.session.ViewOf(uri)
+	f, err := view.GetFile(ctx, uri)
 	if err != nil {
-		event.Error(ctx, "DocumentSymbols failed", err, tag.URI.Of(fh.URI()))
-		return []interface{}{}, nil
+		return nil, err
 	}
-	// Convert the symbols to an interface array.
-	// TODO: Remove this once the lsp deprecates SymbolInformation.
-	symbols := make([]interface{}, len(docSymbols))
-	for i, s := range docSymbols {
-		if snapshot.View().Options().HierarchicalDocumentSymbolSupport {
-			symbols[i] = s
-			continue
-		}
-		// If the client does not support hierarchical document symbols, then
-		// we need to be backwards compatible for now and return SymbolInformation.
-		symbols[i] = protocol.SymbolInformation{
-			Name:       s.Name,
-			Kind:       s.Kind,
-			Deprecated: s.Deprecated,
-			Location: protocol.Location{
-				URI:   params.TextDocument.URI,
-				Range: s.Range,
-			},
-		}
-	}
-	return symbols, nil
+	return source.DocumentSymbols(ctx, view, f)
 }

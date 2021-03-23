@@ -38,7 +38,7 @@ type Presentation struct {
 	SearchDocHTML,
 	SearchCodeHTML,
 	SearchTxtHTML,
-	SearchDescXML *template.Template // If not nil, register a /opensearch.xml handler with this template.
+	SearchDescXML *template.Template
 
 	// TabWidth optionally specifies the tab width.
 	TabWidth int
@@ -129,9 +129,7 @@ func NewPresentation(c *Corpus) *Presentation {
 	p.pkgHandler.registerWithMux(p.mux)
 	p.mux.HandleFunc("/", p.ServeFile)
 	p.mux.HandleFunc("/search", p.HandleSearch)
-	if p.SearchDescXML != nil {
-		p.mux.HandleFunc("/opensearch.xml", p.serveSearchDesc)
-	}
+	p.mux.HandleFunc("/opensearch.xml", p.serveSearchDesc)
 	return p
 }
 

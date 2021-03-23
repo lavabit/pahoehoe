@@ -46,6 +46,8 @@ import (
 	"net"
 	"syscall"
 	"time"
+
+	"github.com/OperatorFoundation/shapeshifter-ipc"
 )
 
 const (
@@ -59,7 +61,8 @@ const (
 	atypIPv6       = 0x04
 
 	authNoneRequired        = 0x00
-	AuthJsonParameterBlock  = 0x09
+	authUsernamePassword    = 0x02
+	authPT2PrivateMethod    = 0x80
 	authNoAcceptableMethods = 0xff
 
 	requestTimeout = 5 * time.Second
@@ -118,7 +121,7 @@ func ErrorToReplyCode(err error) ReplyCode {
 // Request describes a SOCKS 5 request.
 type Request struct {
 	Target string
-	Args   map[string]interface{}
+	Args   pt.Args
 	rw     *bufio.ReadWriter
 }
 
@@ -138,7 +141,6 @@ func Handshake(conn net.Conn, needOptions bool) (*Request, error) {
 		if err == nil {
 			err = nerr
 		}
-
 	}()
 
 	req := new(Request)
@@ -146,11 +148,11 @@ func Handshake(conn net.Conn, needOptions bool) (*Request, error) {
 
 	// Negotiate the protocol version and authentication method.
 	var method byte
-	if method, err = req.NegotiateAuth(needOptions); err != nil {
+	if method, err = req.negotiateAuth(needOptions); err != nil {
 		return nil, err
 	}
 
-	// Authenticate if necessary.
+	// Authenticate if neccecary.
 	if err = req.authenticate(method); err != nil {
 		return nil, err
 	}
@@ -188,7 +190,7 @@ func (req *Request) Reply(code ReplyCode) error {
 	return req.flushBuffers()
 }
 
-func (req *Request) NegotiateAuth(needOptions bool) (byte, error) {
+func (req *Request) negotiateAuth(needOptions bool) (byte, error) {
 	// The client sends a version identifier/selection message.
 	//	uint8_t ver (0x05)
 	//  uint8_t nmethods (>= 1).
@@ -213,16 +215,16 @@ func (req *Request) NegotiateAuth(needOptions bool) (byte, error) {
 	// Pick the best authentication method, prioritizing authenticating
 	// over not if both options are present and SOCKS header options are needed.
 	if needOptions {
-		if bytes.IndexByte(methods, AuthJsonParameterBlock) != -1 {
-			method = AuthJsonParameterBlock
+		if bytes.IndexByte(methods, authPT2PrivateMethod) != -1 {
+			method = authPT2PrivateMethod
 		} else if bytes.IndexByte(methods, authNoneRequired) != -1 {
 			method = authNoneRequired
 		}
 	} else {
 		if bytes.IndexByte(methods, authNoneRequired) != -1 {
 			method = authNoneRequired
-		} else if bytes.IndexByte(methods, AuthJsonParameterBlock) != -1 {
-			method = AuthJsonParameterBlock
+		} else if bytes.IndexByte(methods, authPT2PrivateMethod) != -1 {
+			method = authPT2PrivateMethod
 		}
 	}
 
@@ -233,7 +235,6 @@ func (req *Request) NegotiateAuth(needOptions bool) (byte, error) {
 	if _, err = req.rw.Write(msg); err != nil {
 		return 0, err
 	}
-	println("this is the authentication method the socks server is sending:",msg)
 
 	return method, req.flushBuffers()
 }
@@ -242,7 +243,7 @@ func (req *Request) authenticate(method byte) error {
 	switch method {
 	case authNoneRequired:
 		// No authentication required.
-	case AuthJsonParameterBlock:
+	case authPT2PrivateMethod:
 		if err := req.authPT2(); err != nil {
 			return err
 		}
@@ -339,9 +340,9 @@ func (req *Request) flushBuffers() error {
 	if err := req.rw.Flush(); err != nil {
 		return err
 	}
-	//if req.rw.Reader.Buffered() > 0 {
-	//	return fmt.Errorf("read buffer has %d bytes of trailing data", req.rw.Reader.Buffered())
-	//}
+	if req.rw.Reader.Buffered() > 0 {
+		return fmt.Errorf("read buffer has %d bytes of trailing data", req.rw.Reader.Buffered())
+	}
 	return nil
 }
 

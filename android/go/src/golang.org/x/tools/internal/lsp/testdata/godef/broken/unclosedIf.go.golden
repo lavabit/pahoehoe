@@ -1,9 +1,5 @@
 -- myUnclosedIf-definition --
-godef/broken/unclosedIf.go:7:7-19: defined here as ```go
-var myUnclosedIf string
-```
-
-\@myUnclosedIf
+godef/broken/unclosedIf.go:7:7-19: defined here as var myUnclosedIf string
 -- myUnclosedIf-definition-json --
 {
 	"span": {
@@ -19,12 +15,8 @@ var myUnclosedIf string
 			"offset": 80
 		}
 	},
-	"description": "```go\nvar myUnclosedIf string\n```\n\n\\@myUnclosedIf"
+	"description": "var myUnclosedIf string"
 }
 
 -- myUnclosedIf-hover --
-```go
 var myUnclosedIf string
-```
-
-\@myUnclosedIf

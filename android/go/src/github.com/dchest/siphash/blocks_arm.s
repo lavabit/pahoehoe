@@ -90,7 +90,8 @@ TEXT ·finalize(SB),NOSPLIT,$4-12
 	RET
 
 // blocks(d *digest, data []uint8)
-TEXT ·blocks(SB),NOSPLIT,$4-16
+TEXT ·blocks(SB),NOSPLIT,$8-16
+	MOVW	R9,sav-8(SP)
 	MOVW	d+0(FP),R8
 	MOVM.IA	(R8),[R0,R1,R2,R3,R4,R5,R6,R7]
 	MOVW	p+4(FP),R9
@@ -111,22 +112,24 @@ blocksloop:
 	BLO	blocksloop
 	MOVW	d+0(FP),R8
 	MOVM.IA [R0,R1,R2,R3,R4,R5,R6,R7],(R8)
+	MOVW	sav-8(SP),R9
 	RET
 blocksunaligned:
-	MOVBU.P   8(R9),R12
-	MOVBU    -7(R9),R11
+	MOVBU    (R9),R12
+	MOVBU    1(R9),R11
 	ORR     R11<<8,R12,R12
-	MOVBU    -6(R9),R11
+	MOVBU    2(R9),R11
 	ORR     R11<<16,R12,R12
-	MOVBU    -5(R9),R11
+	MOVBU    3(R9),R11
 	ORR     R11<<24,R12,R12
-	MOVBU    -4(R9),R14
-	MOVBU    -3(R9),R11
+	MOVBU    4(R9),R14
+	MOVBU    5(R9),R11
 	ORR     R11<<8,R14,R14
-	MOVBU    -2(R9),R11
+	MOVBU    6(R9),R11
 	ORR     R11<<16,R14,R14
-	MOVBU    -1(R9),R11
+	MOVBU    7(R9),R11
 	ORR     R11<<24,R14,R14
+	ADD     $8,R9,R9
 	EOR     R12,R6,R6
 	EOR     R14,R7,R7
 	ROUND()
@@ -137,4 +140,5 @@ blocksunaligned:
 	BLO     blocksunaligned
 	MOVW    d+0(FP),R8
 	MOVM.IA [R0,R1,R2,R3,R4,R5,R6,R7],(R8)
+	MOVW    sav-8(SP),R9
 	RET

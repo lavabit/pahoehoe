@@ -8,64 +8,34 @@ package cmdtest
 import (
 	"bytes"
 	"context"
-	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
-	"sync"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 
-	"golang.org/x/tools/internal/jsonrpc2/servertest"
-	"golang.org/x/tools/internal/lsp/cache"
-	"golang.org/x/tools/internal/lsp/cmd"
-	"golang.org/x/tools/internal/lsp/debug"
-	"golang.org/x/tools/internal/lsp/lsprpc"
+	"golang.org/x/tools/go/packages/packagestest"
 	"golang.org/x/tools/internal/lsp/protocol"
 	"golang.org/x/tools/internal/lsp/source"
 	"golang.org/x/tools/internal/lsp/tests"
 	"golang.org/x/tools/internal/span"
-	"golang.org/x/tools/internal/tool"
 )
 
 type runner struct {
-	data        *tests.Data
-	ctx         context.Context
-	options     func(*source.Options)
-	normalizers []tests.Normalizer
-	remote      string
+	exporter packagestest.Exporter
+	data     *tests.Data
+	ctx      context.Context
+	options  func(*source.Options)
 }
 
-func TestCommandLine(t *testing.T, testdata string, options func(*source.Options)) {
-	// On Android, the testdata directory is not copied to the runner.
-	if stat, err := os.Stat(testdata); err != nil || !stat.IsDir() {
-		t.Skip("testdata directory not present")
-	}
-	tests.RunTests(t, testdata, false, func(t *testing.T, datum *tests.Data) {
-		ctx := tests.Context(t)
-		ts := NewTestServer(ctx, options)
-		tests.Run(t, NewRunner(datum, ctx, ts.Addr, options), datum)
-		cmd.CloseTestConnections(ctx)
-	})
-}
-
-func NewTestServer(ctx context.Context, options func(*source.Options)) *servertest.TCPServer {
-	ctx = debug.WithInstance(ctx, "", "")
-	cache := cache.New(ctx, options)
-	ss := lsprpc.NewStreamServer(cache, false)
-	return servertest.NewTCPServer(ctx, ss, nil)
-}
-
-func NewRunner(data *tests.Data, ctx context.Context, remote string, options func(*source.Options)) *runner {
+func NewRunner(exporter packagestest.Exporter, data *tests.Data, ctx context.Context, options func(*source.Options)) tests.Tests {
 	return &runner{
-		data:        data,
-		ctx:         ctx,
-		options:     options,
-		normalizers: tests.CollectNormalizers(data.Exported),
-		remote:      remote,
+		exporter: exporter,
+		data:     data,
+		ctx:      ctx,
+		options:  options,
 	}
-}
-
-func (r *runner) CodeLens(t *testing.T, uri span.URI, want []protocol.CodeLens) {
-	//TODO: add command line completions tests when it works
 }
 
 func (r *runner) Completion(t *testing.T, src span.Span, test tests.Completion, items tests.CompletionItems) {
@@ -96,60 +66,125 @@ func (r *runner) RankCompletion(t *testing.T, src span.Span, test tests.Completi
 	//TODO: add command line completions tests when it works
 }
 
-func (r *runner) FunctionExtraction(t *testing.T, start span.Span, end span.Span) {
-	//TODO: function extraction not supported on command line
+func (r *runner) FoldingRange(t *testing.T, spn span.Span) {
+	//TODO: add command line folding range tests when it works
 }
 
-func (r *runner) runGoplsCmd(t testing.TB, args ...string) (string, string) {
-	rStdout, wStdout, err := os.Pipe()
+func (r *runner) Highlight(t *testing.T, name string, locations []span.Span) {
+	//TODO: add command line highlight tests when it works
+}
+
+func (r *runner) Reference(t *testing.T, src span.Span, itemList []span.Span) {
+	//TODO: add command line references tests when it works
+}
+
+func (r *runner) PrepareRename(t *testing.T, src span.Span, want *source.PrepareItem) {
+	//TODO: add command line prepare rename tests when it works
+}
+
+func (r *runner) Symbol(t *testing.T, uri span.URI, expectedSymbols []protocol.DocumentSymbol) {
+	//TODO: add command line symbol tests when it works
+}
+
+func (r *runner) SignatureHelp(t *testing.T, spn span.Span, expectedSignature *source.SignatureInformation) {
+	//TODO: add command line signature tests when it works
+}
+
+func (r *runner) Link(t *testing.T, uri span.URI, wantLinks []tests.Link) {
+	//TODO: add command line link tests when it works
+}
+
+func (r *runner) Import(t *testing.T, spn span.Span) {
+	//TODO: add command line imports tests when it works
+}
+
+func (r *runner) SuggestedFix(t *testing.T, spn span.Span) {
+	//TODO: add suggested fix tests when it works
+}
+
+func CaptureStdOut(t testing.TB, f func()) string {
+	r, out, err := os.Pipe()
 	if err != nil {
 		t.Fatal(err)
 	}
-	oldStdout := os.Stdout
-	rStderr, wStderr, err := os.Pipe()
+	old := os.Stdout
+	defer func() {
+		os.Stdout = old
+		out.Close()
+		r.Close()
+	}()
+	os.Stdout = out
+	f()
+	out.Close()
+	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		t.Fatal(err)
 	}
-	oldStderr := os.Stderr
-	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		io.Copy(stdout, rStdout)
-		wg.Done()
-	}()
-	go func() {
-		io.Copy(stderr, rStderr)
-		wg.Done()
-	}()
-	os.Stdout, os.Stderr = wStdout, wStderr
-	app := cmd.New("gopls-test", r.data.Config.Dir, r.data.Exported.Config.Env, r.options)
-	remote := r.remote
-	err = tool.Run(tests.Context(t),
-		app,
-		append([]string{fmt.Sprintf("-remote=internal@%s", remote)}, args...))
-	if err != nil {
-		fmt.Fprint(os.Stderr, err)
+	return string(data)
+}
+
+// normalizePaths replaces all paths present in s with just the fragment portion
+// this is used to make golden files not depend on the temporary paths of the files
+func normalizePaths(data *tests.Data, s string) string {
+	type entry struct {
+		path     string
+		index    int
+		fragment string
 	}
-	wStdout.Close()
-	wStderr.Close()
-	wg.Wait()
-	os.Stdout, os.Stderr = oldStdout, oldStderr
-	rStdout.Close()
-	rStderr.Close()
-	return stdout.String(), stderr.String()
-}
-
-// NormalizeGoplsCmd runs the gopls command and normalizes its output.
-func (r *runner) NormalizeGoplsCmd(t testing.TB, args ...string) (string, string) {
-	stdout, stderr := r.runGoplsCmd(t, args...)
-	return r.Normalize(stdout), r.Normalize(stderr)
-}
-
-func (r *runner) Normalize(s string) string {
-	return tests.Normalize(s, r.normalizers)
-}
-
-func (r *runner) NormalizePrefix(s string) string {
-	return tests.NormalizePrefix(s, r.normalizers)
+	match := make([]entry, 0, len(data.Exported.Modules))
+	// collect the initial state of all the matchers
+	for _, m := range data.Exported.Modules {
+		for fragment := range m.Files {
+			filename := data.Exported.File(m.Name, fragment)
+			index := strings.Index(s, filename)
+			if index >= 0 {
+				match = append(match, entry{filename, index, fragment})
+			}
+			if slash := filepath.ToSlash(filename); slash != filename {
+				index := strings.Index(s, slash)
+				if index >= 0 {
+					match = append(match, entry{slash, index, fragment})
+				}
+			}
+			quoted := strconv.Quote(filename)
+			if escaped := quoted[1 : len(quoted)-1]; escaped != filename {
+				index := strings.Index(s, escaped)
+				if index >= 0 {
+					match = append(match, entry{escaped, index, fragment})
+				}
+			}
+		}
+	}
+	// result should be the same or shorter than the input
+	buf := bytes.NewBuffer(make([]byte, 0, len(s)))
+	last := 0
+	for {
+		// find the nearest path match to the start of the buffer
+		next := -1
+		nearest := len(s)
+		for i, c := range match {
+			if c.index >= 0 && nearest > c.index {
+				nearest = c.index
+				next = i
+			}
+		}
+		// if there are no matches, we copy the rest of the string and are done
+		if next < 0 {
+			buf.WriteString(s[last:])
+			return buf.String()
+		}
+		// we have a match
+		n := &match[next]
+		// copy up to the start of the match
+		buf.WriteString(s[last:n.index])
+		// skip over the filename
+		last = n.index + len(n.path)
+		// add in the fragment instead
+		buf.WriteString(n.fragment)
+		// see what the next match for this path is
+		n.index = strings.Index(s[last:], n.path)
+		if n.index >= 0 {
+			n.index += last
+		}
+	}
 }

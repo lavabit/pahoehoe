@@ -12,7 +12,6 @@ import (
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
-	"golang.org/x/tools/go/analysis/passes/internal/analysisutil"
 	"golang.org/x/tools/go/ast/inspector"
 )
 
@@ -44,7 +43,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 	// Fast path: if the package doesn't import net/http,
 	// skip the traversal.
-	if !analysisutil.Imports(pass.Pkg, "net/http") {
+	if !imports(pass.Pkg, "net/http") {
 		return nil, nil
 	}
 
@@ -86,7 +85,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		}
 
 		if resp.Obj == root.Obj {
-			pass.ReportRangef(root, "using %s before checking for errors", resp.Name)
+			pass.Reportf(root.Pos(), "using %s before checking for errors", resp.Name)
 		}
 		return true
 	})
@@ -166,4 +165,13 @@ func isNamedType(t types.Type, path, name string) bool {
 	}
 	obj := n.Obj()
 	return obj.Name() == name && obj.Pkg() != nil && obj.Pkg().Path() == path
+}
+
+func imports(pkg *types.Package, path string) bool {
+	for _, imp := range pkg.Imports() {
+		if imp.Path() == path {
+			return true
+		}
+	}
+	return false
 }

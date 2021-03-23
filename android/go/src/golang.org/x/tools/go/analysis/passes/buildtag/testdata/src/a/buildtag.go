@@ -4,19 +4,15 @@
 
 // This file contains tests for the buildtag checker.
 
-// want +1 `possible malformed \+build comment`
-// +builder
-// +build ignore
+// +builder // want `possible malformed \+build comment`
+// +build !ignore
 
 // Mention +build // want `possible malformed \+build comment`
 
-// want +1 `misplaced \+build comment`
-// +build nospace
-//go:build ok
+// +build nospace // want "build comment must appear before package clause and be followed by a blank line"
 package a
 
-// want +1 `misplaced \+build comment`
-// +build toolate
+// +build toolate // want "build comment must appear before package clause and be followed by a blank line$"
 
 var _ = 3
 

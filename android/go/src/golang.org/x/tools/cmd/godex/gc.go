@@ -6,11 +6,8 @@
 
 package main
 
-import (
-	"go/importer"
-	"go/token"
-)
+import "go/importer"
 
 func init() {
-	register("gc", importer.ForCompiler(token.NewFileSet(), "gc", nil))
+	register("gc", importer.For("gc", nil))
 }

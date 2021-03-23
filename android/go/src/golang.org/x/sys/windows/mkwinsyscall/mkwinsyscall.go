@@ -31,9 +31,6 @@ like func declarations if //sys is replaced by func, but:
   //sys LoadLibrary(libname string) (handle uint32, err error) [failretval==-1] = LoadLibraryA
   and is [failretval==0] by default.
 
-* If the function name ends in a "?", then the function not existing is non-
-  fatal, and an error will be returned instead of panicking.
-
 Usage:
 	mkwinsyscall [flags] [path ...]
 
@@ -82,13 +79,6 @@ func packagename() string {
 	return packageName
 }
 
-func windowsdot() string {
-	if packageName == "windows" {
-		return ""
-	}
-	return "windows."
-}
-
 func syscalldot() string {
 	if packageName == "syscall" {
 		return ""
@@ -115,20 +105,26 @@ func (p *Param) tmpVar() string {
 
 // BoolTmpVarCode returns source code for bool temp variable.
 func (p *Param) BoolTmpVarCode() string {
-	const code = `var %[1]s uint32
-	if %[2]s {
-		%[1]s = 1
+	const code = `var %s uint32
+	if %s {
+		%s = 1
+	} else {
+		%s = 0
 	}`
-	return fmt.Sprintf(code, p.tmpVar(), p.Name)
+	tmp := p.tmpVar()
+	return fmt.Sprintf(code, tmp, p.Name, tmp, tmp)
 }
 
 // BoolPointerTmpVarCode returns source code for bool temp variable.
 func (p *Param) BoolPointerTmpVarCode() string {
-	const code = `var %[1]s uint32
-	if *%[2]s {
-		%[1]s = 1
+	const code = `var %s uint32
+	if *%s {
+		%s = 1
+	} else {
+		%s = 0
 	}`
-	return fmt.Sprintf(code, p.tmpVar(), p.Name)
+	tmp := p.tmpVar()
+	return fmt.Sprintf(code, tmp, p.Name, tmp, tmp)
 }
 
 // SliceTmpVarCode returns source code for slice temp variable.
@@ -246,11 +242,10 @@ func join(ps []*Param, fn func(*Param) string, sep string) string {
 
 // Rets describes function return parameters.
 type Rets struct {
-	Name          string
-	Type          string
-	ReturnsError  bool
-	FailCond      string
-	fnMaybeAbsent bool
+	Name         string
+	Type         string
+	ReturnsError bool
+	FailCond     string
 }
 
 // ErrorVarName returns error variable name for r.
@@ -281,8 +276,6 @@ func (r *Rets) List() string {
 	s := join(r.ToParams(), func(p *Param) string { return p.Name + " " + p.Type }, ", ")
 	if len(s) > 0 {
 		s = "(" + s + ")"
-	} else if r.fnMaybeAbsent {
-		s = "(err error)"
 	}
 	return s
 }
@@ -311,13 +304,17 @@ func (r *Rets) SetReturnValuesCode() string {
 
 func (r *Rets) useLongHandleErrorCode(retvar string) string {
 	const code = `if %s {
-		err = errnoErr(e1)
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = %sEINVAL
+		}
 	}`
 	cond := retvar + " == 0"
 	if r.FailCond != "" {
 		cond = strings.Replace(r.FailCond, "failretval", retvar, 1)
 	}
-	return fmt.Sprintf(code, cond)
+	return fmt.Sprintf(code, cond, syscalldot())
 }
 
 // SetErrorCode returns source code that sets return parameters.
@@ -325,17 +322,11 @@ func (r *Rets) SetErrorCode() string {
 	const code = `if r0 != 0 {
 		%s = %sErrno(r0)
 	}`
-	const ntstatus = `if r0 != 0 {
-		ntstatus = %sNTStatus(r0)
-	}`
 	if r.Name == "" && !r.ReturnsError {
 		return ""
 	}
 	if r.Name == "" {
 		return r.useLongHandleErrorCode("r1")
-	}
-	if r.Type == "error" && r.Name == "ntstatus" {
-		return fmt.Sprintf(ntstatus, windowsdot())
 	}
 	if r.Type == "error" {
 		return fmt.Sprintf(code, r.Name, syscalldot())
@@ -488,10 +479,6 @@ func newFn(s string) (*Fn, error) {
 	default:
 		return nil, errors.New("Could not extract dll name from \"" + f.src + "\"")
 	}
-	if n := f.dllfuncname; strings.HasSuffix(n, "?") {
-		f.dllfuncname = n[:len(n)-1]
-		f.Rets.fnMaybeAbsent = true
-	}
 	return f, nil
 }
 
@@ -590,22 +577,6 @@ func (f *Fn) HelperCallParamList() string {
 	return strings.Join(a, ", ")
 }
 
-// MaybeAbsent returns source code for handling functions that are possibly unavailable.
-func (p *Fn) MaybeAbsent() string {
-	if !p.Rets.fnMaybeAbsent {
-		return ""
-	}
-	const code = `%[1]s = proc%[2]s.Find()
-	if %[1]s != nil {
-		return
-	}`
-	errorVar := p.Rets.ErrorVarName()
-	if errorVar == "" {
-		errorVar = "err"
-	}
-	return fmt.Sprintf(code, errorVar, p.DLLFuncName())
-}
-
 // IsUTF16 is true, if f is W (utf16) function. It is false
 // for all A (ascii) functions.
 func (f *Fn) IsUTF16() bool {
@@ -651,7 +622,6 @@ func (f *Fn) HelperName() string {
 // Source files and functions.
 type Source struct {
 	Funcs           []*Fn
-	DLLFuncNames    []*Fn
 	Files           []string
 	StdLibImports   []string
 	ExternalImports []string
@@ -684,15 +654,6 @@ func ParseFiles(fs []string) (*Source, error) {
 			return nil, err
 		}
 	}
-	src.DLLFuncNames = make([]*Fn, 0, len(src.Funcs))
-	uniq := make(map[string]bool, len(src.Funcs))
-	for _, fn := range src.Funcs {
-		name := fn.DLLFuncName()
-		if !uniq[name] {
-			src.DLLFuncNames = append(src.DLLFuncNames, fn)
-			uniq[name] = true
-		}
-	}
 	return src, nil
 }
 
@@ -707,7 +668,6 @@ func (src *Source) DLLs() []string {
 			r = append(r, name)
 		}
 	}
-	sort.Strings(r)
 	return r
 }
 
@@ -742,13 +702,6 @@ func (src *Source) ParseFile(path string) error {
 		return err
 	}
 	src.Files = append(src.Files, path)
-	sort.Slice(src.Funcs, func(i, j int) bool {
-		fi, fj := src.Funcs[i], src.Funcs[j]
-		if fi.DLLName() == fj.DLLName() {
-			return fi.DLLFuncName() < fj.DLLFuncName()
-		}
-		return fi.DLLName() < fj.DLLName()
-	})
 
 	// get package name
 	fset := token.NewFileSet()
@@ -908,7 +861,6 @@ const (
 
 var (
 	errERROR_IO_PENDING error = {{syscalldot}}Errno(errnoERROR_IO_PENDING)
-	errERROR_EINVAL error     = {{syscalldot}}EINVAL
 )
 
 // errnoErr returns common boxed Errno values, to prevent
@@ -916,7 +868,7 @@ var (
 func errnoErr(e {{syscalldot}}Errno) error {
 	switch e {
 	case 0:
-		return errERROR_EINVAL
+		return nil
 	case errnoERROR_IO_PENDING:
 		return errERROR_IO_PENDING
 	}
@@ -937,7 +889,7 @@ var (
 {{define "dlls"}}{{range .DLLs}}	mod{{.}} = {{newlazydll .}}
 {{end}}{{end}}
 
-{{define "funcnames"}}{{range .DLLFuncNames}}	proc{{.DLLFuncName}} = mod{{.DLLName}}.NewProc("{{.DLLFuncName}}")
+{{define "funcnames"}}{{range .Funcs}}	proc{{.DLLFuncName}} = mod{{.DLLName}}.NewProc("{{.DLLFuncName}}")
 {{end}}{{end}}
 
 {{define "helperbody"}}
@@ -948,16 +900,13 @@ func {{.Name}}({{.ParamList}}) {{template "results" .}}{
 
 {{define "funcbody"}}
 func {{.HelperName}}({{.HelperParamList}}) {{template "results" .}}{
-{{template "maybeabsent" .}}	{{template "tmpvars" .}}	{{template "syscall" .}}	{{template "tmpvarsreadback" .}}
+{{template "tmpvars" .}}	{{template "syscall" .}}	{{template "tmpvarsreadback" .}}
 {{template "seterror" .}}{{template "printtrace" .}}	return
 }
 {{end}}
 
 {{define "helpertmpvars"}}{{range .Params}}{{if .TmpVarHelperCode}}	{{.TmpVarHelperCode}}
 {{end}}{{end}}{{end}}
-
-{{define "maybeabsent"}}{{if .MaybeAbsent}}{{.MaybeAbsent}}
-{{end}}{{end}}
 
 {{define "tmpvars"}}{{range .Params}}{{if .TmpVarCode}}	{{.TmpVarCode}}
 {{end}}{{end}}{{end}}

@@ -12,8 +12,8 @@ import (
 	"os"
 	"strings"
 
+	guru "golang.org/x/tools/cmd/guru/serial"
 	"golang.org/x/tools/internal/lsp/protocol"
-	"golang.org/x/tools/internal/lsp/source"
 	"golang.org/x/tools/internal/span"
 	"golang.org/x/tools/internal/tool"
 	errors "golang.org/x/xerrors"
@@ -34,12 +34,9 @@ const (
 	exampleOffset = 1270
 )
 
-// definition implements the definition verb for gopls.
+// definition implements the definition noun for the query command.
 type definition struct {
-	app *Application
-
-	JSON              bool `flag:"json" help:"emit output in JSON format"`
-	MarkdownSupported bool `flag:"markdown" help:"support markdown in responses"`
+	query *query
 }
 
 func (d *definition) Name() string      { return "definition" }
@@ -63,18 +60,7 @@ func (d *definition) Run(ctx context.Context, args ...string) error {
 	if len(args) != 1 {
 		return tool.CommandLineErrorf("definition expects 1 argument")
 	}
-	// Plaintext makes more sense for the command line.
-	opts := d.app.options
-	d.app.options = func(o *source.Options) {
-		if opts != nil {
-			opts(o)
-		}
-		o.PreferredContentFormat = protocol.PlainText
-		if d.MarkdownSupported {
-			o.PreferredContentFormat = protocol.Markdown
-		}
-	}
-	conn, err := d.app.connect(ctx)
+	conn, err := d.query.app.connect(ctx)
 	if err != nil {
 		return err
 	}
@@ -113,7 +99,7 @@ func (d *definition) Run(ctx context.Context, args ...string) error {
 	if hover == nil {
 		return errors.Errorf("%v: not an identifier", from)
 	}
-	file = conn.AddFile(ctx, fileURI(locs[0].URI))
+	file = conn.AddFile(ctx, span.NewURI(locs[0].URI))
 	if file.err != nil {
 		return errors.Errorf("%v: %v", from, file.err)
 	}
@@ -122,15 +108,37 @@ func (d *definition) Run(ctx context.Context, args ...string) error {
 		return errors.Errorf("%v: %v", from, err)
 	}
 	description := strings.TrimSpace(hover.Contents.Value)
-	result := &Definition{
-		Span:        definition,
-		Description: description,
+	var result interface{}
+	switch d.query.Emulate {
+	case "":
+		result = &Definition{
+			Span:        definition,
+			Description: description,
+		}
+	case emulateGuru:
+		pos := span.New(definition.URI(), definition.Start(), definition.Start())
+		result = &guru.Definition{
+			ObjPos: fmt.Sprint(pos),
+			Desc:   description,
+		}
+	default:
+		return errors.Errorf("unknown emulation for definition: %s", d.query.Emulate)
 	}
-	if d.JSON {
+	if err != nil {
+		return err
+	}
+	if d.query.JSON {
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "\t")
 		return enc.Encode(result)
 	}
-	fmt.Printf("%v: defined here as %s", result.Span, result.Description)
+	switch d := result.(type) {
+	case *Definition:
+		fmt.Printf("%v: defined here as %s", d.Span, d.Description)
+	case *guru.Definition:
+		fmt.Printf("%s: defined here as %s", d.ObjPos, d.Desc)
+	default:
+		return errors.Errorf("no printer for type %T", result)
+	}
 	return nil
 }

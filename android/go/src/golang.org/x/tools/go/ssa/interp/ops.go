@@ -11,7 +11,6 @@ import (
 	"go/token"
 	"go/types"
 	"os"
-	"reflect"
 	"strings"
 	"sync"
 	"unsafe"
@@ -149,7 +148,7 @@ func zero(t types.Type) value {
 			// this is unreachable.  Currently some
 			// constants have 'untyped' types when they
 			// should be defaulted by the typechecker.
-			t = types.Default(t).(*types.Basic)
+			t = ssa.DefaultType(t).(*types.Basic)
 		}
 		switch t.Kind() {
 		case types.Bool:
@@ -1078,9 +1077,34 @@ func callBuiltin(caller *frame, callpos token.Pos, fn *ssa.Builtin, args []value
 func rangeIter(x value, t types.Type) iter {
 	switch x := x.(type) {
 	case map[value]value:
-		return &mapIter{iter: reflect.ValueOf(x).MapRange()}
+		// TODO(adonovan): fix: leaks goroutines and channels
+		// on each incomplete map iteration.  We need to open
+		// up an iteration interface using the
+		// reflect.(Value).MapKeys machinery.
+		it := make(mapIter)
+		go func() {
+			for k, v := range x {
+				it <- [2]value{k, v}
+			}
+			close(it)
+		}()
+		return it
 	case *hashmap:
-		return &hashmapIter{iter: reflect.ValueOf(x.entries()).MapRange()}
+		// TODO(adonovan): fix: leaks goroutines and channels
+		// on each incomplete map iteration.  We need to open
+		// up an iteration interface using the
+		// reflect.(Value).MapKeys machinery.
+		it := make(mapIter)
+		go func() {
+			for _, e := range x.entries() {
+				for e != nil {
+					it <- [2]value{e.key, e.value}
+					e = e.next
+				}
+			}
+			close(it)
+		}()
+		return it
 	case string:
 		return &stringIter{Reader: strings.NewReader(x)}
 	}
@@ -1195,7 +1219,7 @@ func conv(t_dst, t_src types.Type, x value) value {
 		// TODO(adonovan): fix: test integer -> named alias of string.
 		if ut_src.Info()&types.IsInteger != 0 {
 			if ut_dst, ok := ut_dst.(*types.Basic); ok && ut_dst.Kind() == types.String {
-				return fmt.Sprintf("%c", x)
+				return string(asInt(x))
 			}
 		}
 

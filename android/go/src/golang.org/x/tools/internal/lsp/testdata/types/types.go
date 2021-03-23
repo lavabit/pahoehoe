@@ -1,7 +1,5 @@
 package types
 
-type CoolAlias = int //@item(CoolAlias, "CoolAlias", "int", "type")
-
 type X struct { //@item(X_struct, "X", "struct{...}", "struct")
 	x int
 }

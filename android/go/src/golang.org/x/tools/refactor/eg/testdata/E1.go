@@ -1,3 +1,5 @@
+// +build ignore
+
 package E1
 
 import "log"

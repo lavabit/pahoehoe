@@ -276,7 +276,7 @@ var (
 func supportsNonPrivilegedICMP() (string, bool) {
 	nonPrivOnce.Do(func() {
 		switch runtime.GOOS {
-		case "darwin", "ios":
+		case "darwin":
 			nonPrivICMP = true
 		case "linux":
 			for _, t := range []struct{ network, address string }{
