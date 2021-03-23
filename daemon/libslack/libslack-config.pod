@@ -1,0 +1,138 @@
+#
+# libslack - http://libslack.org/
+#
+# Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+# 20201111 raf <raf@raf.org>
+
+=head1 NAME
+
+I<libslack-config> - administrative tool for libslack
+
+=head1 SYNOPSIS
+
+ libslack-config [options]
+ options:
+
+   -h, --help      - Print this help and exit
+   -v, --version   - Print the version of the currently installed libslack
+   -L, --latest    - Print the latest version of libslack (uses wget)
+   -D, --download  - Download the latest version of libslack (uses wget)
+   -U, --upgrade   - Upgrade to the latest version of libslack (uses wget)
+   -p, --prefix    - Print the prefix directory of the libslack installation
+   -c, --cflags    - Print CFLAGS needed to compile clients of libslack
+   -l, --libs      - Print LDFLAGS needed to link against libslack
+   -l, --ldflags   - Identical to --libs
+   -u, --uninstall - Uninstall libslack
+
+ Note: The dashes are optional for long option names
+
+ Command line example:
+   gcc -o app app.c `libslack-config --cflags --libs`
+
+ Makefile example:
+   APP_CFLAGS  += $(shell libslack-config --cflags)
+   APP_LDFLAGS += $(shell libslack-config --libs)
+
+=head1 DESCRIPTION
+
+I<libslack-config> is an administrative tool for I<libslack(3)>. It can
+print the compiler and linker flags that are needed to compile and link
+programs that use I<libslack(3)>. It can also print the version of the
+currently installed I<libslack(3)> or print the latest version available at
+C<http://www.libslack.org/>. It can also download the latest version. It can
+also upgrade libslack. It can also uninstall libslack.
+
+=head1 OPTIONS
+
+=over 4
+
+=item C<-h>, C<--help>
+
+Print a help message and exit.
+
+=item C<-v>, C<--version>
+
+Print the version of the currently installed I<libslack>.
+
+=item C<-L>, C<--latest>
+
+Print the latest version of I<libslack> available at
+C<http://libslack.org/>.
+
+=item C<-D>, C<--download>
+
+Download the latest version of I<libslack> from
+C<http://libslack.org/>.
+
+=item C<-U>, C<--upgrade>
+
+Upgrade to the latest version of I<libslack> from
+C<http://libslack.org/>. This downloads the latest
+version, configures it, compiles it, uninstalls the currently installed
+version and then installs the new version wherever the current version
+was installed.
+
+=item C<-p>, C<--prefix>
+
+Print the prefix directory under which I<libslack> was installed.
+
+=item C<-c>, C<--cflags>
+
+Print the compiler flags needed to compile code that uses I<libslack>.
+
+=item C<-l>, C<--libs>, C<--ldflags>
+
+Print the linker flags needed to link code against I<libslack>.
+
+=item C<-u>, C<--uninstall>
+
+Uninstall I<libslack>.
+
+=back
+
+=head1 SEE ALSO
+
+C<http://libslack.org/>,
+I<libslack(3)>,
+I<agent(3)>,
+I<coproc(3)>,
+I<daemon(3)>,
+I<err(3)>,
+I<fio(3)>,
+I<getopt(3)>,
+I<hsort(3)>,
+I<lim(3)>,
+I<link(3)>,
+I<list(3)>,
+I<locker(3)>,
+I<map(3)>,
+I<mem(3)>,
+I<msg(3)>,
+I<net(3)>,
+I<prog(3)>,
+I<prop(3)>,
+I<pseudo(3)>,
+I<sig(3)>,
+I<snprintf(3)>,
+I<str(3)>,
+I<vsscanf(3)>
+
+=head1 AUTHOR
+
+20201111 raf <raf@raf.org>
+
+=cut

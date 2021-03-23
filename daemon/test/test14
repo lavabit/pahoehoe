@@ -1,0 +1,3 @@
+#!/bin/sh
+
+./test13.compile && ./test13.daemon test14 "`pwd`/daemon.conf" sort

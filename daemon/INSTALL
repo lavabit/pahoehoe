@@ -1,0 +1,218 @@
+INSTALL
+=======
+This version is only known to work on the following systems:
+
+    Linux 3.x/4.x (i386, x86_64, debian-{7,8,9,10}, ubuntu-{14.04,16.04}, ...)
+    Linux 2.6 (i386, x86_64, debian-5.0.4, ubuntu-10.04, fedora-13)
+    Solaris 10 10/09 (i386, amd64)
+    OpenSolaris 2009/06 (i386, amd64)
+    OpenBSD 4.7 (i386, amd64), 6.6 (amd64)
+    FreeBSD 8.0 (i386, amd64), 12.1 (amd64)
+    NetBSD 5.0.2 (i386, amd64), 8.1 (amd64)
+    MacOSX 10.{4,5,6,11,14} (ppc, i386, x86_64)
+    kFreeBSD 20090729 (i386)
+    GNU/Hurd (i386)
+
+For these systems (or later), just run the "configure" script in the source
+directory. It will run the appropriate script in the "conf" directory for
+the current host. Perl and GNU make are required for building.
+
+Note: There isn't a real configure script so you will no doubt encounter
+problems on other systems. An ISO C and POSIX/XPG4 environment will help
+greatly. If your system doesn't have snprintf(3), GNU getopt_long(3),
+vsscanf(3), strcasecmp(3), strncasecmp(3), strlcpy(3) or strlcat(3),
+uncomment the relevant lines in the libslack/config.h file to include them
+in libslack.
+
+If your system doesn't have POSIX 1003.2 compliant regex functions, or they
+are buggy, either: install the GNU implementation,
+ftp://ftp.gnu.org/gnu/regex/regex-0.12.tar.gz [290K]
+(doesn't support internationalisation);
+or install Henry Spencer's implementation,
+ftp://ftp.zoo.toronto.edu/pub/regex.shar [157K].
+
+If you really, really, really don't want the regular expression functions,
+uncomment HAVE_REGEX_H in libslack/config.h to enable the rest of the str
+module to be compiled.
+
+If you have a linux-2.2.x system, you must have LinuxThreads-0.8 or
+LinuxThreads-0.9 and the latest corresponding version of glibc.
+If you have a linux-2.4.x system, you must have at least glibc-2.2.1
+and glibc-linuxthreads-2.2.1. They are available from
+http://ftp.gnu.org/pub/gnu/glibc/. Older versions can be used but
+they have some very nasty bugs.
+
+First, uninstall any previous version:
+
+    cd /usr/local/src/daemon-0.6.4
+    make uninstall
+
+To build and test:
+
+    tar xzf daemon-0.7.tar.gz
+    cd daemon-0.7
+    ./configure # iff linux, openbsd, freebsd, netbsd, macosx, solaris, gnuhurd or kfreebsd
+    make        # must be gnu make
+    make test   # only tests libslack. to test daemon, see test/README
+
+To install daemon and its manpage (in /usr/local by default):
+
+    make install
+
+To install into somewhere other than /usr/local:
+
+    make PREFIX=/opt/daemon install
+
+To install an empty /etc/daemon.conf file and /etc/daemon.conf.d directory:
+
+    make install-daemon-conf
+
+To uninstall daemon:
+
+    make uninstall
+
+To install libslack and its manpages (into /usr/local by default):
+
+    make install-slack
+
+To uninstall libslack:
+
+    make uninstall-slack
+
+For more details:
+
+    make help
+
+The manpage for daemon is daemon(1). There is one manpage for each module in
+libslack (as well as a symlink for each function). The module manpages are
+agent(3), coproc(3), daemon(3), err(3), fio(3), hsort(3), lim(3), link(3),
+list(3), locker(3), map(3), mem(3), msg(3), net(3), prog(3), prop(3),
+pseudo(3), sig(3) and str(3). If necessary, the manpages getopt(3),
+snprintf(3) and vsscanf(3) are created as well.
+
+BINARY PACKAGES
+===============
+Binary packages are no longer available on daemon's website. The Makefile
+contains rules for creating them for several systems (i.e. Debian, Fedora,
+OpenBSD, FreeBSD, NetBSD, OSX/macOS, Solaris10) but they might need updating
+and they might need to be changed to incorporate signing the package.
+
+The rest of this section shows installation from binary packages if they are
+created.
+
+To install from the Fedora RPM binary package (into /usr by default):
+
+    rpm -i daemon-0.7-1.x86_64.rpm # or
+    rpm -i daemon-0.7-1.i686.rpm
+
+To install from the OpenBSD binary package (into /usr/local by default):
+
+    mv daemon-0.7-openbsd-amd64.tgz daemon-0.7.tgz # or
+    mv daemon-0.7-openbsd-i386.tgz  daemon-0.7.tgz
+    # then
+    pkg_add daemon-0.7.tar.gz
+
+To install from the FreeBSD binary package (into /usr/local by default):
+
+    pkg_add daemon-0.7-freebsd-amd64.tbz # or
+    pkg_add daemon-0.7-freebsd-i386.tbz
+
+To install from the NetBSD binary package (into /usr/local by default):
+
+    pkg_add daemon-0.7-netbsd-amd64.tgz # or
+    pkg_add daemon-0.7-netbsd-i386.tgz
+
+To install from the Mac OS X binary package (into /usr/local by default):
+
+    cd /usr/local
+    tar xzf /usr/local/src/daemon-0.7-macosx-universal.tar.gz # or
+    tar xzf /usr/local/src/daemon-0.7-macosx-x86_64.tar.gz # or
+    tar xzf /usr/local/src/daemon-0.7-macosx-i386.tar.gz # or
+    tar xzf /usr/local/src/daemon-0.7-macosx-powerpc.tar.gz
+
+To install from the Solaris10 binary package (into /usr/local by default):
+
+    gunzip daemon-0.7-solaris-amd64.pkg.gz
+    pkgadd -d daemon-0.7-solaris-amd64.pkg
+
+or
+
+    gunzip daemon-0.7-solaris-i386.pkg.gz
+    pkgadd -d daemon-0.7-solaris-i386.pkg
+
+On debian/ubuntu systems you should be able to:
+
+    apt-get install daemon
+
+REQUIREMENTS
+============
+Requires GNU make to compile.
+Requires perl to run the scripts in the conf directory.
+Requires perl to install per-function manpage links.
+Requires an ISO C compiler like gcc to compile the source.
+Requires pod2man (comes with perl) to make the manpages.
+Requires pod2html (comes with perl) to make the html manpages.
+Requires POSIX 1003.2 compliant regex functions. See INSTALL.
+Requires libpthread. See INSTALL.
+
+PLATFORM NOTES
+==============
+These platform notes are quite old and probably mostly irrelevant.
+
+Linux
+-----
+Linux 2.2 always returns 0.0.0.0 on getsockopt(IP_MULTICAST_IF) so
+net_multicast_get_interface() always returns 0 under Linux 2.2. Linux 2.4
+does not have this bug.
+
+Make sure you have a recent glibc (at least 2.1.3) and libpthread (at least
+0.8) (See INSTALL).
+
+Linux 2.2 and 2.4 have a bug-like feature in poll(2). It always times out
+10ms later than specified. Libslack corrects for this as best as it can (if
+> 10ms -= 10ms) but it's not good enough when you need timers with a
+granularity of 10ms. In this case, you have to use
+agent_create_with_select() instead of agent_create() under Linux because
+select() doesn't have this bug. However, scalable I/O is impossible with
+select(). So, if you need timers with a granularity of 10ms *and* scalable
+I/O, you need an agent that uses select() in one thread for the timers and
+separate agents that use poll() in other threads for the I/O.
+
+Solaris
+-------
+Solaris (at least 2.6 and 2.7) doesn't return the hardware address or index
+of network interfaces from ioctl() with a SIOCGIFINDEX command argument.
+Libslack fills in the index in net_interfaces().
+
+UNIX domain datagram sockets aren't supported very nicely. An actual
+filesystem entry is needed for the client and it must be unlinked after use.
+It's also possible for a malicious local user to deny a client access to the
+server. The solution is to always use UNIX domain stream sockets.
+
+Solaris has an inadequate snprintf() function so libslack provides it's own
+implementation. When configured for Solaris, this snprintf() function will
+format exactly like the system's sprintf() function, even though it has
+incorrect behaviour with respect to the ISO C standard. I thought this was
+better than having thousands of module tests apparently "fail".
+
+OpenBSD
+-------
+Has the same UNIX domain datagram socket problem as Solaris.
+
+FreeBSD
+-------
+Has the same UNIX domain datagram socket problem as Solaris.
+Can't lock fifos so fifo_open() can't guarantee a unique reader.
+
+Mac OS X
+--------
+Probably has the same UNIX domain datagram problem as Solaris.
+
+--------------------------------------------------------------------------------
+
+    URL: http://libslack.org/daemon
+    URL: http://raf.org/daemon
+    GIT: https://github.com/raforg/daemon
+    Date: 20201111
+    Author: raf <raf@raf.org>
+

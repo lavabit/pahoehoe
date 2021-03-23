@@ -1,0 +1,5 @@
+#!/bin/sh
+
+../daemon -C "`pwd`/daemon.conf" -n test48 -P "`pwd`" "`pwd`/test1.client"
+sleep 1
+/bin/ls -laspq "`pwd`/test48.pid"

@@ -1,0 +1,493 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+
+#
+# libslack - http://libslack.org/
+#
+# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+# 20201111 raf <raf@raf.org>
+#
+
+=head1 NAME
+
+I<prefix> - add a prefix to libslack's public identifiers
+
+=head1 SYNOPSIS
+
+    prefix [options] prefix [identifier...]
+    options:
+
+      -h        - Print the help message then exit
+      -d        - Print debug messages
+      -n        - Don't modify anything. Run diff instead
+      -r        - Remove the prefix from identifiers
+      -a        - Include all public identifiers (no exceptions)
+      -m module - Modify identifiers in the specified module only
+      -s srcdir - Specify the source directory (".." by default)
+      -P        - Generage prefix.h (adds prefixes in client code)
+      -R        - Generate remove_prefix.h (removes prefixes in client code)
+
+=head1 DESCRIPTION
+
+There is little attempt to make the public identifiers in I<libslack> unique
+across the entire C identifier space. Proper libraries usually insert a
+prefix to all public identifiers. Unfortunately, this doesn't actually
+guarantee uniqueness and things can get rather ugly. Without a global prefix
+registry, any number of developers could choose the same prefix. To
+quarantee uniqueness, system administrators who install libraries must
+define locally unique prefixes to libraries when necessary.
+
+This program adds the specified prefix to public identifiers in libslack. If
+no identifiers are specified on the command line, all public identifiers are
+modified. Otherwise, just those that are specified on the command line are
+modified. Note that the manual pages are modified as well as the source code
+and header files. If the C<-r> option is supplied, the prefix is removed. This
+makes it possible to change an existing prefix.
+
+Note that this program must be run before the library is compiled and before
+the manual pages are generated. It has no effect on an already installed
+instance of libslack.
+
+=head1 OPTIONS
+
+=over 4
+
+=item C<-h>
+
+Print the help message then exit.
+
+=item C<-d>
+
+Print debug messages.
+
+=item C<-n>
+
+Don't modify any files. Run diff instead.
+
+=item C<-r>
+
+Remove the prefix from identifiers.
+
+=item C<-a>
+
+Include all public identifiers (no exceptions). See the EXCEPTIONS section
+for more information. This option only makes sense when no identifiers are
+supplied on the command line.
+
+=item C<-m module>
+
+Modify identifiers in the specified module only.
+
+=item C<-s srcdir>
+
+Specify the source directory (".." by default).
+
+=item C<-P>
+
+Generate the C<prefix.h> header file which contains macros that translate
+the original I<libslack> identifiers into the prefixed identifiers. Client
+code that includes this header file can use the original I<libslack>
+identifiers when compiled on systems that have I<libslack> installed with
+prefixed identifiers. Can't be used if the C<-r> option is supplied.
+
+=item C<-R>
+
+Generate the C<remove_prefix.h> header file which contains macros that
+translate prefixed identifiers into the original I<libslack> identifiers.
+Client code written on a system that installed I<libslack> with prefixes can
+use those identifiers when compiled on systems that have I<libslack>
+installed with the original identifiers. Can't be used if the C<-r> option
+is supplied.
+
+=back
+
+=head1 EXCEPTIONS
+
+By default, this program does not alter the identifiers of functions that
+are only included in I<libslack> as a backup in case your system doesn't
+already have them. These are I<snprintf()>, I<vsnprintf()>, I<asprintf()>,
+I<vasprintf()>, I<strcasecmp()>, I<strncasecmp()>, I<strlcpy()>,
+I<strlcat()>, I<vsscanf()> and the entire I<GNU getopt> module. This is so
+I<libslack> will use your system's implementations if they exist. If they
+don't exist, then there's little harm in defining them here.
+
+Also excluded from renaming are C<null> and C<nul> since these are only
+defined if they have not already been defined so they won't clash with an
+existing C<#define> as long as the I<libslack> headers are included last.
+
+If you require any of these to be renamed, supply them on the command line.
+If you require all of them to be renamed, supply the C<-a> option.
+
+=head1 EXAMPLES
+
+    prefix org_libslack_           # prefix everything with "org_libslack_"
+    prefix s_ error fatal debug    # prefix a few identifiers with "s_"
+    prefix -r s_ debug             # remove "s_" prefix from debug
+    prefix -r -m daemon daemon_    # remove "daemon_" prefix from daemon module
+    prefix -n -r -m daemon daemon_ # see what removing "daemon_" would do
+    prefix -P libslack_            # prefix with "libslack.h" and make prefix.h
+    prefix -n -R libslack_         # just make remove_prefix.h
+
+=head1 ADVICE
+
+If you need to use this program, use C<"libslack_"> as the prefix. It would
+be best if everyone used the same prefix whenever possible. Technically, the
+prefix should probably be C<"org_libslack_libslack_"> but that's ridiculous.
+
+Also generate the C<prefix.h> header file and install it. If client code can
+separate uses of I<libslack(3)> from uses of other libraries with clashing
+names into separate translation units, then it is possible to never see the
+I<libslack(3)> prefixes and still have everything link.
+
+=head1 NOTES
+
+This program only renames functions, not modules. If you don't like this,
+install I<libslack(3)> into a directory under C</opt> so the module names
+can't clash with anything else.
+
+This program works on the I<libslack(3)> source code. Don't expect it to
+work on anything else.
+
+=head1 SEE ALSO
+
+I<libslack(3)>,
+C<http://libslack.org/>
+
+=head1 AUTHOR
+
+20020916 raf <raf@raf.org>
+
+=cut
+
+use Getopt::Std;
+$| = 1;
+
+my $srcdir = '..';
+my ($name) = $0 =~ /([^\/]+)$/;
+my $usage = << "USAGE";
+usage: $name [options] prefix [identifier...]
+options:
+
+  -h        - Print the help message then exit
+  -d        - Print debug messages
+  -n        - Don't modify anything. Run diff instead
+  -r        - Remove the prefix from identifiers
+  -a        - Include all public identifiers (no exceptions)
+  -m module - Modify identifiers in the specified module only
+  -s srcdir - Specify the source directory ("$srcdir" by default)
+  -P        - Generage prefix.h (adds prefixes in client code)
+  -R        - Generate remove_prefix.h (removes prefixes in client code)
+
+Type \"perldoc -F `which $name`\" for the manpage.
+
+USAGE
+
+sub usage
+{
+	my ($msg) = @_;
+	die "$msg\n$usage";
+}
+
+# check the arguments
+
+my %opt;
+usage('Illegal option') unless getopts('hdnram:s:PR', \%opt);
+usage('') if defined $opt{h};
+my $debug = defined $opt{d};
+my $test = defined $opt{n};
+my $reverse = defined $opt{r};
+my $all = defined $opt{a};
+my @modules = split / /, $opt{m} if defined $opt{m};
+$srcdir = $opt{s} if defined $opt{s};
+my $prefix_h = defined $opt{P};
+my $remove_prefix_h = defined $opt{R};
+
+usage('Must specify prefix') unless defined $ARGV[0];
+my $prefix = shift @ARGV;
+usage("Not a valid identifier prefix: '$prefix'") if $prefix =~ /(^[0-9])|([^a-zA-Z0-9_])/;
+my @targets = @ARGV;
+my %identifiers;
+my $total = $#modules == -1 && $#targets == -1;
+
+# build the module list
+
+my %exclude_modules = (getopt => 1) unless $all;
+
+if ($#modules != -1)
+{
+	# check module names supplied on the command line
+
+	for (my $i = 0; $i <= $#modules; ++$i)
+	{
+		usage("No such module: '$srcdir/$modules[$i]'")
+			unless -f "$srcdir/$modules[$i].h" && -f "$srcdir/$modules[$i].c";
+	}
+}
+else
+{
+	# find all module names (i.e. header files with corresponding source files)
+
+	opendir(SRCDIR, $srcdir) || die "failed to open $srcdir: $!\n";
+	@modules = grep { /.*\.h$/ && s/\.h$// && -f "$srcdir/$_.c" && !defined $exclude_modules{$_} } readdir(SRCDIR);
+	closedir SRCDIR;
+}
+
+print("modules:\n\n    ", join("\n    ", sort @modules), "\n\n") if $debug;
+
+# build the identifier list
+
+my %exclude_identifiers =
+(
+	snprintf    => 1, # use system implementation if possible
+	vsnprintf   => 1, # use system implementation if possible
+	asprintf    => 1, # use system implementation if possible
+	vasprintf   => 1, # use system implementation if possible
+	strcasecmp  => 1, # use system implementation if possible
+	strncasecmp => 1, # use system implementation if possible
+	strlcpy     => 1, # use system implementation if possible
+	strlcat     => 1, # use system implementation if possible
+	vsscanf     => 1, # use system implementation if possible
+	option      => 1, # use system implementation if possible
+	null        => 1, # only defined if not already defined
+	nul         => 1  # only defined if not already defined
+)
+	unless $all;
+
+for (my $i = 0; $i <= $#modules; ++$i)
+{
+	my $module = "$srcdir/$modules[$i].h";
+	my $hdr_state = '';
+
+	open(HDR, $module) or die("failed to open $module\n");
+
+	while (<HDR>)
+	{
+		if ($_ =~ /^#ifndef HAVE_PTHREAD_RWLOCK/)
+		{
+			my $skip;
+			do { $skip = <HDR>; } while $skip !~ /^#endif$/;
+		}
+
+		next if $_ =~ /^$/;
+		next if $_ =~ /^#/ && $_ !~ /^#\s*define\s+[a-z_0-9]+/;
+		next if $_ =~ /^\//;
+		next if $_ =~ /^\*/;
+
+		$hdr_state = 'decls', next if $_ =~ /^_begin_decls$/;
+		last if $_ =~ /^_end_decls$/;
+
+		if (/^#\s*define\s+[a-z_0-9]+(\s|\()/)
+		{
+			my $macro = $_;
+			chop($macro);
+			$macro =~ s/^#\s*define\s+//;
+			$macro =~ s/^([a-z_0-9]+).*$/$1/;
+			$identifiers{$macro} = 1 unless defined $exclude_identifiers{$macro};
+		}
+		elsif (/^typedef.*;$/)
+		{
+			my $type = $_;
+			chop($type);
+			$type =~ s/;$//;
+			$type =~ s/\([^)]*\)$//;
+			$type =~ s/^[^(]+\(\*(\w+)\)$/$1/ if $type =~ /\(\*\w+\)$/;
+			$type =~ s/^.*\W(\w+)$/$1/;
+			$identifiers{$type} = 1 unless defined $exclude_identifiers{$type};
+		}
+		elsif ($hdr_state eq 'decls')
+		{
+			my $proto = $_;
+			chop($proto);
+			#warn "$module: _args missing: $proto\n" if $proto =~ /\);\s*$/ && $proto !~ / _args /;
+			#$proto =~ s/ _args.*$//;
+			$proto =~ s/\(.*$//;
+			$proto =~ s/^.*\W(\w+)$/$1/;
+			$proto = $1 if $proto =~ /^extern\s+\w+\s+(\w+)/;
+			$identifiers{$proto} = 1 unless defined $exclude_identifiers{$proto};
+		}
+	}
+
+	close(HDR);
+}
+
+print("identifiers:\n\n    ", join("\n    ", sort keys %identifiers), "\n\n") if $debug;
+
+# set up the target list
+
+if ($#targets != -1)
+{
+	# check identifiers supplied on the command line
+
+	for (my $i = 0; $i <= $#targets; ++$i)
+	{
+		usage("Not an identifier: '$targets[$i]'")
+			if $targets[$i] =~ /(^[0-9])|([^a-zA-Z0-9_])/;
+
+		usage("No such identifier: '$targets[$i]'")
+			unless defined $identifiers{$targets[$i]};
+	}
+}
+else
+{
+	# use all identifiers as targets
+
+	@targets = keys %identifiers;
+}
+
+print("targets:\n\n    ", join("\n    ", sort @targets), "\n\n") if $debug;
+
+# modify every instance of the public identifiers
+
+opendir(SRCDIR, $srcdir) || die "failed to open $srcdir: $!\n";
+my @sources = grep { (/.*\.h$/ || /.*\.c$/) && -f "$srcdir/$_" } readdir(SRCDIR);
+closedir SRCDIR;
+
+my %patterns;
+
+for my $target (@targets)
+{
+	if ($reverse)
+	{
+		usage("Identifier $target does not begin with $prefix")
+			unless $target =~ /^$prefix/;
+
+		my ($sans_prefix) = $target =~ /^$prefix([a-zA-Z0-9_]+)$/;
+
+		usage("Result will not be an identifier: '$target' -> '$sans_prefix'")
+			unless defined $sans_prefix && $sans_prefix =~ /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+		$patterns{$target} = $sans_prefix;
+	}
+	else
+	{
+		$patterns{$target} = $prefix . $target;
+	}
+}
+
+print("pattern:\n\n    ", join("\n    ", map { "s/\\b$_\\b/$patterns{$_}/" } sort keys %patterns), "\n\n") if $debug;
+
+my %reverse_patterns = map { ($patterns{$_}, $_) } keys %patterns unless $reverse;
+
+print("reverse pattern:\n\n    ", join("\n    ", map { "s/\\b$_\\b/$reverse_patterns{$_}/" } sort keys %reverse_patterns), "\n\n") if $debug && !$reverse;
+
+# modify every instance of every target in every source file
+
+$/ = undef;
+
+for (my $i = 0; $i <= $#sources; ++$i)
+{
+	my $src = "$srcdir/$sources[$i]";
+
+	open(SRC, $src) or die("failed to open $src\n");
+	my $text = <SRC>;
+	my $copy = $text;
+	close(SRC);
+
+	$text =~ s/(?<![-."\/])\b(@{[join('|', keys %patterns)]})\b(?!\.h)/$patterns{$1}/mg;
+	$text = fixdoco($text) unless $reverse;
+
+	if ($text ne $copy)
+	{
+		print($test ? 'not ' : '', "modifying $src\n");
+		my $out = $test ? "$src.jnk" : $src;
+		open(SRC, "> $out") or die("failed to open $out for writing\n");
+		print SRC $text;
+		close(SRC);
+		print("diff -du $src $out\n") if $test;
+		system("diff -du $src $out") if $test;
+		unlink($out) if $test;
+	}
+}
+
+# generate prefix.h
+
+hdr('prefix.h', map { "#define $_ $patterns{$_}\n" } sort keys %patterns)
+	if $prefix_h && !$reverse;
+
+# generate remove_prefix.h
+
+hdr('remove_prefix.h', map { "#define $patterns{$_} $_\n" } sort keys %patterns)
+	if $remove_prefix_h && !$reverse;
+
+# generate a header file with a macro for each changed identifier
+
+sub hdr
+{
+	my ($name, @macros) = @_;
+
+	my $name_macro = $name;
+	$name_macro =~ tr/a-z./A-Z_/;
+
+	open(HDR, "> $name") or die "failed to open $name for writing\n";
+	print HDR << "EOT";
+/*
+* libslack - http://libslack.org/
+*
+* Copyright (C) 1999-2004, 2010, 2020 raf <raf\@raf.org>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+* or visit http://www.gnu.org/copyleft/gpl.html
+*
+* 20201111 raf <raf\@raf.org>
+*/
+
+#ifndef LIBSLACK_$name_macro
+#define LIBSLACK_$name_macro
+
+EOT
+
+	print HDR @macros, "\n#endif\n";
+	close(HDR);
+}
+
+# undo prefix changes on ordinary words in the manpages
+# ordinary words do not appear inside C<...> or I<...>
+
+sub fixdoco
+{
+	my ($text) = @_;
+	my (@lines) = split(/\n/, $text);
+	my $pod = 0;
+
+	for (my $i = 0; $i <= $#lines; ++$i)
+	{
+		$pod = 0, next if $lines[$i] =~ /^=cut$/; # pod start
+		$pod = 1 if $lines[$i] =~ /^=/;           # pod stop
+		next if $lines[$i] =~ /^=\w+\s+[CI]</;    # skip function prototypes
+		next if $lines[$i] =~ /^\s/;              # skip code examples
+		next unless $pod;                         # skip code
+
+		$lines[$i] =~ s/(?<![CI][<])\b(@{[join('|', keys %reverse_patterns)]})\b/$reverse_patterns{$1}/g;
+	}
+
+	return join("\n", @lines) . "\n";
+}
+
+# vi:set ts=4 sw=4:

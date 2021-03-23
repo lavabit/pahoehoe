@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cc -o test15.client test15.client.c
+
+./test13.compile && ./test13.daemon test15 "`pwd`/daemon.conf" "`pwd`/test15.client"

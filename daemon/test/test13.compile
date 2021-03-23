@@ -1,0 +1,15 @@
+#!/bin/sh
+
+[ -x test13.daemon ] && exit 0
+
+cc -I../libslack -DHAVE_GETOPT_LONG=1 -DHAVE_SNPRINTF=1 -DHAVE_VSSCANF=1 -DHAVE_PTHREAD_RWLOCK=1 -o test13.daemon test13.daemon.c -L../libslack -lslack -lpthread -lutil
+
+# cc -o test13.daemon test13.daemon.c `libslack-config --cflags --libs`
+
+if [ "$?" != 0 ]
+then
+	echo "compilation failed" >&2
+	exit 1
+fi
+
+exit 0

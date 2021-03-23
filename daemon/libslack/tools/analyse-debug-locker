@@ -1,0 +1,103 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+
+#
+# libslack - http://libslack.org/
+#
+# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+# 20201111 raf <raf@raf.org>
+#
+
+=head1 NAME
+
+I<analyse-debug-locker> - scan debug locker output to locate deadlocks
+
+=head1 SYNOPSIS
+
+    analyse-debug-locker <debug-locker-output>
+
+=head1 DESCRIPTION
+
+The I<locker(3)> module of I<libslack(3)> provides decoupled synchronisation
+of data shared between multiple threads. Application developers (rather than
+library developers) and users (rather than application developers) can
+specify synchronisation strategies.
+
+There are versions of the mutex and readers/writer lock lockers and produce
+debugging information. This program reads the output of these lockers,
+keeping track of which thread owns which lock. When the input stops, this
+program prints out which threads still own locks. Such output indicates a
+deadlock.
+
+You should be able to compare the original debugging information with the
+output of this program to locate deadlocks in client code.
+
+=head1 SEE ALSO
+
+I<libslack(3)>,
+I<locker(3)>
+
+=head1 AUTHOR
+
+20020916 raf <raf@raf.org>
+
+=cut
+
+my %rwlock_thread;
+my %rwlock_state;
+
+while (<>)
+{
+	if ($_ =~ /^\[(\d+)\]\s+rwlock_rdlock (\w+)\.\.\./)
+	{
+		$rwlock_thread{$2} = $1;
+		$rwlock_state{$2} = 'rdlock...';
+	}
+	elsif ($_ =~ /^\[(\d+)\]\s+rwlock_rdlock (\w+) locked/)
+	{
+		$rwlock_thread{$2} = $1;
+		$rwlock_state{$2} = 'rdlock';
+	}
+	elsif ($_ =~ /^\[(\d+)\]\s+rwlock_wrlock (\w+)\.\.\./)
+	{
+		$rwlock_thread{$2} = $1;
+		$rwlock_state{$2} = 'wrlock...';
+	}
+	elsif ($_ =~ /^\[(\d+)\]\s+rwlock_wrlock (\w+) locked/)
+	{
+		$rwlock_thread{$2} = $1;
+		$rwlock_state{$2} = 'wrlock';
+	}
+	elsif ($_ =~ /^\[(\d+)\]\s+rwlock_unlock (\w+)\.\.\./)
+	{
+		$rwlock_thread{$2} = $1;
+		$rwlock_state{$2} = 'unlock...';
+	}
+	elsif ($_ =~ /^\[(\d+)\]\s+rwlock_unlock (\w+) unlocked/)
+	{
+		delete $rwlock_thread{$2};
+		delete $rwlock_state{$2};
+	}
+}
+
+for (keys %rwlock_state)
+{
+	print 'rwlock ', $_, ' ', $rwlock_state{$_}, ' [', $rwlock_thread{$_} , ']', "\n";
+}
+
+# vi:set ts=4 sw=4:

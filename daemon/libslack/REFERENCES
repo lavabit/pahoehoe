@@ -1,0 +1,104 @@
+REFERENCES
+==========
+
+    Advanced Programming in the UNIX Environment
+    W. Richard Stevens
+    Addison-Wesley Professional Computing Series, 1992
+
+    UNIX Network Programming
+    W. Richard Stevens
+    Prentice Hall Software Series, 1990
+
+    UNIX System V Network Programming
+    Stephen A. Rago
+    Addison-Wesley Professional Computing Series, 1993
+
+    TCP/IP Illustrated Volume 1, The Protocols
+    W. Richard Stevens
+    Addison-Wesley Professional Computing Series, 1994
+
+    UNIX Network Programming Volume 1, Networking APIs: Sockets and XTI
+    W. Richard Stevens
+    Prentice Hall Software Series, 1998
+
+    The Practice of Programming
+    Brian W. Kernighan and Rob Pike,
+    Addison-Wesley Professional Computing Series, 1999
+
+    Multithreaded Programming with Pthreads
+    Bil Lewis and Daniel J. Berg
+    Sun Microsystem Press/Prentice Hall, 1998
+
+    Effective TCP/IP Programming
+    Jon C. Snader
+    Addison-Wesley, 2000
+
+    Design Patterns - Elements of Reusable Object-Oriented Software
+    Erich Gamma, Richard Helm, Ralph Johnson and John Vlissides
+    Addison-Wesley Professional Computing Series, 1995
+
+    The Standard C Library
+    P. J. Plauger
+    Prentice Hall, 1992
+
+    The Discipline and Method Architecture for Reusable Libraries
+    Kiem-Phong Vo
+    Software - Practice & Experience, v.30, pp.107-128, 2000
+    http://www.research.att.com/sw/tools/sfio/dm-spe.ps
+
+    strlcpy and strlcat--Consistent, Safe, String Copy and Concatenation
+    Todd C. Miller and Theo De Raadt
+    Proceedings of the FREENIX Track: 1999 USENIX Annual Technical Conference
+    http://www.usenix.org/events/usenix99/millert.html
+
+    The Perl manpages
+    Larry Wall
+    http://www.perl.com/
+
+    Practical UNIX and Internet Security
+    Simson Garfinkel and Gene Spafford
+    O'Reilly, 1996
+
+    Interconnections - Bridges, Routers, Switches and Internetworking Protocols
+    Radia Perlman
+    Addison-Wesley Professional Computing Series, 2000
+
+    MT-Disciplined
+    raf
+    http://raf.org/papers/mt-disciplined.html, 2001
+
+    I/O Event Handling Under Linux
+    Richard Gooch
+    http://www.atnf.csiro.au/~rgooch/linux/docs/io-events.html, 1999
+
+    Scalable kernel performance for Internet servers under realistic loads
+    Gaurav Banga and Jeffrey C. Mogul
+    Proceeding of the Refereed Papers Track: 1998 USENIX Annual Technical Conference
+    http://www.usenix.org/publications/library/proceedings/usenix98/banga.html
+
+    TCP Buffering and Performance Over An ATM Network
+    Purdue Technical Report CSD-TR 94-026 (Revision)
+    Journal of Internetworking: Research and Experience, Vol. 6 (1), Pages 1-13
+    Douglas E. Comer and John C. Lin
+    ftp://gwen.cs.purdue.edu/pub/lin/TCP.atm.ps.Z, 1994
+
+    Experimental and Simulation Performance Results of TCP/IP over High-Speed ATM over ACTS
+    Charalambos, C.; Lazarou, G.; Frost, V.; Evans, J.; Jonkman, R.
+    Information and Telecommunication Technology Center,
+    Department of Electrical Engineering & Computer Science,
+    The University of Kansas
+    http://acts.lerc.nasa.gov/library/docs/gsn/charalambous.pdf
+
+    Revelation X: The "Bob" Apocryphon
+    Translated by The Subgenius Foundation,
+    Edited by Reverend Ivan Stang,
+    Simon & Schuster, 1994
+
+--------------------------------------------------------------------------------
+
+    URL: http://libslack.org
+    URL: http://raf.org/libslack
+    GIT: https://github.com/raforg/libslack
+    Date: 20201111
+    Author: raf <raf@raf.org>
+

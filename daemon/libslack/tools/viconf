@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# edit the configuration files and keep them in sync
+
+case "`pwd`" in
+	*libslack) cd ..;;
+esac
+
+gvim -f conf/*
+cp conf/* libslack/conf
+perl -pi -e 's/^# daemon - http:\/\/libslack.org\/daemon\/$/# libslack - http:\/\/libslack.org\//' libslack/conf/*

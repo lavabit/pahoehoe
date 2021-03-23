@@ -1,0 +1,5 @@
+#!/bin/sh
+
+chmod g+w daemon.conf.d/unsafe # Just in case it isn't already
+
+../daemon -C "`pwd`/daemon.conf" --safe -n test66 echo extra

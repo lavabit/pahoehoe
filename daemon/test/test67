@@ -1,0 +1,48 @@
+#!/bin/sh
+
+opts="--debug=0"
+
+echo Start test67
+../daemon $opts -C "`pwd`/daemon.conf" -n test67 "`pwd`/test3.client"
+
+sleep 4
+echo "daemon --running (burst 1) (client should be running)"
+../daemon $opts --name=test67 --verbose --running
+echo "daemon --signal term"
+../daemon $opts --name=test67 --signal term
+echo
+
+sleep 4
+echo "daemon --running (burst 1) (client should be running)"
+../daemon $opts --name=test67 --verbose --running
+echo "daemon --signal term"
+../daemon $opts --name=test67 --signal term
+echo
+
+sleep 5
+echo "daemon --running during delay between bursts (client should not be running)"
+../daemon $opts --name=test67 --verbose --running
+echo
+echo "daemon --signal term (should fail since client is not running during delay)"
+../daemon $opts --name=test67 --signal term
+echo
+
+sleep 9
+echo "daemon --running (burst 2) (client should be running)"
+../daemon $opts --name=test67 --verbose --running
+echo "daemon --signal term"
+../daemon $opts --name=test67 --signal term
+echo
+
+sleep 4
+echo "daemon --running (burst 2) (client should be running)"
+../daemon $opts --name=test67 --verbose --running
+echo "daemon --signal term"
+../daemon $opts --name=test67 --signal term
+echo
+
+sleep 4
+echo "daemon --running after exit (should not be running at all)"
+../daemon $opts --name=test67 --verbose --running
+echo
+

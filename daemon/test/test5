@@ -1,0 +1,6 @@
+#!/bin/sh
+
+umask 022
+cc -o test5.client test5.client.c
+
+../daemon -C "`pwd`/daemon.conf" -n test5 "`pwd`/test5.client"

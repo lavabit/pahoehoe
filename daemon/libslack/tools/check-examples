@@ -1,0 +1,75 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+$| = 1;
+
+# Compiles and executes the examples from the manpages.
+# Run this from the source directory.
+
+die("usage: $0 *.c\n") if $#ARGV == -1;
+
+my $total = 0;
+
+for my $src (@ARGV)
+{
+	next unless $src =~ /\.c$/;
+	#next if $src =~ /getopt\.c$/;
+
+	warn("Failed to open $src for reading: $!\n"), next unless open SRC, $src;
+
+	my $state = '';
+	my $desc = '';
+	my $code = '';
+	my $num = 0;
+
+	while (<SRC>)
+	{
+		$state = 'X', next if /^=head\d EXAMPLE/;
+		$state = '', next if $state eq 'X' && (/^=head/ || /^=cut/);
+		next unless $state eq 'X';
+		s/\s*(?<!http:)\/\/.*$//;
+		next if /^$/;
+		check($src, ++$num, $desc, $code), $desc = $_, $code = '', next if /^\S/ && $code ne '';
+		$desc .= $_, next if /^\S/;
+		$code .= $_;
+	}
+
+	check($src, ++$num, $desc, $code) if $code ne '';
+
+	close SRC;
+
+	print "WARNING: $src has no EXAMPLES section\n" unless $num;
+	$total += $num;
+}
+
+print "There were $total examples in total\n";
+exit;
+
+sub check
+{
+	my $src = shift;
+	my $num = shift;
+	my $desc = shift;
+	my $code = shift;
+
+	return unless $code =~ /\bint\s+main\s*\(/m;
+
+	print "$src:$num\n$desc\n$code\nExecute ([y]/n): ";
+	my $response = <STDIN>;
+	return if $response =~ /n/i;
+
+	warn("Failed to open example.c for writing: $!\n"), return
+		unless open(EXAMPLE, "> example.c");
+	print EXAMPLE $code;
+	close EXAMPLE;
+
+	print 'Arguments: ';
+	chop(my $args = <STDIN>);
+
+	system("echo Compiling...; cc -o example example.c `libslack-config --cflags --libs` && echo Executing... && ./example $args; echo rc=\$?");
+	unlink 'example', 'example.c';
+	print 'Press return to continue or Ctrl-C to quit.';
+	<STDIN>;
+}
+
+# vi:set ts=4 sw=4:

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+../daemon -C "`pwd`/daemon.conf" -n test49 -F "/i-am-not-a-directory/i-am-an-invalid-argument/test49.pid" "`pwd`/test1.client"

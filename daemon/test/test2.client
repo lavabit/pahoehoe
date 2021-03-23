@@ -1,0 +1,11 @@
+#!/bin/sh
+
+for i in 0 1 2 3 4
+do
+	sleep 1
+	echo $i
+done
+
+exec >&- 2>&-
+
+sleep 2

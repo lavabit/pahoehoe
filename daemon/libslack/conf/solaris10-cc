@@ -1,0 +1,154 @@
+#!/bin/sh
+#
+# libslack - http://libslack.org/
+#
+# Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+
+# Modify the macros.mk make include files to compile on Solaris 10 with cc
+#
+# 20201111 raf <raf@raf.org>
+
+perl -pi \
+	-e 's/^# (\S+ \+= xnet)$/$1/;' \
+	-e 's/^# (\S+ \+= socket)$/$1/;' \
+	-e 's/^# (\S+ \+= nsl)$/$1/;' \
+	-e 's/^# (\S+ \+= m)$/$1/;' \
+	-e 's/^# (GETOPT := getopt)$/$1/;' \
+	-e 's/^# (SNPRINTF := snprintf)$/$1/;' \
+	-e 's/^# (VSSCANF := vsscanf)$/$1/;' \
+	-e 's/^(\S+ \+= -DHAVE_GETOPT_LONG=1)$/# $1/;' \
+	-e 's/^(\S+ \+= -DHAVE_VSSCANF=1)$/# $1/;' \
+	-e 's/^# (\S+ \+= -DHAVE_PTHREAD_RWLOCK=1)$/$1/;' \
+	-e 's/^(\S+ \+= -DNO_POSIX_C_SOURCE=1)$/# $1/;' \
+	-e 's/^(\S+ \+= -DNO_POSIX_SOURCE=1)$/# $1/;' \
+	-e 's/^(\S+ \+= -DNO_XOPEN_SOURCE=1)$/# $1/;' \
+	-e 's/^(\S+ \+= -DROOT_PID_DIR)=.*$/# $1=\\"\/var\/run\\"/;' \
+	-e 's/^# (CC := cc)$/$1/;' \
+	-e 's/^(CC := gcc)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-long-long)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-overlength-strings)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-address)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-nonnull)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-format)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-restrict)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-comment)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-pointer-bool-conversion)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-deprecated-declarations)$/# $1/;' \
+	-e 's/^(\w*CCFLAGS \+= -O3)$/# $1/;' \
+	-e 's/^(\w*CCFLAGS \+= -Wall -pedantic)$/# $1/;' \
+	-e 's/^(\w*(?:CC|LD)FLAGS \+= -m64)$/# $1/;' \
+	-e 's/^# (\w*CCFLAGS \+= -xO4)$/$1/;' \
+	-e 's/^# (\w*LIBS \+= pthread)$/$1/;' \
+	-e 's/^(\w*LIBS \+= util)$/# $1/;' \
+	-e 's/^(\w*LDFLAGS \+= -pthread)$/# $1/;' \
+	-e 's/^MAN_GZIP := 1$/MAN_GZIP := 0/;' \
+	-e 's/^(MAN_LOCDIR\s*:=).*$/$1 \$(PREFIX)\/share\/man/;' \
+	-e 's/^CONF_INSDIR := \$\(PREFIX\)\/etc$/CONF_INSDIR := \/etc/;' \
+	-e 's/^# (PREFIX := \$\(DESTDIR\)\/usr\/local)$/$1/;' \
+	-e 's/^(PREFIX := \$\(DESTDIR\)\/usr\/pkg)$/# $1/;' \
+	-e 's/^(DAEMON_DEFINES \+= -DCONFIG_PATH=\\"\$\(PREFIX\)\/etc\/daemon\.conf\\")$/# $1/;' \
+	`find . -name Makefile` \
+	`find . -name macros.mk`
+
+# Solaris10 has /usr/ucb/install but OpenSolaris 200906 doesn't
+# so we use own version rather than trying to get their native
+# (weird) install program to work the way the normal one does.
+
+if [ ! -f /usr/ucb/install ]
+then
+	perl -pi \
+		-e 's/install -m/.\/myinstall -m/' \
+		`find . -name rules.mk`
+else
+	perl -pi \
+		-e 's/\.\/myinstall -m/install -m/' \
+		`find . -name rules.mk`
+fi
+
+perl -pi \
+	-e 's/^#define (NO_POSIX_SOURCE) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (NO_XOPEN_SOURCE) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_STDARG_H) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_STDINT_H) 1$/\/\* #undef $1 \*\//;' \
+	-e 's/^#define (HAVE_POLL_H) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_SYS_POLL_H) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_SYS_SELECT_H) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_REGEX_H) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_LONG_DOUBLE) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_LONG_LONG) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_SNPRINTF) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_VSNPRINTF) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_GETOPT_LONG) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_VSSCANF) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_STRCASECMP) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_STRNCASECMP) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_STRLCPY) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_STRLCAT) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_ASPRINTF) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_VASPRINTF) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_FLOCKFILE) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_FCNTL_THAT_CAN_LOCK_FIFOS) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_ISOC_REALLOC) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_POLL) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_LINUX_POLL_BUG) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_MLOCK) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_FUNC_GETHOSTBYNAME_R_6) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_FUNC_GETHOSTBYNAME_R_5) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_FUNC_GETHOSTBYNAME_R_3) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_FUNC_GETSERVBYNAME_R_6) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_FUNC_GETSERVBYNAME_R_5) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_FUNC_GETSERVBYNAME_R_4) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_PTHREAD_PROCESS_PRIVATE) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_PTHREAD_PROCESS_SHARED) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_PTHREAD_CONDATTR_INIT) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_PTHREAD_CONDATTR_SETPSHARED) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_PTHREAD_MUTEXATTR_SETPSHARED) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_PTHREAD_RWLOCK) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_MSGHDR_MSG_CONTROL) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_IFREQ_IFR_IFINDEX) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_IFREQ_IFR_MTU) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_SOCKADDR_SA_LEN) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_IF_INDEXTONAME) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_IF_NAMETOINDEX) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (MLOCK_REQUIRES_PAGE_BOUNDARY) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_PRINTF_PTR_FMT_ALTERNATE) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_PRINTF_PTR_FMT_SIGNED) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_PRINTF_PTR_FMT_NIL) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_PRINTF_STR_FMT_NULL) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_PRINTF_FLT_FMT_G_STD) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_PRINTF_PTR_FMT_NOALT) \*\/$/#define $1 1/;' \
+	-e 's/^\/\* #undef (HAVE_PRINTF_WITH_SOLARIS_NEGATIVE_WIDTH_BEHAVIOUR) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_PRINTF_WITH_SOLARIS8_ZERO_PRECISION_ALT_OCTAL_BEHAVIOUR) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_UNIX_DOMAIN_WILDCARD) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (SVR4) \*\/$/#define $1 1/;' \
+	-e 's/^#define (SOCKS) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_CYGWIN) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_DEV_PTMX) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_DEV_PTS_AND_PTC) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_OPENPTY) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_PTY_H) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_UTIL_H) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_LIBUTIL_H) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_SYS_STROPTS_H) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_VHANGUP) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE__GETPTY) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_TTYNAME_R) 1$/\/* #undef $1 *\//;' \
+	-e 's/^#define (HAVE_PTSNAME_R) 1$/\/* #undef $1 *\//;' \
+	-e 's/^\/\* #undef (HAVE_PTSNAME) \*\/$/#define $1 1/;' \
+	-e 's/^#define (HAVE_POLL_THAT_ABORTS_WHEN_POLLFDS_IS_NULL) 1$/\/* #undef $1 *\//;' \
+	`find . -name config.h`
+

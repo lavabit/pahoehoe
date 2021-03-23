@@ -1,0 +1,7 @@
+#!/bin/sh
+
+rm -rf tmp
+mkdir tmp
+chmod 1777 tmp
+
+../daemon -C "`pwd`/daemon.conf" $CHROOT -u nobody -n test4 -D "`pwd`/tmp" "`pwd`/test4.client"

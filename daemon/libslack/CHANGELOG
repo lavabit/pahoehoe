@@ -1,0 +1,292 @@
+CHANGELOG
+=========
+
+0.7 (20201111)
+
+    - Fixed bug: race condition causing failure with "exec daemon ..." (with Askar Safin safinaskar at mail.ru)
+    - Added $DAEMON_INIT_EXIT_DELAY_MSEC workaround for obscure konsole bug (with Askar Safin safinaskar at mail.ru)
+    - Removed O_NOCTTY-related manpage "bug" (now historical) (spotted by Askar Safin safinaskar at mail.ru)
+    - Always double fork for safety on systems of unknown flavour (suggested by Askar Safin safinaskar at mail.ru)
+    - Added support for GNU/Hurd (by Svante Signell svante.signell at telia.com)
+    - Fixed bug: daemon_lock_pidfile() leaked fd across exec (spotted by Tilman Baumann tilman.baumann at grandeye.com)
+    - Added fcntl_set_fdflag() and fcntl_clear_fdflag() to the fio module
+    - Added signal_set_siginfo_handler() to the sig module
+    - Added msg_filter_t, msg_create_filter(), msg_create_filter_with_locker() to the msg module
+    - Test secure memory in the mem module for non-root users as well (now that they can do it)
+    - Added prog_{out,err,dbg,alert}_push_filter() to the prog module
+    - Added recvcred(), recvfromcred() to the net module
+    - Fixed harmless format string bug in prog_opt_process() (spotted by Jong-Gwon Kim and Woosuk Lee {jgkim,wslee} at ropas.snu.ac.kr)
+    - Fixed bug in parallelized make: "make ready" first so do it in configure (spotted by ilovezfs at icloud.com)
+    - Fixed copyright messages (list actual years of publication, not just a range of years)
+    - Fixed all sscanf "%s" to limit output (e.g. "%63s") to prevent buffer overruns (was only in test and example code)
+    - Added more tests in the prop module
+    - Fixed buglet: Removed vhangup() in pty_make_controlling_tty() as it broke some coproc module tests run as root
+    - Fixed str.h to not clash with new strlcpy/strlcat macros on OSX/macOS
+    - Updated to avoid new warnings in recent versions of gcc
+    - Split README into multiple files (README.md INSTALL COPYING REFERENCES CHANGELOG)
+    - Changed "config" script name to "configure" (not an alias anymore) (but it's not GNU configure)
+    - Changed installation location prefix to /usr/pkg on NetBSD
+    - Replaced racist pty jargon in code with more descriptive terms
+
+0.6 (20100612)
+
+    - Stopped accidentally installing config.h (spotted by rrt at sc3d.org)
+    - Fixed bug: need double-fork on Linux (spotted by Joey Hess joeyh at debian.org)
+    - Fixed bug checking argument validity in agent_recv()
+    - Updated makefiles to work with recent versions of GNU make
+    - Changed opt module to be ISO C compliant (backwards-incompatible!)
+    - Updated to avoid new warnings in recent versions of gcc
+    - Fixed pidfile race condition (with Hilko Bengen bengen at hilluzination.de)
+    - 64-bit-related fixes for pack() and snprintf()
+    - Updated to use va_copy() with vsnprintf() in str module
+    - Made daemon_is_running() work when readonly (spotted by Thomas Koch thomas at koch.ro)
+    - Ported to GNU/kFreeBSD (with Cyril Brulebois cyril.brulebois at enst-bretagne.fr)
+    - Ported to NetBSD
+    - Added make nbsd nbsd-daemon nbsd-slack (netbsd binary packages)
+    - Ported to Solaris10 and OpenSolaris
+    - Tested on ubuntu-10.04, debian-5.0.4, fedora-13 (x86_64, i386)
+    - Tested on solaris-10-200910, opensolaris-200906 (amd64, i386)
+    - Tested on openbsd-4.7, freebsd-8.0, netbsd-5.0.2 (amd64, i386)
+    - Tested on macosx-10.{4,5,6} (x86_64, i386, ppc)
+    - Tested on kfreebsd-20090729 (i386)
+    - Updated make rpm sol obsd fbsd osx to continue working
+
+0.5.2 (20040102)
+
+    - Fixed API bug: <slack/lib.h> didn't include <slack/coproc.h>
+    - Fixed bug: -lm wasn't in `libslack-config --libs` on Solaris
+    - Changed daemon_path_is_safe() to give an explanation when unsafe
+    - Fixed bug: reset agent state to IDLE when interrupted (bte at kamash.com)
+    - Trim unquoted leading spaces from property values (with bte at kamash.com)
+    - Also trim only unquoted trailing spaces from property names
+    - Added tools/migrate-properties utility (preserves old propfile behaviour)
+    - Fixed bug: ownership partially lost in map_resize (with bte at kamash.com)
+    - Fixed bug: mem_resize was broken since libslack-0.4 (bte at kamash.com)
+    - Fixed DOC bug: stated the importance of including <slack/lib.h> first
+    - Added sections to libslack(3) features list (coproc+pty, low level api)
+    - Fixed bug: if select() failed (unlikely), coproc wasn't closed properly
+    - Fixed bug: when tty_raw() failed (unlikely), it returned the wrong value
+    - Added many examples to the manpages (there are now 91 runnable examples)
+    - Added tools/check-examples to verify that all examples work
+    - Fixed bug: str_fgetline() returned empty string rather than null on eof
+    - Fixed bug: cstrstr() didn't always work due to a typo
+    - Added sections to libslack(3) features list (documentation, testing)
+    - Added intel solaris8 binary package
+    - Ported to Mac OS X (Darwin) 10.3.2
+    - Added make osx osx-daemon osx-slack (macosx binary packages)
+    - Dropped support for K&R clients (suggested by skaller at ozemail.com.au)
+    - Added hsort_closure(3) (suggested by skaller at maxtal.com.au)
+    - Added make slack.swig (generate a SWIG input file for libslack)
+
+0.5.1 (20020916)
+
+    - Added HEADER FILES section to libslack(3) manpage
+    - Added #include <slack/std.h> to example sections of module manpages
+    - Added conf/freebsd (mmoraes at teleias.com)
+    - Added tools/prefix utility (add prefix to all libslack identifiers)
+    - Added manpage for tools/analyse-debug-locker utility
+    - Separated stdout and stderr in coproc_open() and coproc_close()
+    - Changed coproc open functions to take action() and data arguments
+    - Exposed daemon_pidfile()
+    - Added daemon_is_running()
+    - Added daemon_stop()
+    - Renamed sighandler_t to signal_handler_t (glibc clash - gdr at gno.org)
+    - Ported to Solaris 8
+    - Split Solaris configuration scripts into conf/solaris[68]-[g]cc
+    - Added support for installing gzipped manpages
+    - Stopped generating debian package (until it's a shared library)
+    - Added make fbsd fbsd-daemon fbsd-slack (freebsd binary packages)
+    - Added support for absolute path in daemon_pidfile()
+    - Added daemon_getpid()
+    - Added libslack-config --upgrade option
+    - Added lame ./config script that just calls existing lame conf/* scripts
+
+0.5 (20011109)
+
+    - Fixed Makefile bug: decoupled libslack optlevel from module test optlevel
+    - Fixed API bug: str_length_unlocked() was static
+    - Fixed API bug: prop_locker() prototype wasn't in prop.h
+    - Added prop_clear() to prop module
+    - Added octal/hex and error handling to command line integer option handling
+    - Fixed bug: check() just called dump() without testing the condition first
+    - Added variants of six standard C string functions with more useful APIs
+    - Added thread module tests (and locker timing tests)
+    - Changed locker function return values (now same as pthread return values)
+    - Improved speed of lockers (now overhead = 1 test + 1 deref + 1 offset)
+    - Changed item/length/size, bin/hex/oct functions to return -1 on error
+    - Changed error returns to consistently set errno (str, list, map)
+    - Added set_errnull() to err module
+    - Added relative index/range semantics to list functions (same as with str)
+    - Changed fifo_open() to take writefd return arg to prevent fd leaks
+    - Simplified mem_resize() assuming ISO C compliant realloc()
+    - Added internal ISO C compliant realloc() for systems that don't have it
+    - Fixed bug: optval/optlen for getsockopt(SO_ERROR) not initialised
+    - Fixed inode leak: fifo_open() didn't unlink fifo created on error
+    - Removed thread_init(), thread_setcancel() and barriers from thread module
+    - Renamed thread module to locker (decoupled thread safety)
+    - Stopped daemon_revoke_privileges() from clearing supplementary group list
+    - Added support for "debug sections" to debug messaging
+    - Added daemon_become_user() to daemon module
+    - Added "_unlocked" versions of functions in str, list and map modules
+    - Renamed "_locked" functions to "_with_locker" to avoid confusion
+    - Fixed bug: removed highly dubious synchronisation from internal iterators
+    - Added read locked iterators
+    - Added alert functions to prog, err and msg modules
+    - Systematically corrected function prototype typos in manpages
+    - Added net_options() to net module (sets multiple socket options)
+    - Added soundex() to str module
+    - Removed caching and mutex locks in daemon_started_by_init/inetd()
+    - Added ignoring SIGHUP before losing session leadership in daemon_init()
+    - Improved IPv6 support in net module (i.e. can now bind to IPv6 wildcard)
+    - Added support for UNIX domain sockets to net module
+    - Increased socket listen queue length from 5 to 1024
+    - Fixed bug: net service port selection only used numeric port arg
+    - Added handling of name lookup returning multiple addresses for net clients
+    - Added default host to net client functions (i.e. null host == loopback)
+    - Changed net_create_server() and net_create_client() to take sockopt list
+    - Added support for net clients binding to a specific local port
+    - Added net_gethostbyname() and net_getservbyname() to net module
+    - Made net server and client functions threadsafe
+    - Added socket option notes to net module manpage (from W. Richard Stevens)
+    - Added protocol design notes to net module manpage (from Radia Perlman)
+    - Added sendfd() and recvfd() to net module (send/recv open file descriptor)
+    - Replaced ioctl() with fcntl() in nonblock functions
+    - Added support for net client/server service argument being numeric
+    - Added link module (singly/doubly linked lists and "growable" freelists)
+    - Added agent module (poll/select plus hierarchical timing wheel scheduler)
+    - Added net_interfaces() to net module (retrieve list of network interfaces)
+    - Added support for IPv4 and IPv6 multicasting to net module
+    - Added Reliability over UDP functions to net module (net_rudp_transact())
+    - Added Type of Service (TOS) functions to net module
+    - Changed net_pack/net_unpack functions to take a timeout arg
+    - Added nap() function to fio module (subsecond sleep)
+    - Added threadsafe snprintf() function for systems that don't have it
+    - Added asprintf() to str module for systems that don't have it
+    - Added config.h to simplify compile commands (prelude to autoconf)
+    - Removed thread_attr_{init,set}() (not useful enough or portable enough)
+    - Ported to OpenBSD 2.9
+    - Added pseudo module (pseudo terminals by Tatu Ylonen from openssh)
+    - Added coproc module (coprocesses with or without a pseudo terminal)
+    - Changed syslog functions to take a priority parameter
+    - Added make obsd obsd-daemon obsd-slack (openbsd binary packages)
+    - Added libslack-config --uninstall
+    - Proofread all of the doco (just once)
+    - Added setting appropriate TOS values in mail()
+    - Fixed validation of relative index/range values in str/list modules
+    - Added relative index semantics to list_item()
+    - Added read locked versions of map_apply() and list_apply()
+    - Added make and dist-html-slack (manpages as html.tar.gz)
+
+0.4 (20010215)
+
+    - Fixed memory usage bugs
+    - Changed net server/client functions to use service name else port number
+    - Fixed security bug: daemon_file_is_safe() wasn't following symlinks (doh!)
+    - Renamed daemon_file_is_safe() to daemon_path_is_safe()
+    - Added daemon_absolute_path() to daemon module
+    - Added memory pool functions to mem module
+    - Fixed bug: optional option arguments were handled in dodgy C
+    - Made supplied snprintf() POSIX compliant (was using getpagesize())
+    - Removed conf module (Added daemon_parse_config() to daemon module)
+    - Removed net_chat(), rfc822_localtime(), rfc822_gmtime() (not useful enough)
+    - Added secure memory/pool functions to mem module
+    - Fixed Makefile bug: $(CCFLAGS) for daemon and libslack weren't separate
+    - Added fgetline() to fifo module (reads a line with any line ending)
+    - Added str_fgetline() to str module (like fgetline but handles any length)
+    - Renamed fifo module to fio
+    - Fixed Makefile bug: wasn't uninstalling everything properly
+    - Changed net_send() to take a timeout argument like next_expect() does
+    - Added strlcpy(), strlcat(), strcasecmp() and strncasecmp() to str module
+    - Renamed conf/solaris to solaris-gcc and added solaris-cc for sun workshop
+    - Added support for root and user pidfiles in separate directories
+    - Added make rpm rpm-daemon rpm-slack (with Edward Avis ed at membled.com)
+    - Added installation of manpages for each function (link to module manpage)
+    - Added libslack(3) overview manpage
+    - Added list_break(), map_break()
+    - Renamed assert() to check() for obvious reasons
+    - Renamed re funcs in str module: s/regex/regexpr/g
+    - Added thread module and made everything MT-Safe or MT-Disciplined
+    - Added relative index/range semantics to string functions
+    - Added make deb deb-daemon deb-slack (debian binary packages)
+    - Added make pkg pkg-daemon pkg-slack (solaris binary packages)
+    - Added setsockopt(SO_REUSEADDR) for net servers
+    - Changed net server/client API to allow optional setsockopt(RCVBUF/SNDBUF)
+    - Added REFERENCES section to README file
+    - Stopped net_expect/net_send from interfering with SIGALRM/alarm/setitimer
+    - Added read_timeout(), write_timeout() and rw_timeout() to fio module
+    - Changed net_read() and net_write() to take a timeout argument
+    - Added '?' field size specifier to unpack() (for packet length fields)
+    - Added libslack-config administration utility
+    - Renamed sockaddr typedef to sockaddr_t
+    - Changed net_client to take a timeout parameter
+    - Fixed fd leak in error handling code in net server/client functions
+    - Fixed bug: str_regsub() didn't handle empty string matches at all
+    - Changed str_regexpr_split() to take cflags and eflags arguments
+    - Changed all *_destroy macros to functions that take address of pointer
+    - Changed mem_resize macro so client must explicitly provide address of mem
+    - Changed all *_destroy_t typedefs to *_release_t
+    - Added make [un]install-{daemon|slack}-html (not part of make [un]install)
+    - Temporarily removed snprintf module (not MT-Safe, not essential)
+    - Merged lognames module into msg module
+    - Merged opt module into prog module
+    - Renamed _* functions in err module to *f (not ANSI compliant)
+    - Removed MANIFEST
+
+0.3 (20000902)
+
+    - Started using GNU getopt_long() instead of getopt_long_only()
+    - Added -DSVR4 in conf/solaris (doh!)
+    - Added conditional compilation of debug functions
+    - Added assert macro that calls dump()
+    - Fixed bug: SIG_IGN, SIG_DFL and nasty signals weren't treated specially
+    - Made lists grow/shrink exponentially rather than linearly
+    - Made maps grow as needed and use arbitrary hash functions and key types
+    - Added multi-dimensional array allocator to the mem module
+    - Added net module: clients/servers, expect/send, pack/unpack, mail
+    - Added internal iterators and some more functions to list and map
+    - Added examples sections to some libprog manpages
+    - Added str module: decent strings + tr, regex, regsub, fmt, trim, lc, uc ...
+    - Added vsscanf(3) implementation for systems that don't have it (e.g. solaris)
+    - Renamed libprog to libslack (thanks, fred)
+    - Added socks.h
+    - Added daemon_revoke_privileges(), daemon_file_is_safe() to daemon module
+
+0.2 (19991223)
+
+    - Decoupled core file prevention from daemon_init()
+      into its own function, daemon_prevent_core()
+    - Decoupled signal handling from daemon_init()
+    - Cached daemon_started_by_init() and daemon_started_by_inetd() results
+    - Added some modules to libprog: conf, list, hsort, map, prop
+    - Added timestamps to msg_out_file()
+    - Included source to GNU getopt_long_only() (if necessary)
+    - Added hdr.h to allow non-ANSI compilers to parse libprog's headers
+    - Moved libprog to a subdirectory using a "Whole Project" Makefile
+    - Converted "Whole Project" Makefile into "Scalable" Makefiles
+    - Added verbosity functions to libprog(prog)
+    - Fixed bug when constructing data for GNU getopt_long_only()
+    - Fixed bugs in the options table for libprog(prog)
+    - Changed help message format: separated option chunks by a blank line
+    - Fixed bug when obtaining names associated with syslog constants
+    - Added pathetic conf/linux and conf/solaris scripts
+    - Added manpages
+
+0.1 (19991020)
+
+    - Initial version
+
+TODO
+====
+
+    - Add epoll and kqueue to the agent module
+    - Decouple memory type and allocation strategy from List/Map/String code
+    - Use autoconf and libtool
+
+--------------------------------------------------------------------------------
+
+    URL: http://libslack.org
+    URL: http://raf.org/libslack
+    GIT: https://github.com/raforg/libslack
+    Date: 20201111
+    Author: raf <raf@raf.org>
+

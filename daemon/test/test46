@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Create the ~/.daemonrc file
+
+[ -f "$HOME/.daemonrc" ] && mv "$HOME/.daemonrc" "$HOME/.daemonrc.testbak"
+echo "* errlog=daemon.err" > "$HOME/.daemonrc"
+echo "* dbglog=daemon.debug" >> "$HOME/.daemonrc"
+echo "* output=daemon.err" >> "$HOME/.daemonrc"
+echo "* verbose=9,debug=9" >> "$HOME/.daemonrc"
+echo "test46 respawn,acceptable=10,attempts=2,delay=10,limit=2,core" >> "$HOME/.daemonrc"
+
+# Run the test
+
+../daemon --noconfig -n test46 "`pwd`/test1.client"
+
+# Clean up the ~/.daemonrc file
+
+rm "$HOME/.daemonrc"
+[ -f "$HOME/.daemonrc.testbak" ] && mv "$HOME/.daemonrc.testbak" "$HOME/.daemonrc"

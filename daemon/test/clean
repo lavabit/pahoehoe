@@ -1,0 +1,19 @@
+#!/bin/sh
+
+rm -rf tmp
+rm -f test5.client
+rm -f test6.client
+rm -f test10.client
+rm -f test10.interpreter
+rm -f test11.client
+rm -f test11.interpreter
+rm -f test13.daemon
+rm -f test15.client
+rm -f test16.stdout
+rm -f test16.stderr
+rm -f test17.dbg
+rm -f test17.output
+rm -f test18.err
+rm -f test18.dbg
+rm -f test58.client
+rm -f test63.client

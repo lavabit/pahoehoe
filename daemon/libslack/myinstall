@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# This is a local version of install for OpenSolaris because it doesn't have
+# /usr/ucb/install and the normal Solaris install program is weird and
+# doesn't do what its manpage says it does (i.e. it ignores the directory 
+# at the end of the command line instead of installing the file there).
+
+# Note: All our uses of install are of the form: install -m ### file... dir
+
+if [ "x$1" != "x-m" -o "$#" -lt 4 ]
+then
+	echo "$0: Unexpected usage" >&2
+	exit 1
+fi
+
+shift
+mode="$1"
+shift
+files=""
+while [ "$#" -gt 1 ]
+do
+	if [ ! -f "$1" ]
+	then
+		echo "$0: Expected $1 to be a file" >&2
+		exit 1
+	fi
+	files="$files $1"
+	shift
+done
+dir="$1"
+if [ ! -d "$dir" ]
+then
+	mkdir -p "$dir"
+	if [ "$?" != 0 ]
+	then
+		echo "$0: Failed to create $dir" >&2
+		exit 1
+	fi
+fi
+cp $files $dir
+for file in $files
+do
+	chmod $mode $dir/$file
+done
+exit 0
+
+# vi:set ts=4 sw=4:

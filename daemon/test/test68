@@ -1,0 +1,30 @@
+#!/bin/sh
+
+opts="--debug=0"
+
+echo Start daemons
+../daemon $opts -C "`pwd`/daemon.conf" -n test68_11 "`pwd`/test3.client"
+../daemon $opts -C "`pwd`/daemon.conf" -n test68_10 "`pwd`/test3.client"
+../daemon $opts -C "`pwd`/daemon.conf" -n test68_9 "`pwd`/test3.client"
+../daemon $opts -C "`pwd`/daemon.conf" -n test68_1 "`pwd`/test3.client"
+sleep 1
+echo
+echo List:
+../daemon --list
+echo
+echo List verbose:
+../daemon --list --verbose
+echo
+echo Stop daemons
+../daemon -n test68_1 --stop
+../daemon -n test68_9 --stop
+../daemon -n test68_10 --stop
+../daemon -n test68_11 --stop
+sleep 1
+echo
+echo List:
+../daemon --list
+echo
+echo List verbose:
+../daemon --list --verbose
+echo

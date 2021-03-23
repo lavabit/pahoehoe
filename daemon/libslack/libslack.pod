@@ -1,0 +1,345 @@
+#
+# libslack - http://libslack.org/
+#
+# Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#a You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+# 20201111 raf <raf@raf.org>
+
+=head1 NAME
+
+I<libslack> - A UNIX/C library of general utilities for programmers with Slack
+
+    Slack(n.): The state in which you need nothing,
+               because you already have it.
+                     -- J. R. "Bob" Dobbs, 1956
+
+=head1 SYNOPSIS
+
+Compiling:
+
+    gcc -o app app.c `libslack-config --cflags --libs`
+
+Headers:
+
+    /* Include this before all other header files */
+    #include <slack/lib.h>
+
+or
+
+    /* Include this before all other header files */
+    #include <slack/std.h>
+
+    /* Then select what you want from the rest */
+    #include <slack/agent.h>
+    #include <slack/coproc.h>
+    #include <slack/daemon.h>
+    #include <slack/err.h>
+    #include <slack/fio.h>
+    #include <slack/hsort.h>
+    #include <slack/lim.h>
+    #include <slack/link.h>
+    #include <slack/list.h>
+    #include <slack/locker.h>
+    #include <slack/map.h>
+    #include <slack/mem.h>
+    #include <slack/msg.h>
+    #include <slack/net.h>
+    #include <slack/prog.h>
+    #include <slack/prop.h>
+    #include <slack/pseudo.h>
+    #include <slack/sig.h>
+    #include <slack/str.h>
+
+    #ifndef HAVE_SNPRINTF
+    #include <slack/snprintf.h>
+    #endif
+
+    #ifndef HAVE_VSSCANF
+    #include <slack/vsscanf.h>
+    #endif
+
+=head1 DESCRIPTION
+
+Libslack is a library of general utilities designed to make UNIX/C programming
+a bit easier on the eye. It is a seemingly random collection of modules and
+functions that I find commonly useful.
+
+It's a small library with lots of functionality, accurately documented and
+thoroughly tested. Good library naming conventions are not rigorously observed
+on the principle that common operations should always be easy to write and code
+should always be easy to read.
+
+=head1 FEATURES
+
+=over 4
+
+=item Program Framework
+
+The "framework" parts of I<libslack> are bound to be the most objectionable.
+Nobody likes frameworks. Don't worry, there isn't much to it. If you don't
+like it, pretend it's not there.
+
+I<Libslack> provides the ability for programs to identify themselves,
+perform command line option processing in a single line of code and produce
+"standard" GNU style C<--help>, C<--version> and usage messages. Debug and
+verbose messaging is also provided and is enabled by the use of "standard"
+C<--debug> and C<--verbose> command line options.
+
+Messages (including error, debug and verbose messages) are provided with
+clean call syntax and flexible semantics. Messages can be directed to log
+files, file descriptors, syslog or multiplexed to any of the above (and to
+anywhere else (e.g. dialog boxes) if you implement your own message
+handlers) without complicating the call syntax.
+
+ISO C imposes extreme restrictions on signal handlers. POSIX imposes less
+extreme but still annoying restrictions. I<Libslack> contains functions that
+provide a level of abstraction between the signal handlers that you write
+and the real (ISO C compliant) signal handlers. This allows you to write
+unrestricted signal handlers.
+
+Coarse grained persistence of simple configuration information is provided
+by the use of Java style properties files in "well-known" locations.
+
+=item Daemon Services
+
+I<Libslack> provides functions that make writing daemons trivial. It
+includes functions to become a daemon and to optionally create a locked pid
+file to ensure that only a single instance of a named daemon is ever active
+at the same time. The daemon function behaves appropriately if the client
+process is started by I<init(8)> or I<inetd(8)>. There are also functions to
+streamline the parsing of simple configuration files (like those commonly
+found in the C</etc> directory). There are also functions that help you
+write more secure daemons (i.e. revoke setuid/setgid privileges, prevent
+core file generation, change user and group, test the safety of a given file
+path).
+
+=item Network Services
+
+I<Libslack> provides functions to simplify the implementation of network
+servers and clients (TCP, UDP, unicast and multicast) and the (text or
+binary) application protocols that they use. Network servers and clients can
+be setup in a single line of code. There is transparent support for IPv4,
+IPv6 and UNIX domain socket addresses. There is support for reliability over
+UDP. Text protocols are implemented by sequences of expect and send
+functions. Binary protocol packets can be packed and unpacked (using
+functions similar to I<pack()> and I<unpack()> in I<Perl> but
+network/storage friendly). There's also a function to send mail.
+
+=item Agent Oriented Programming
+
+I<Libslack> provides a generic agent oriented programming model in the form
+of the I<Agent> data type. Like objects, agents can react to external
+stimuli. Unlike objects, agents can can also take independent actions. This
+is performed by multiplexing I/O events on arbitrary file descriptors using
+I<poll()> or I<select()> and also multiplexing timers for scheduling
+actions. Connecting and disconnecting file descriptors is done in constant
+time. Scheduling and cancelling actions is done in constant time. Timer
+maintenance is performed in constant average time. This means that agents
+are scalable with respect to the number of outstanding timers and can
+support thousands of scheduled actions. A single agent may be used like a
+simple event loop, or multiple agents can be connected to each other in
+arbitrary networks across multiple threads, processes and/or hosts. A single
+agent isn't scalable with respect to the number of connected descriptors but
+multiple agents can be combined to achieve much higher scalability.
+They're useful for networked applications, distributed systems and
+simulations.
+
+=item Data Types
+
+I<Libslack> provides a generic growable pointer array data type called
+I<List>, a generic growable hash table data type called I<Map> and a decent
+I<String> data type that comes with heaps of functions (many lifted from
+I<Perl>). There are also abstract singly and doubly linked list data types
+with optional, "growable" freelists.
+
+=item Decoupled Thread Safety
+
+I<Libslack> provides the I<Locker> data type which decouples thread
+synchronisation strategies from client code. This allows code to be written
+that delegates the choice of synchronisation strategy to the client. This
+enables run time selection of locking strategies which means it's even
+possible to let the end user specify which locking strategy to use. It
+supports mutual exclusion locks, readers/writer locks and no locking. There
+are also debug versions that print messages to standard output to help
+clients locate deadlocks. See
+C<http://raf.org/papers/mt-disciplined.html>.
+
+=item Coprocesses and Pseudo Terminals
+
+I<Libslack> provides functions for creating pseudo terminals portably and
+for creating coprocesses that use either pipes or a pseudo terminal for
+communication with the client process.
+
+=item Miscellaneous
+
+I<Libslack> contains convenience/shorthand functions for random things such
+as reading a line of text with any line ending (UNIX, DOS or Macintosh),
+fifo and file control, retrieving POSIX.1 limits, parsing syslog
+facility/priority pairs, dynamic allocation of multi-dimensional arrays,
+memory pools, secure memory, secure memory pools, There's also a heap sort
+function. And there are also implementations of GNU I<getopt_long()>,
+I<strlcat()>, I<strlcpy()>, I<snprintf()>, I<vsnprintf()>, I<vsscanf()>,
+I<asprinf()> and I<vasprintf()> for systems that don't have them.
+
+=item Low Level API
+
+Although there is a lot of functionality in I<libslack>, the API itself is
+as low-level as possible. There are no gratuitous data structures that wrap
+around perfectly acceptable data structures that are provided by the system.
+For instance, the networking functions do not return some home grown
+I<Socket> object. They return file descriptors just like underlying system
+calls. The coprocess API is similar in spirit to I<popen(3)> and
+I<pclose(3)>. The I<fgetline(3)> function interoperates perfectly with
+standard I/O. Errors are returned via C<errno> just like system calls and
+some standard library functions. You may not like C<errno> if you write
+threaded programs but I figured that until C<errno> goes away, it's best to
+accept it and find a way to benefit from it. Unavoidably, the string module
+does wrap an object around perfectly good char pointers but the underlying
+char pointer is always accessible and many of the string functions have
+versions that work on ordinary C strings.
+
+The purpose of this design is Laziness. It means I don't have to wrap every
+net related system call or standard string function in an extra function and
+you don't have to learn a load of new identifiers for functionality that you
+already know how to access. The same goes for error codes. I don't want to
+re-invent them and you don't need to re-learn them. It also means that
+I<libslack> functions can be more easily incorporated into existing programs
+to enhance their functionality without huge code rewrites and without the
+need for a steep learning curve.
+
+=item Accurate Documentation
+
+Every module has a manpage that explains every function in detail. The
+function signatures in the manpages are systematically checked against the
+source code to make sure that they never get out of sync.
+
+There are plenty of examples in the manpages. Most of them are
+systematically compiled and executed to make sure that they never get out of
+sync with the source code.
+
+The actual text of the manpages can't be systematically checked but it does
+get proofread regularly. If you find any errors of any kind in the
+documentation, please let me know.
+
+All of the documentation takes the form of manpages because manpages are
+faster and more accessible than anything else.
+
+=item Thorough Testing
+
+I<Libslack> is thoroughly tested. This doesn't mean that there are no bugs
+but it does mean that there is a large list of bugs that it doesn't have.
+Excluding the snprintf module, there are nearly 2,800 tests. Including the
+snprintf module, there are nearly 150,000 tests. These tests also serve as
+extra examples.
+
+=back
+
+=head1 MODULES
+
+Libslack contains the following modules:
+
+    agent    - agent oriented programming
+    coproc   - coprocesses using pipes or pseudo terminals
+    daemon   - becoming a daemon
+    err      - message/error/debug/verbosity/alert messaging
+    fio      - fifo and file control and some I/O
+    getopt   - GNU getopt_long() for systems that don't have it
+    hsort    - generic heap sort
+    lim      - POSIX.1 limits convenience functions
+    link     - abstract linked lists with optional growable free lists
+    list     - list (growable pointer array) data type
+    locker   - abstract locking and reader/writer lock implementation
+    map      - map (hash table) data type
+    mem      - memory helper functions, secure memory, memory pools
+    msg      - message handling and syslog helper functions
+    net      - network functions (clients/servers, expect/send, pack/unpack, mail)
+    prog     - program framework and flexible command line option handling
+    prop     - program properties files
+    pseudo   - pseudo terminals
+    sig      - ISO C compliant signal handling
+    snprintf - safe sprintf() for systems that don't have it
+    str      - string data type (tr, regexpr, regsub, fmt, trim, lc, uc, ...)
+    vsscanf  - sscanf() with va_list argument for systems that don't have it
+
+Each module, as well as each function, has its own section 3 manpage.
+
+=head1 HEADER FILES
+
+Each module has its own header file (see SYNOPSIS). If you want to include
+these header files individually, you must first include the <slack/std.h>
+header file. Alternatively, you can just include the <slack/lib.h> header
+file and get everything. B<Note:> Make sure that <slack/lib.h> or
+<slack/std.h> is included before any system header files. Otherwise, the
+system headers won't be set up properly.
+
+If I<libslack> was installed on your system with a prefix added to each
+identifier, you may also want to include <slack/prefix.h> which allows you
+to continue to use the original I<libslack> identifiers and have them
+automatically translated into the prefixed identifiers.
+
+Alternatively, if I<libslack> was installed on your system with the original
+names and you wish to compile client code that does use a prefix, you can
+include I<"remove_prefix.h"> which allows you to continue to use the
+prefixed identifiers and have them automatically translated into the
+original identifiers. Note that you will probably have to generate this
+header file yourself (see the prefix program in the tools directory).
+
+If your client code uses one prefix and the I<libslack> installed on your
+current system uses a different prefix, you will need to include both of
+these header files. First include I<"remove_prefix.h">. Then include
+<slack/prefix.h>.
+
+=head1 EXAMPLES
+
+There are examples in all of the module manpages. If you can't find what
+you're looking for there, look at the test code which can be found at the
+bottom of each module's source file. The test code executes every function
+and thus serves as a treasure trove of examples. If you think of an example
+that really needs to be in the manpages, don't hesitate to let me know.
+
+=head1 SEE ALSO
+
+C<http://libslack.org/>,
+C<http://raf.org/papers/mt-disciplined.html>,
+I<libslack-config(1)>,
+I<agent(3)>,
+I<coproc(3)>,
+I<daemon(3)>,
+I<err(3)>,
+I<fio(3)>,
+I<getopt(3)>,
+I<hsort(3)>,
+I<lim(3)>,
+I<link(3)>,
+I<list(3)>,
+I<locker(3)>,
+I<map(3)>,
+I<mem(3)>,
+I<msg(3)>,
+I<net(3)>,
+I<prog(3)>,
+I<prop(3)>,
+I<pseudo(3)>,
+I<sig(3)>,
+I<snprintf(3)>,
+I<str(3)>,
+I<vsscanf(3)>
+
+=head1 AUTHOR
+
+20201111 raf <raf@raf.org>
+
+=cut

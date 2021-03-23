@@ -1,0 +1,13 @@
+#!/bin/sh
+
+touch test11.interpreter
+chmod 775 test11.interpreter
+
+echo "#!/usr/bin/env test11.interpreter" > test11.client
+chmod 755 test11.client
+
+PATH="`pwd`:$PATH"
+export PATH
+
+../daemon -C "`pwd`/daemon.conf" -n test11 "`pwd`/test11.client"
+rm test11.interpreter

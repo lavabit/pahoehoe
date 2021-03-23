@@ -1,0 +1,93 @@
+#!/bin/sh
+#
+# daemon - http://libslack.org/daemon/
+#
+# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+
+# 20201111 raf <raf@raf.org>
+
+die() { echo "$0: $@" >&2; exit 1; }
+
+case "`uname -a`" in
+	Linux*)
+		echo "Configuring for linux"
+		conf/linux
+		;;
+
+	GNU/kFreeBSD*)
+		echo "Configuring for kfreebsd"
+		conf/kfreebsd
+		;;
+
+	GNU*)
+		echo "Configuring for GNU/Hurd"
+		conf/gnuhurd
+		;;
+
+	FreeBSD*)
+		echo "Configuring for freebsd"
+		conf/freebsd
+		;;
+
+	NetBSD*)
+		echo "Configuring for netbsd"
+		conf/netbsd
+		;;
+
+	OpenBSD*)
+		echo "Configuring for openbsd"
+		conf/openbsd
+		;;
+
+	SunOS*)
+		cc=""
+		solaris="solaris10"
+		[ "x`uname -r`" = "x5.8" ] && solaris="solaris8"
+		[ "x`uname -r`" = "x5.6" ] && solaris="solaris6"
+		if [ "`uname -m`" = sun4u ]
+		then
+			[ "x`which gcc 2>&-`" != "x" ] && cc="gcc"
+			[ "x`which cc 2>&-`"  != "x" ] && cc="cc"
+		else
+			[ "x`which cc 2>&-`"  != "x" ] && cc="cc"
+			[ "x`which gcc 2>&-`" != "x" ] && cc="gcc"
+		fi
+		[ "$cc" = "" ] && die "Failed to find a compiler"
+		echo "Configuring for $solaris (with $cc)"
+		conf/$solaris-$cc
+		;;
+
+	Darwin*)
+		echo "Configuring for macosx"
+		conf/macosx
+		;;
+
+	*)
+		die "Unknown platform: please configure manually"
+		;;
+esac
+
+if [ x"`which gmake`" != x"" ]
+then
+	gmake ready
+else
+	make ready
+fi
+
+exit 0
+
+# vi:set ts=4 sw=4:

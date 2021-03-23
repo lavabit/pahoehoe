@@ -1,0 +1,8 @@
+#!/bin/sh
+
+umask 022
+cc -o test58.client test58.client.c
+
+../daemon -C "`pwd`/daemon.conf" --name test58 "`pwd`/test58.client"
+sleep 3
+../daemon -C "`pwd`/daemon.conf" --debug=0 --verbose=0 --name test58 --restart

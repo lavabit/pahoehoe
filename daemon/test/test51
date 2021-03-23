@@ -1,0 +1,3 @@
+#!/bin/sh
+
+../daemon -C "`pwd`/daemon.conf" -n test51 -F "test51.pid" "`pwd`/test1.client"

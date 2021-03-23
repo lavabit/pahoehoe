@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Create the ~/.daemonrc file
+
+[ -f "$HOME/.daemonrc" ] && mv "$HOME/.daemonrc" "$HOME/.daemonrc.testbak"
+echo "test45 respawn,acceptable=10,attempts=2,delay=10,limit=2,core" > "$HOME/.daemonrc"
+
+# Run the test
+
+../daemon -C "`pwd`/daemon.conf" -n test45 "`pwd`/test1.client"
+
+# Clean up the ~/.daemonrc file
+
+rm "$HOME/.daemonrc"
+[ -f "$HOME/.daemonrc.testbak" ] && mv "$HOME/.daemonrc.testbak" "$HOME/.daemonrc"
