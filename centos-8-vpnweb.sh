@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 sed -i "s/1024/3072 -b 1024 -d 1024 -i 1024/g" /usr/lib/systemd/system/haveged.service
 systemctl daemon-reload && systemctl restart haveged && sudo systemctl restart sysstat
@@ -16,15 +16,12 @@ EOF
 dnf -q -y module enable go-toolset
 dnf -q -y install jq git gcc curl make expect golang coreutils gnutls-utils python3-jinja2 python3-netaddr python3-yaml python3-six
 
-[ -d $HOME/daemon-0.7 ] && rm --force --recursive $HOME/daemon-0.7
-cd $HOME && curl --silent --show-error --location --output $HOME/daemon-0.7.tar.gz http://libslack.org/daemon/download/daemon-0.7.tar.gz
-printf "f66af2ece784c16dcb5219de1f4fa3ae5787bb3374e44bd4b1d3e275e8ff272c  daemon-0.7.tar.gz" | sha256sum -c || exit 1
-tar xzf daemon-0.7.tar.gz && cd $HOME/daemon-0.7 && ./configure && make install && cd $HOME
-
-export PATH=$PATH:$HOME/go/bin
+[ -d $HOME/daemon ] && rm --force --recursive $HOME/daemon
+cd $HOME && git clone https://github.com/lavabit/pahoehoe.git $HOME/daemon && cd $HOME/daemon && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter daemon
+./configure && make install && cd $HOME
 
 [ -d $HOME/vpnweb ] && rm --force --recursive $HOME/vpnweb
-git clone https://0xacab.org/leap/vpnweb.git/ $HOME/vpnweb && cd $HOME/vpnweb
+cd $HOME && git clone https://github.com/lavabit/pahoehoe.git $HOME/vpnweb && cd $HOME/vpnweb && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter vpnweb
 
 [ -d /etc/vpnweb/ ] && rm --force --recursive /etc/vpnweb/
 mkdir --parents /etc/vpnweb/public/
@@ -201,204 +198,7 @@ cat <<-EOF > /etc/vpnweb/public/3/configs.json
 }
 EOF
 
-cat <<-EOF > $HOME/vpnweb/scripts/templates/eip-service.1.json.jinja
-{
-  "serial": 1,
-  "version": 1,
-  "locations": { {% for loc in locations %}
-      "{{loc}}": {
-          "name": "{{ locations[loc]['name'] }}",
-          "country_code": "{{ locations[loc]['country_code'] }}",
-          "hemisphere": "{{ locations[loc]['hemisphere'] }}",
-          "timezone": "{{ locations[loc]['timezone'] }}"
-      }{{ "," if not loop.last }}{% endfor %}
-  },
-  "gateways": [ {% for gw in gateways %}
-      {
-          "host": "{{ gateways[gw]["host"] }}",
-          "ip_address": "{{ gateways[gw]["ip_address"] }}",
-          "location": "{{ gateways[gw]["location"] }}",
-          "capabilities": {
-            "adblock": false,
-            "filter_dns": false,
-            "limited": false,
-            "ports": [
-              "443"
-            ],
-            "protocols": [
-              "tcp"
-            ],
-            "transport": [
-              "openvpn"
-            ],
-            "user_ips": false
-        }
-    }{{ "," if not loop.last }}{% endfor %}
-  ],
-  "openvpn_configuration": {{ openvpn|tojson(indent=8) }}
-}
-EOF
-
-cat <<-EOF > $HOME/vpnweb/scripts/templates/eip-service.3.json.jinja
-{
-    "auth": "{{ auth }}",
-    "serial": 1,
-    "version": 3,
-    "locations": { {% for loc in locations %}
-        "{{loc}}": {
-            "name": "{{ locations[loc]['name'] }}",
-            "country_code": "{{ locations[loc]['country_code'] }}",
-            "hemisphere": "{{ locations[loc]['hemisphere'] }}",
-            "timezone": "{{ locations[loc]['timezone'] }}"
-        }{{ "," if not loop.last }}{% endfor %}
-    },
-    "gateways": [ {% for gw in gateways %}
-        {
-            "host": "{{ gateways[gw]["host"] }}",
-            "ip_address": "{{ gateways[gw]["ip_address"] }}",
-            "location": "{{ gateways[gw]["location"] }}",
-            "capabilities": {
-                "adblock": false,
-                "filter_dns": false,
-                "limited": false,
-                "transport": [ {% for tr, proto, port, options in gateways[gw]["transports"] %}
-                    {"type": "{{ tr }}",
-                     "protocols": ["{{ proto }}"],{% if options %}
-                     "options": {{ options | tojson }},{% endif %}
-                     "ports": ["{{ port }}"]
-                    }{{ "," if not loop.last }}{% endfor %}
-                ]
-            }
-        }{{ "," if not loop.last }}{% endfor %}
-    ],
-    "openvpn_configuration": {{ openvpn|tojson(indent=8) }}
-}
-EOF
-
-patch -p1 <<-EOF
-diff --git a/scripts/templates/provider.json.jinja b/scripts/templates/provider.json.jinja
-index f54a3c0..43bcf5e 100644
---- a/scripts/templates/provider.json.jinja
-+++ b/scripts/templates/provider.json.jinja
-@@ -5 +5 @@
--  "ca_cert_uri": "https://{{ provider.domain }}/ca.crt",
-+  "ca_cert_uri": "https://{{ provider.api_uri }}/ca.crt",
-EOF
-
-patch -p1 <<-EOF
-diff --git a/pkg/config/config.go b/pkg/config/config.go
-index b2d3e6d..bbb4a5e 100644
---- a/pkg/config/config.go
-+++ b/pkg/config/config.go
-@@ -35,0 +36,2 @@ type Opts struct {
-+       Address        string
-+       Redirect       string
-@@ -94,0 +97,2 @@ func initializeFlags(opts *Opts) {
-+       flag.StringVar(&opts.Address, "address", "", "Listen for connections on a specific IP address or leave empty to listen on all IP address (default: empty)")
-+       flag.StringVar(&opts.Redirect, "redirect", "", "Redirect any unhandled/unecpected URLs to this address")
-@@ -106,0 +111,2 @@ func initializeFlags(opts *Opts) {
-+       FallbackToEnv(&opts.Address, "VPNWEB_ADDRESS", "")
-+       FallbackToEnv(&opts.Redirect, "VPNWEB_REDIRECT", "")
-EOF
-
-patch -p1 <<-EOF
-diff --git a/pkg/web/certs.go b/pkg/web/certs.go
-index 203c9d9..8931d46 100644
---- a/pkg/web/certs.go
-+++ b/pkg/web/certs.go
-@@ -28 +27,0 @@ import (
--	mrand "math/rand"
-@@ -32,13 +31,3 @@ import (
--const keySize = 2048
--const expiryDays = 28
--const certPrefix = "UNLIMITED"
--
--var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
--
--func randStringRunes(n int) string {
--	b := make([]rune, n)
--	for i := range b {
--		b[i] = letterRunes[mrand.Intn(len(letterRunes))]
--	}
--	return string(b)
--}
-+const keySize = 4096
-+const expiryDays = 120
-+const certPrefix = "BAZINGA"
-@@ -67 +56,5 @@ func (ci *caInfo) CertWriter(out io.Writer) {
--	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-+	serialMin := new(big.Int).SetInt64(1000)
-+	serialNumber := new(big.Int).SetInt64(0)
-+	for serialNumber.Cmp(serialMin) < 0 {
-+		serialNumber, err = rand.Int(rand.Reader, serialNumberLimit)
-+	}
-@@ -72 +64,0 @@ func (ci *caInfo) CertWriter(out io.Writer) {
--	_ = randStringRunes(25)
-@@ -78 +69,0 @@ func (ci *caInfo) CertWriter(out io.Writer) {
--			//CommonName: certPrefix + randStringRunes(25),
-EOF
-
-cat <<-EOF > $HOME/vpnweb/main.go
-package main
-
-import (
-  "log"
-  "net/http"
-  "path/filepath"
-
-  "0xacab.org/leap/vpnweb/pkg/auth"
-  "0xacab.org/leap/vpnweb/pkg/config"
-  "0xacab.org/leap/vpnweb/pkg/web"
-)
-
-func main() {
-  opts := config.NewOpts()
-  ch := web.NewCertHandler(opts.CaCrt, opts.CaKey)
-  authenticator := auth.GetAuthenticator(opts, false)
-
-  srv := http.NewServeMux()
-
-  /* protected routes */
-  srv.Handle("/cert", web.RestrictedMiddleware(authenticator.NeedsCredentials, ch.CertResponder, opts))
-  srv.Handle("/1/cert", web.RestrictedMiddleware(authenticator.NeedsCredentials, ch.CertResponder, opts))
-  srv.Handle("/3/cert", web.RestrictedMiddleware(authenticator.NeedsCredentials, ch.CertResponder, opts))
-
-  /* files */
-  web.HttpFileHandler(srv, "/ca.crt", opts.ProviderCaPath)
-  web.HttpFileHandler(srv, "/geoip.json", filepath.Join(opts.ApiPath, "geoip.json"))
-  web.HttpFileHandler(srv, "/provider.json", filepath.Join(opts.ApiPath, "provider.json"))
-
-  web.HttpFileHandler(srv, "/1/ca.crt", opts.ProviderCaPath)
-  web.HttpFileHandler(srv, "/1/configs.json", filepath.Join(opts.ApiPath, "1", "configs.json"))
-  web.HttpFileHandler(srv, "/1/service.json", filepath.Join(opts.ApiPath, "1", "service.json"))
-  web.HttpFileHandler(srv, "/1/config/eip-service.json", filepath.Join(opts.ApiPath, "1", "eip-service.json"))
-
-  web.HttpFileHandler(srv, "/3/ca.crt", opts.ProviderCaPath)
-  web.HttpFileHandler(srv, "/3/configs.json", filepath.Join(opts.ApiPath, "3", "configs.json"))
-  web.HttpFileHandler(srv, "/3/service.json", filepath.Join(opts.ApiPath, "3", "service.json"))
-  web.HttpFileHandler(srv, "/3/config/eip-service.json", filepath.Join(opts.ApiPath, "3", "eip-service.json"))
-
-  /* catchall redirect */
-  if opts.Redirect != "" {
-    srv.Handle("/", http.RedirectHandler(opts.Redirect, http.StatusMovedPermanently))
-  }
-
-  /* address setup */
-  pstr := ":" + opts.Port
-  if opts.Address != "" {
-    pstr = opts.Address + ":" + opts.Port
-  }
-
-  /* api server */
-  if opts.Tls == true {
-    log.Fatal(http.ListenAndServeTLS(pstr, opts.TlsCrt, opts.TlsKey, srv))
-  } else {
-    log.Fatal(http.ListenAndServe(pstr, srv))
-  }
-}
-EOF
-
-go clean -i -r -cache -modcache && go build -a
+GOPATH=$HOME/vpnweb/.go/ go build -a
 
 # $HOME/vpnweb/scripts/gen-shapeshifter-state.py /etc/vpnweb/shapeshifter-state/
 # python3 $HOME/vpnweb/scripts/simplevpn.py --file=eip --config=/etc/vpnweb/provider.yaml --template=$HOME/vpnweb/scripts/templates/eip-service.1.json.jinja --obfs4_state=/etc/vpnweb/shapeshifter-state/ | jq -M '.' > /etc/vpnweb/public/1/eip-service.json || echo "ERROR: see /etc/vpnweb/public/1/eip-service.json for output"
@@ -487,5 +287,5 @@ done
 echo "Unit tests completed."
 
 # Cleanup.
-rm --force --recursive $HOME/go/ $HOME/.cache/ $HOME/vpnweb/ $HOME/daemon-0.7/ $HOME/daemon-0.7.tar.gz
+rm --force --recursive $HOME/go/ $HOME/.cache/ $HOME/vpnweb/ $HOME/daemon/
 dnf -q -y module disable go-toolset && dnf -q -y remove jq git gcc make golang expect gnutls-utils python3-jinja2 python3-netaddr python3-yaml patch

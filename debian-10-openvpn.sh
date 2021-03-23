@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 env DEBCONF_NONINTERACTIVE_SEEN=true DEBIAN_FRONTEND=noninteractive apt-get -qq -y install openvpn gnutls-bin iptables-persistent < /dev/null > /dev/null
 

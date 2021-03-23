@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 sudo tee /etc/modprobe.d/nested.conf <<-EOF > /dev/null
 options kvm_intel nested=1
@@ -54,6 +54,9 @@ sudo sed -i "s/OnCalendar.*/OnCalendar=hourly/g" /lib/systemd/system/fstrim.time
 sudo sed -i "s/AccuracySec.*/AccuracySec=5m/g" /lib/systemd/system/fstrim.timer
 sudo systemctl daemon-reload && sudo systemctl enable fstrim.timer
 
+# Prevent an error.
+#sudo mkdir --parents /etc/ssl/certs/java/cacerts
+
 # swap swap defaults
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
@@ -66,7 +69,7 @@ APT::Get::Assume-Yes "true";
 Dpkg::Use-Pty "0";
 EOF
 
-sudo apt-get -qq -y update && sudo apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl default-jdk-headless dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nfs-kernel-server nload openssh-client openssl packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null
+sudo apt-get -qq -y update && sudo apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null
 
 # Android client build.
 cd $HOME
@@ -77,12 +80,12 @@ sed -i "/HISTFILESIZE/d" $HOME/.bashrc
 sed -i "s/HISTSIZE=.*/export HISTSIZE=100000/g" $HOME/.bashrc
 
 # Setup NFS share
-sudo tee -a /etc/exports <<-EOF > /dev/null
-/home/vagrant/bitmask_android_leap 192.168.221.1(rw,async,no_subtree_check,anonuid=1000,anongid=1000)
-EOF
+# sudo tee -a /etc/exports <<-EOF > /dev/null
+# /home/vagrant/android 192.168.221.1(rw,async,no_subtree_check,anonuid=1000,anongid=1000)
+# EOF
 
-[ ! -d /home/vagrant/bitmask_android_leap ] && mkdir /home/vagrant/bitmask_android_leap
-sudo systemctl enable nfs-server && sudo systemctl start nfs-server
+[ ! -d /home/vagrant/android ] && mkdir /home/vagrant/android
+# sudo systemctl enable nfs-server && sudo systemctl start nfs-server
 
 # Install Atom editor.
 curl --location --silent https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -

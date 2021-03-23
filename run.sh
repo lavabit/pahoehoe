@@ -129,7 +129,7 @@ vagrant ssh --tty -c 'bash -e build.sh' debian_build
 # Extract the Android APKs from the build environment.
 [ -d $BASE/apk/ ] && rm --force --recursive $BASE/apk/ ; mkdir $BASE/apk/
 vagrant ssh-config debian_build > $BASE/apk/config
-printf "cd /home/vagrant/bitmask_android_leap/app/build/outputs\nget -r apk\n" | sftp -q -F $BASE/apk/config debian_build
+printf "cd /home/vagrant/android/app/build/outputs\nget -r apk\n" | sftp -q -F $BASE/apk/config debian_build
 
 # Download Termux
 [ -d $BASE/apk/termux/ ] && rm --force --recursive $BASE/apk/termux/ ; mkdir --parents $BASE/apk/termux/
@@ -163,9 +163,9 @@ printf "359dd465e81c796c98f9cb4deb493956715c5834ebf31b643f366dcf6a713037  $BASE/
 curl --silent --location --output $BASE/apk/cpuinfo/com.kgurgul.cpuinfo_40403.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40403.apk
 printf "6c0f6bff9ffd3416ab66b705dca0cff6f02af2ca153a1922b91c2287b8516fc0  $BASE/apk/cpuinfo/com.kgurgul.cpuinfo_40403.apk" | sha256sum -c || exit 1
 
-[ ! -d $BASE/android/ ] && mkdir $BASE/android/
-sshfs vagrant@192.168.221.50:/home/vagrant/bitmask_android_leap android -o uidfile=1000 -o gidfile=1000 \
--o StrictHostKeyChecking=no -o IdentityFile=$BASE/.vagrant/machines/debian_build/libvirt/private_key
+# [ ! -d $BASE/build/ ] && mkdir $BASE/build/
+# sshfs vagrant@192.168.221.50:/home/vagrant/android build -o uidfile=1000 -o gidfile=1000 \
+# -o StrictHostKeyChecking=no -o IdentityFile=$BASE/.vagrant/machines/debian_build/libvirt/private_key
 
 cat <<-EOF
 adb install apk/termux/com.termux_108.apk

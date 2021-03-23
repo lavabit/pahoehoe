@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
     debian_build.vm.box = "generic/debian10"
     debian_build.vm.hostname = "debian-build"
     debian_build.vm.network :private_network, :ip => "192.168.221.50"
-    # debian_build.vm.synced_folder "build/", "/home/vagrant/bitmask_android_leap/", create: true, disabled: false, type: "nfs", nfs_udp: false, nfs_version: "3", :mount_options => ['nolock,noatime,fsc,ac,actimeo=120,async,retrans=10']
+    # debian_build.vm.synced_folder "android/", "/home/vagrant/android/", create: true, disabled: false, type: "nfs", nfs_udp: false, nfs_version: "3", :mount_options => ['nolock,noatime,fsc,ac,actimeo=120,async,retrans=10']
     # :mount_options => ['nolock,vers=3,tcp,noatime,fsc,actimeo=1,async']
 
     debian_build.vm.provider :libvirt do |v, override|
@@ -33,8 +33,6 @@ Vagrant.configure("2") do |config|
       # set -x
       export DEBIAN_FRONTEND=noninteractive
       export DEBCONF_NONINTERACTIVE_SEEN=true
-      [ -e /dev/sda ] && echo "set grub-pc/install_devices /dev/sda" | debconf-communicate
-      [ -e /dev/vda ] && echo "set grub-pc/install_devices /dev/vda" | debconf-communicate
       apt-get -qq update && apt-get -qq -y upgrade < /dev/null > /dev/null
       echo "* * * * * root command bash -c '/etc/cron.daily/mlocate'" > /etc/cron.d/updatedb
       sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
@@ -108,8 +106,6 @@ Vagrant.configure("2") do |config|
       # set -x
       export DEBIAN_FRONTEND=noninteractive
       export DEBCONF_NONINTERACTIVE_SEEN=true
-      [ -e /dev/sda ] && echo "set grub-pc/install_devices /dev/sda" | debconf-communicate
-      [ -e /dev/vda ] && echo "set grub-pc/install_devices /dev/vda" | debconf-communicate
       apt-get -qq update && apt-get -qq -y upgrade < /dev/null > /dev/null
       echo "* * * * * root command bash -c '/etc/cron.daily/mlocate'" > /etc/cron.d/updatedb
       sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config

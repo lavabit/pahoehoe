@@ -37,13 +37,13 @@ IPADDR="`ip -br a show dev anbox0 | awk -F' ' '{print $3}' | awk -F'/' '{print $
 #sudo ANBOX_LOG_LEVEL=debug anbox container-manager --daemon --privileged --data-path=/var/lib/anbox --container-network-dns-servers=$IPADDR &
 sudo /usr/bin/anbox container-manager --daemon --privileged --data-path=/var/lib/anbox --container-network-dns-servers="`ip -br a show dev eth0 | awk -F' ' '{print $3}' | awk -F'/' '{print $1}'`" &
 env ANBOX_LOG_LEVEL=debug ANBOX_FORCE_SOFTWARE_RENDERING=1 EGL_LOG_LEVEL=debug anbox session-manager --single-window --window-size=1024,768 &
-adb install $HOME/bitmask_android_leap/app/build/outputs/apk/normalInsecureFat/debug/Bitmask_debug.apk
+adb install $HOME/android/app/build/outputs/apk/normalInsecureFat/debug/Bitmask_debug.apk
 adb install $HOME/com.termux_104.apk
 
 # Alternative attempt.
 export $(dbus-launch)
 sudo /usr/local/bin/anbox container-manager --daemon --privileged --data-path=/var/lib/anbox &
 env ANBOX_LOG_LEVEL=debug ANBOX_FORCE_SOFTWARE_RENDERING=1 EGL_LOG_LEVEL=debug /usr/local/bin/anbox session-manager --single-window --window-size=1024,768 &
-adb install $HOME/bitmask_android_leap/app/build/outputs/apk/normalInsecureFat/debug/Bitmask_debug.apk
+adb install $HOME/android/app/build/outputs/apk/normalInsecureFat/debug/Bitmask_debug.apk
 adb install $HOME/com.termux_104.apk
 # sudo tail -f /var/lib/anbox/logs/console.log
