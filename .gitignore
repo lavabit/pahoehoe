@@ -72,7 +72,6 @@ bitmask_android/assets/minivpn.mips
 bitmask_android/assets/minivpn.x86
 openvpn/a.out.dSYM
 openvpn/config.status
-Makefile
 openvpn/libtool
 openvpn/stamp-h1
 openvpn/version.sh
