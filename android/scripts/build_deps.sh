@@ -27,7 +27,7 @@ else
     cd ..
 fi
 
-if [[ $(ls -A ${DIR_GOLIBS}) ]]
+if [[ $(ls -A ${DIR_GOLIBS} &> /dev/null) ]]
 then
     echo "Dirty build: Reusing go libraries"
 else
