@@ -123,8 +123,8 @@ vagrant ssh --tty -c 'sudo --login bash -e < vpnweb.sh' debian_vpn
 vagrant ssh --tty -c 'sudo --login bash -e < openvpn.sh' debian_vpn
 
 # Compile the Android client.
-vagrant ssh --tty -c 'bash -ex setup.sh' debian_build
-vagrant ssh --tty -c 'bash -ex build.sh' debian_build
+vagrant ssh --tty -c 'bash -e setup.sh' debian_build
+vagrant ssh --tty -c 'bash -e build.sh' debian_build
 
 # Extract the Android APKs from the build environment.
 [ -d $BASE/apk/ ] && rm --force --recursive $BASE/apk/ ; mkdir $BASE/apk/
