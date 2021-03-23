@@ -1,0 +1,6 @@
+﻿[sip2]
+
+accept  = 6443
+connect = 6001
+cert    = /etc/stunnel/ssl/sip2-cert.pem
+key     = /etc/stunnel/ssl/sip2-key.pem

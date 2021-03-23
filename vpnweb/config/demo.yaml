@@ -1,0 +1,42 @@
+auth: sip
+
+openvpn:
+
+    - auth: SHA1
+    - cipher: AES-256-CBC
+    - keepalive: "10 30"
+    - tls-cipher: DHE-RSA-AES128-SHA
+    - tun-ipv6: true
+    - dev: tun
+    - sndbuf: 0
+    - rcvbuf: 0
+    - nobind: true
+    - persist-key: true
+    - key-direction: 1
+    - verb: 3
+
+locations:
+
+    - Amsterdam:
+        - name: Amsterdam
+        - country_code: NL
+        - hemisphere: N
+        - timezone: -1
+
+
+gateways:
+
+    - pt.demo.bitmask.net:
+        - host: pt.demo.bitmask.net
+        - ip_address: 37.218.247.60
+        - location: Amsterdam
+        - transports:
+            - [ "openvpn", "tcp", "443"]
+            - [ "obfs4", "tcp", "23042"]
+
+provider:
+    - name: "demo provider"
+    - description: "this is a demo provider"
+    - domain: demo.bitmask.net:9000
+    - api_uri: demo.bitmask.net:9000
+    - fingerprint: "SHA256: F3340B115F69B16C1B7C52C85A0A4A752C64B10670109B4032BA612B782D8753"

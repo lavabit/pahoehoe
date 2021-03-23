@@ -1,0 +1,22 @@
+# general variables
+
+export VPNWEB_API_PATH="./public"
+export VPNWEB_PROVIDER_CA="./public/ca.crt"
+export VPNWEB_AUTH=sip
+export VPNWEB_CAKEY=test/files/ca.key
+export VPNWEB_CACRT=test/files/ca.crt
+export VPNWEB_PORT=8000
+export VPNWEB_AUTH_SECRET=othaoPhejei8aidaeghaiVohie4du
+
+# sip authentication
+
+export VPNWEB_SIP_USER=leap
+export VPNWEB_SIP_PASS="Kohapassword1!"
+export VPNWEB_SIP_HOST="localhost"
+export VPNWEB_SIP_PORT="7001"
+export VPNWEB_SIP_LIBR_LOCATION=testlibrary
+export VPNWEB_SIP_TERMINATOR="\r"
+
+# debug
+
+export VPNWEB_DEBUG_AUTH=yes

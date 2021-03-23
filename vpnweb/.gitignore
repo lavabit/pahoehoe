@@ -1,0 +1,8 @@
+deploy/*
+.mypy_cache
+*.swp
+*.swo
+vpnweb
+public/*
+test/integration/sipcli/sipcli
+.go/pkg/mod/github.com/

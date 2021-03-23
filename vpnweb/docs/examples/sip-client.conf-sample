@@ -1,0 +1,4 @@
+﻿[sip2]
+accept  = localhost:6001
+connect = koha.example.org:6443
+client  = yes

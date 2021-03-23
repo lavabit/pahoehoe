@@ -1,0 +1,3 @@
+---
+include:
+  - 'https://0xacab.org/leap/container-platform/glue/raw/master/.gitlab-ci.yml'

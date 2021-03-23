@@ -1,0 +1,37 @@
+{
+  "api_uri": "https://{{ provider.api_uri }}",
+  "api_version": "3",
+  "ca_cert_fingerprint": "{{ provider.fingerprint }}",
+  "ca_cert_uri": "https://{{ provider.api_uri }}/ca.crt",
+  "default_language": "en",
+  "description": {
+  "en": "{{ provider.description }}"
+  },
+  "domain": "{{ provider.domain }}",
+  "enrollment_policy": "open",
+  "languages": [
+    "en"
+  ],
+  "name": {
+    "en": "{{ provider.name }}"
+  },
+  "service": {
+    "allow_anonymous": true,
+    "allow_free": true,
+    "allow_limited_bandwidth": false,
+    "allow_paid": false,
+    "allow_registration": false,
+    "allow_unlimited_bandwidth": true,
+    "bandwidth_limit": 102400,
+    "default_service_level": 1,
+    "levels": {
+      "1": {
+        "description": "Please donate.",
+        "name": "free"
+      }
+    }
+  },
+  "services": [
+    "openvpn"
+  ]
+}
