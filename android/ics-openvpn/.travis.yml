@@ -1,0 +1,54 @@
+language: android
+git:
+  depth: 1
+jdk: oraclejdk8
+android:
+  components:
+    - tools
+    - build-tools-27.0.3
+    - extra-android-m2repository
+    - platform-tools
+
+  licenses:
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
+    - '.+'
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+    
+script:
+  # Force signing with the debug keys
+  - echo icsopenvpnDebugSign=true > ~/.gradle/gradle.properties
+  # Building one variant is enough and already takes quite a long time...
+  - ./gradlew assembleUiRelease
+
+before_script:
+  # Install packages
+  - sudo add-apt-repository ppa:teward/swig3.0 -y
+  - sudo apt-get update -q
+  - sudo apt-get install -q unzip swig3.0 cmake
+  
+  # Annoying workarounds #1
+  - sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
+  - swig -version
+  # Annoying workarounds #2
+  #- curl -L https://dl.google.com/android/repository/android-ndk-r19b-linux-x86_64.zip
+  #- unzip -q android-ndk-r19b-linux-x86_64.zip
+  #- rm android-ndk-r19b-linux-x86_64.zip
+  #- export ANDROID_NDK_HOME=`pwd`/android-ndk-r16b
+  #- export LOCAL_ANDROID_NDK_HOME="$ANDROID_NDK_HOME"
+  
+  #- yes | sdkmanager --update
+  #- yes | sdkmanager --licenses
+  - yes | sdkmanager 'ndk'
+  - yes | sdkmanager 'platforms;android-29'
+
+  - export PATH=$PATH:${ANDROID_NDK_HOME}
+

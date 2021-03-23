@@ -1,0 +1,170 @@
+---
+stages:
+  - docker_image_sdk
+  - docker_image_other
+  - build
+  - test
+
+# When using dind, it's wise to use the overlayfs driver for
+# improved performance.
+variables:
+  DOCKER_DRIVER: overlay
+
+.job_template: &build_docker_image
+  image: 0xacab.org:4567/leap/docker/debian:stretch_amd64
+  tags:
+    - docker-in-docker
+  services:
+    - docker:dind
+
+  before_script:
+    - >
+      export LAST_COMMIT=$(curl -s --header "PRIVATE-TOKEN: ${LEAP_CODE_O_MATIC_PRIVATE_TOKEN}" https://0xacab.org/api/v4/projects/578/pipelines |
+      python -c "import sys, json; print json.load(sys.stdin)[1]['sha']")
+
+  script:
+    - docker --version
+    - docker info
+    - if ! .gitlab/build.sh ${DOCKER_IMAGE} >> dockerbuild.log 2>&1; then echo "Image build failed. Please check dockerbuild.log."; exit 1; fi;
+  allow_failure: false
+  artifacts:
+    expire_in: 3d
+    paths:
+    - dockerbuild.log
+
+docker_image:sdk:
+  stage: docker_image_sdk
+  variables:
+    DOCKER_IMAGE: android-sdk
+  <<: *build_docker_image
+
+docker_image:ndk:
+  stage: docker_image_other
+  variables:
+    DOCKER_IMAGE: android-ndk
+  <<: *build_docker_image
+
+docker_image:emulator:
+  stage: docker_image_other
+  variables:
+    DOCKER_IMAGE: android-emulator
+  <<: *build_docker_image
+
+unit_test:
+  image: "0xacab.org:4567/leap/bitmask_android/android-ndk:latest"
+  stage: test
+  script:
+    - ./gradlew testCustomProductionFatReleaseUnitTest testNormalProductionFatReleaseUnitTest
+  artifacts:
+    paths:
+      - app/build/reports/tests
+    when: on_failure
+    expire_in: 3 days
+
+#ui_test:
+#  image: "0xacab.org:4567/leap/bitmask_android/android-emulator:latest"
+#  stage: test
+#  script:
+#    - emulator -avd testApi27 -no-audio -no-window &
+#    - .gitlab/wait-for-emulator.sh
+#    - adb devices
+#    - adb shell settings put global window_animation_scale 0 &
+#    - adb shell settings put global transition_animation_scale 0 &
+#    - adb shell settings put global animator_duration_scale 0 &
+#    - adb shell input keyevent 82 &
+#    - ./gradlew connectedAndroidTest
+#    - adb -s testApi27 emu kill
+
+#expanded_test:
+#  image: "0xacab.org:4567/leap/bitmask_android/android-emulator:latest"
+#  stage: test
+#  script:
+#    - emulator -avd testApi27 -no-audio -no-window &
+#    - .gitlab/wait-for-emulator.sh
+#    - adb devices
+#    - adb shell settings put global window_animation_scale 0 &
+#    - adb shell settings put global transition_animation_scale 0 &
+#    - adb shell settings put global animator_duration_scale 0 &
+#    - adb shell input keyevent 82 &
+#    - ./gradlew connectedAndroidTest
+#    - ./gradlew createProductionDebugCoverageReport
+#    - adb -s testApi27 emu kill
+#    - ./gradlew test
+#  artifacts:
+#    expire_in: 3 days
+#    paths:
+#      - app/build/reports/androidTests/connected/
+#      - app/build/reports/coverage/production/
+#      - app/build/tests/
+#  when: manual
+
+build:
+  image: "0xacab.org:4567/leap/bitmask_android/android-ndk:latest"
+  stage: build
+  script:
+    - ./scripts/cleanProject.sh
+    - ./scripts/build_deps.sh >> build_deps.log 2>&1
+    - ./gradlew clean assembleNormalProductionFatDebug --stacktrace >> build.log 2>&1
+  artifacts:
+    paths:
+    - app/build/outputs/
+    - build_deps.log
+    - build.log
+    when: always
+    expire_in: 3 days
+
+build_release:
+  image: "0xacab.org:4567/leap/bitmask_android/android-ndk:latest"
+  stage: build
+  script:
+    - ./scripts/prepareForDistribution.sh build -no-tag >> normalRelease.log 2>&1
+  artifacts:
+    paths:
+      - app/build/outputs/
+      - currentReleases/
+      - normalRelease.log
+    when: always
+    expire_in: 1 week
+  when: manual
+
+build_fdroid_beta_release:
+  image: "0xacab.org:4567/leap/bitmask_android/android-ndk:latest"
+  stage: build
+  script:
+    - ./scripts/prepareForDistribution.sh build -no-tag -beta >> normalBeta.log 2>&1
+  artifacts:
+    paths:
+      - app/build/outputs/
+      - currentReleases/
+      - normalBeta.log
+    when: always
+    expire_in: 1 week
+  when: manual
+
+build_custom_release:
+  image: "0xacab.org:4567/leap/bitmask_android/android-ndk:latest"
+  stage: build
+  script:
+    - ./scripts/prepareForDistribution.sh build -no-tag -custom >> customRelease.log 2>&1
+  artifacts:
+    paths:
+    - app/build/outputs/
+    - currentReleases/
+    - customRelease.log
+    when: always
+    expire_in: 1 week
+  when: manual
+
+build_fdroid_custom_beta_release:
+  image: "0xacab.org:4567/leap/bitmask_android/android-ndk:latest"
+  stage: build
+  script:
+    - ./scripts/prepareForDistribution.sh build -no-tag -beta -custom >> customBeta.log 2>&1
+  artifacts:
+    paths:
+      - app/build/outputs/
+      - currentReleases/
+      - customBeta.log
+    when: always
+    expire_in: 1 week
+  when: manual

@@ -1,0 +1,16 @@
+Setup
+
+You need an invite to use DustMail. The first time you run the reader (dust/services/dustmail/reader.py), it will prompt
+you for an invite, either pasted in or loaded from a file.
+
+The reader will configure your dust client to be capable of receiving DustMail packets.
+
+Commands
+
+a: add invite - Paste in an invite code, or load one from a file. It will be added to your address book.
+i: make invite - Display an invite code to be copied, save it to a file, or send it via email.
+s: send message - Send a message to someone in your address book.
+
+l: list messages
+num: read message num
+x: quit

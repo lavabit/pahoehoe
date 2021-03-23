@@ -1,0 +1,37 @@
+{
+  "api_uri": "https://api.centos.local",
+  "api_version": "3",
+  "ca_cert_fingerprint": "SHA256: 5532a3ddddb1af104db4293041f4bdb3839803a1510e733d3d9f5dae88600e2d",
+  "ca_cert_uri": "https://api.centos.local/ca.crt",
+  "default_language": "en",
+  "description": {
+    "en": "CentOS Test Proxy"
+  },
+  "domain": "centos.local",
+  "enrollment_policy": "open",
+  "languages": [
+    "en"
+  ],
+  "name": {
+    "en": "CentOS Test Proxy"
+  },
+  "service": {
+    "allow_anonymous": true,
+    "allow_free": true,
+    "allow_limited_bandwidth": false,
+    "allow_paid": false,
+    "allow_registration": false,
+    "allow_unlimited_bandwidth": true,
+    "bandwidth_limit": 102400,
+    "default_service_level": 1,
+    "levels": {
+      "1": {
+        "description": "Please donate.",
+        "name": "free"
+      }
+    }
+  },
+  "services": [
+    "openvpn"
+  ]
+}

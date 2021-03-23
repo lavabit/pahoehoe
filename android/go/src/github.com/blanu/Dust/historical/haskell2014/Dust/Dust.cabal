@@ -1,0 +1,95 @@
+Name:                Dust
+Version:             2.3.1
+Description:         Dust is a polymorphic protocol engine designed to circumvent Internet filtering based on protocol identification
+Synopsis:            Polymorphic protocol engine
+Category:            Network
+License:             GPL
+License-file:        LICENSE
+Author:              Brandon Wiley
+Maintainer:          brandon@blanu.net
+Build-Type:          Simple
+Cabal-Version:       >=1.8
+
+Library
+  Build-Depends:
+    base >= 3 && < 5,
+    Dust-crypto >= 0.2,
+    bytestring,
+    entropy,
+    network,
+    cereal,
+    ghc-prim,
+    binary,
+    random,
+    random-extras,
+    random-source,
+    random-fu,
+    containers,
+    directory,
+    split,
+    crypto-api,
+    base64-bytestring,
+    lens,
+    mtl,
+    normaldistribution
+  Extensions:
+    ForeignFunctionInterface
+
+  Exposed-modules:
+      Dust.Core.Invite,
+      Dust.Model.PacketLength,
+      Dust.Model.Huffman,
+      Dust.Model.Content,
+      Dust.Model.TrafficModel,
+      Dust.Model.Stats,
+      Dust.Network.TcpServer,
+      Dust.Network.UdpServer,
+      Dust.Network.TcpClient,
+      Dust.Network.Util,
+      Dust.Network.ProtocolSocket
+      Dust.Core.DustPacket
+      Dust.Core.SignedDustPacket
+      Dust.Core.CryptoProtocol
+      Dust.Core.WireProtocol
+      Dust.Core.WireProtocolHandler
+      Dust.Model.Port
+      Dust.Model.Packet
+      Dust.Network.DustServer
+
+test-suite core
+  type: exitcode-stdio-1.0
+  main-is: TestCore.hs
+  ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
+  hs-source-dirs: tests
+
+  build-depends:
+    base,
+    Dust,
+    Dust-crypto >= 0.2,
+    HUnit >= 1.2,
+    test-framework       >= 0.6,
+    test-framework-hunit >= 0.2,
+    test-framework-quickcheck2,
+    test-framework-th,
+    bytestring,
+    threefish,
+    cereal,
+    ghc-prim,
+    QuickCheck,
+    lens,
+    mtl
+
+-- test-suite model
+--   type: exitcode-stdio-1.0
+--   main-is: TestModel.hs
+--   ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
+--   hs-source-dirs: tests
+
+--   build-depends:
+--     base,
+--     Dust,
+--     HUnit >= 1.2,
+--     test-framework       >= 0.6,
+--     test-framework-hunit >= 0.2,
+--     test-framework-th,
+--     base >= 3 && < 5, bytestring, threefish, entropy, network, cereal, ghc-prim, binary, random, random-extras, random-source, random-fu, containers

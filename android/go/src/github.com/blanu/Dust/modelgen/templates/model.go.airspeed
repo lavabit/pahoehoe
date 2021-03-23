@@ -1,0 +1,66 @@
+package $packagename
+
+import (
+        "time"
+	"math/rand"
+
+	"git.torproject.org/pluggable-transports/obfs4.git/common/csrand"
+	"github.com/blanu/Dust/go/v2/interface"
+	"github.com/blanu/Dust/go/dist"
+	"github.com/blanu/Dust/go/huffman"
+	"github.com/blanu/Dust/go/model1"
+)
+
+type $model_type struct {
+	c2sHalf, s2cHalf *model1.HalfModel
+
+	prng *rand.Rand
+}
+
+var (
+	c2sStatic = model1.HalfStatic{
+		$sequence.incoming,
+		$huffman.incoming,
+	}
+
+	s2cStatic = model1.HalfStatic{
+		$sequence.outgoing,
+		$huffman.outgoing,
+	}
+)
+
+var theModel $model_type
+
+func (model *$model_type) MakeClientPair() (Dust.ShapingEncoder, Dust.ShapingDecoder, error) {
+	enc1 := model.c2sHalf.NewEncoderIsh()
+	$packet_sleep.incoming
+	$packet_length.incoming
+	$max_sleep
+	dec1 := model.s2cHalf.NewDecoderIsh()
+	return enc1, dec1, nil
+}
+
+func (model *$model_type) MakeServerPair() (Dust.ShapingEncoder, Dust.ShapingDecoder, error) {
+	enc1 := model.s2cHalf.NewEncoderIsh()
+	$packet_sleep.outgoing
+	$packet_length.outgoing
+	$max_sleep
+	dec1 := model.c2sHalf.NewDecoderIsh()
+	return enc1, dec1, nil
+}
+
+func init() {
+	panicPrefix := "$name: bad Dust model data!  "
+	theModel.c2sHalf, theModel.s2cHalf = model1.CompileTwoHalvesOrPanic(&c2sStatic, &s2cStatic, panicPrefix)
+	theModel.prng = csrand.Rand
+
+	constructor := func(params map[string]string) (Dust.ShapingModel, error) {
+		if err := Dust.CheckUnackedParams(params, nil); err != nil {
+			return nil, err
+		}
+
+		return &theModel, nil
+	}
+
+	Dust.RegisterModel("$name", constructor)
+}

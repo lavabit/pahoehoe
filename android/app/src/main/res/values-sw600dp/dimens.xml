@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2012-2016 Arne Schwabe
+  ~ Distributed under the GNU GPL v2 with additional terms. For full terms see the file doc/LICENSE.txt
+  -->
+
+<resources>
+    <bool name="logSildersAlwaysVisible">true</bool>
+    <dimen name="bitmask_logo">72dp</dimen>
+    <dimen name="bitmask_logo_compact">56dp</dimen>
+    <dimen name="stdpadding">16dp</dimen>
+    <dimen name="compact_padding">6dp</dimen>
+    <dimen name="button_radius">20dp</dimen>
+
+</resources>

@@ -1,0 +1,397 @@
+1.0.8
+features:
+- new languages: Burmese, Uyghur
+- more translations, <3 to all translators!
+
+bugfixes:
+- reduce crash rate
+- better error logging during provider and VPN gateway setup
+- switch failing VPN gateways faster during gateway setup
+
+1.0.7
+features:
+- new translations
+
+bugfixes:
+- fixed relaunch VPN on reboot:
+> in case always-on system setting is enabled on Android O+
+> in case VPN was connected before turning off the smartphone on pre Android O
+> better support for "Block connections without VPN" system setting while rebooting
+
+
+1.0.6 - New Year release
+features:
+- auto-update for apks downloaded from bitmask.net and from brand websites like riseup.net
+- pgp verification to secure auto-update mechanism
+- support for Android 10 and Android 11
+- new translations (<3 to all translators)
+- update openvpn, openssl and other dependencies
+
+bugfixes:
+- fix "exclude apps from VPN" feature
+
+1.0.5 - Menshen release
+features:
+- geoip service: improved automatic gateway selection, taking hemisphere into account
+- vpn tethering over bluetooth
+- general vpn tethering improvements
+- tile service: start/stop Bitmask from Quick Setting Tiles
+- updated openvpn, openssl, ics-openvpn dependencies, Android support libraries, golang version
+- reduced APK size for RiseupVPN
+- updated translations (thanks to Localization Lab and all translators!)
+bugfixes:
+- fixes for several UI bugs on Android 4.X devices
+- improved provider setup flow
+- fixes for several rare crashes
+- fixed memory leaks
+
+1.0.3 - #PuraVida release
+features:
+- circumvent DNS blocking
+- IPv6 Firewall: allows now the usage of many apps that couldn't connect before while Bitmask was enabled (requires root permission)
+- VPN Tethering: share your VPN with other devices via USB- or Wifi-Tethering (requires root permission)
+- updated translations
+bugfixes:
+- fix UI bug in navigation drawer
+
+1.0.2 - the anti-censorship release
+features:
+- implement Pluggable Transports to circumvent VPN blocking
+- exclude apps from VPN (credits to Akuma!)
+- improved gateway setup error handling
+- faster recognition of newly added providers (leads to improved server load balancing)
+- updated translations (thanks to Localization Lab and all translators!)
+- reduced APK size
+
+bugfixes:
+- fix performance issues on UI thread if VPN (re-)connects
+- fix several crashes
+- removed annoying dot from navigation drawer menu icon ;)
+- show the correct state on main screen if VPN blocks all outgoing traffic
+
+1.0.1
+- fix Android 9 crash
+
+1.0.0
+Bugs:
+- fix tablet layouts in portrait
+- fix bug that leads to inability to turn off vpn on Android 8+
+
+features:
+- full support of Android 8+ kill switch ("Block connections without VPN")
+- improve visibility of connecting state by changing the progress animation
+- update ics-openvpn, openssl and openvpn
+- a lot of small UI improvements
+- updated translations (thanks to Localization Lab and all translators!)
+
+0.9.11 - another consolidation release
+Bugs:
+- fixes app crashes
+- make Bitmask usable for Android 4.X again
+- improve setup if provider changes its config
+- improve vpn start
+- fix notification sound bug on Android O
+features:
+- new translations
+
+0.9.10 - a hotfix release
+Bugs:
+- fixes error handling of invalid vpn client certificates
+
+Features:
+- updates on languages (thanks to Localization Lab!!!)
+- improved gateway selection: if the app cannot connect to the nearest gateway it will choose the next closest one
+
+0.9.9 - custom branded apps
+Features:
+- allows Providers to create an own version of Bitmask without knowing much about Android development
+-> Credits goes to janak, a GSOC 2018 participant for LEAP!
+- direct link to Android's VPN settings to allow always-on vpn
+- updated crypto libraries
+- new translations
+- bugfixes
+
+0.9.8 - the UI overhaul
+Bugs:
+- fixes notification channel bug on Android 8+
+- fixes Bitmask starting always on restart regardless of the last state before the phone was turned off
+
+Features:
+- support for Android's always-on vpn system setting:
+    - Bitmask starts the vpn with the last selected profile
+    - if no vpn provile is available Bitmask blocks all outgoing internet traffic until
+      the user creates a vpn profile or enables unsecured internet traffic
+      with a click on a notification
+- improved certificate pinning mechanism
+- complete new ui based on material design
+- different layouts for smartphones and tablets
+- improved error handling for expired certificates
+- updated crypto libraries openssl, openvpn, mbedtls etc.
+- support for Android 8.1
+- new translations
+- new experimental feature to save battery
+
+0.9.7 - the maintenance release
+Bugs:
+- fixes failing login on Android 7.0 and Android 7.1 (Android Nougat)
+- switching between different providers was buggy - bitmask selected
+  the nearest gateway of all providers ever chosen, now the nearest
+  gateway of the current provider is selected
+- fixes app crashes on tablets
+- fixes major tablet layout issues
+- fixes different app crashes during provider set up
+- update information in About Page
+
+Features:
+- updated ics-openvpn code, incl. openvpn and openssl
+- show vpn data throughput and button to disconnect vpn in notification bar
+- support for Android O
+- enforce TLSv1.2 on all devices
+- bitmask honors the default protocol order (udp/tcp) specified by
+  the provider
+- removes redundant cancellation confirmation dialog - one is sufficient
+
+0.9.4 June 16th, 2015 - the "fabbutton" release
+Bugs:
+- Show the log window only when a real error happened, since some
+  users weren't able to know why Bitmask had failed and they didn't
+  think of opening the log by themselves.
+- Aborting the establishment of a new VPN connection didn't work
+  properly, and some users were confused because they wanted to cancel
+  the start and Bitmask didn't do it, although the UI stated the
+  opposite. That has been improved, detecting the real status of the
+  VPN connection much better.
+- If the user doesn't "trust this application", bitmask doesn't try to
+  connect to the VPN anymore.
+
+Features:
+- Removed the progress bars that caused confusion in some states (such
+  as "Waiting for connectivity")
+- Removed the switch button that was not clear enough (some users
+  experimented problems with it during connections, staying "on" while
+  the VPN was "off", and put an icon with a progress indicator around
+  it.
+- Code tests to avoid this bugs are revived, since some problems the
+  users were experiencing had already been fixed in the early days of
+  the project.
+- Optimized the layout to various devices, so that UI remains
+  consistent across sizes, screen resolutions...
+- Localized the app to Spanish, and simplified the login/logout
+  feedback so that localization can be polished.
+- Improved wording, both in Spanish and in English.
+- Updated gradle libraries
+- Updated ics-openvpn (thanks Arne), from GitHub!
+
+0.9.3
+Bugs:
+- If VPN connection fails, blocking VPN is turned off
+- Don't try to log out if nothing is logged in.
+- Give better user feedback to some problems
+- Switching orientation doesn't hide any useful message
+- Blocking VPN is more consistently removed if an error happens
+- Typo: you is not logged in -> you *are* not logged in
+- Cleaner log messages to logcat
+
+Features:
+- Show the user status progress and info in its own place
+- Remember riseup's users that this is a different service
+- Advice users to be cautious when surfing the web after disconnecting the VPN
+
+0.9.2
+Bugs:
+- Sign Up dialog works correctly
+Features:
+- Updated ics-openvpn code (thanks Arne!)
+
+0.9.1 January 21 2015 - the "insistent reloaded" release
+Bugs:
+- Autostart on boot works
+
+0.9.0 January 19 2015 - the "insistent" release
+Features:
+- Fail back to other ports/servers in case of error
+- Start vpn automatically after foced to log in
+- More unit tests added, better code structured
+Bugs:
+- Switching providers logs out before showing Configuration Wizard
+- Update profiles correctly
+- Don't get killed if restarting the device
+- Don't crash in xlarge devices (such as tablets)
+
+0.8.2 December 22 2014 - the "refactored+" release
+Bugs:
+- Better error handling while setting up a provider
+- Don't crash after selecting a provider in the Configuration Wizard
+- Substitute a dialog if a second one tries to be showed
+
+0.8.1 December 20 2014 - the "refactored" release
+Features:
+- RiseUp.net and Calyx.net are new preseeded providers!
+- Material design for Android 5
+- Cleaner codebase
+- Update vpn info automatically
+Bugs:
+- Custom providers are saved and restored
+- Smoother orientation changes
+- Disconnect correctly: stop blocking and normal VPN connections
+- Many small bugs fixed during the refactor
+
+0.8.0 November 25 2014 - the "problematic" release
+Features:
+- Block connection until VPN is established
+- Start VPN automatically after logging in
+- Lollipop support
+- Update ndk and ics-openvpn codebase
+Bugs:
+- Pin provider certificate with configuration data
+- Autoupdate vpn certificate correctly
+
+0.7.0 September 26 2014 - the "quick" release
+Features
+- Restart quickly if killed
+- F-Droid ready
+Bugs Fixed
+- Vpn can be turned off with the Off switch
+- "Blocked" notification not shown if Vpn is ff
+
+0.6.0 August 18 2014 - the "persistent" release
+Features
+- Improved security:
+  - traffic always routed by VPN after you've established a connection
+  - Avoid a common security attack (a Mitm - man in the middle)
+- Clearer setup dialog: you can also sign up from the log in dialog
+- Faster autostart: Bitmask starts sooner during your phone boot process
+- Prompt to log in if you start a register only EIP provider
+
+Bugs Fixed
+- Removed second notification!
+- VPN switch more consistent with the real state
+- Changed orientation? No problem.
+- Reported bugs from Google Play fixed.
+
+0.5.4 July 21 2014 - the "meetup" release
+Features
+- Renewal of the certificate soon enough
+- After signing up, eip restarts to use the new certificate
+- EIP profiles are named according to their locations
+- Developers: tests run, and network tests are more intensive
+
+0.5.3 June 27 2014- the "beautiful oak" release
+Features
+- Updated ics-openvpn (again).
+- Support for riseup leap provider
+- Always use latests certificate
+Bugs Fixed
+- UI inconsistencies (notification, messages)
+- About text contains correct tracker
+- Long provider names are shown correctly
+- Fewer glue code for ics-openvpn customizations
+
+0.5.2 June 13 2014 - the "new beginning" release
+Features
+- Updated ics-openvpn codebase!
+- Disconnecting prompts you before doing anything
+- UI for signup more accessible
+- Error messages are shown as they arrive from the server
+
+Bugs Fixed
+- Cancelling a failed signup/login stops progressbar
+
+0.5.1 April 26 2014 - the "blue sky" release
+Features
+- Autostart
+- Gradle build system
+Bugs Fixed
+- README file describes the building process correctly
+- Provider data is downloaded only using its commercial certificate
+
+0.5 April 4 2014 - the "soft winds" release
+Features
+- Replace bitmask.net with demo.bitmask.net
+- Transifex URL added to the About page
+Bugs Fixed
+- Tests run without problems from ant
+- Calyx.net and all registered-only EIP providers works correctly once logged in.
+- Menu gets built correctly from the beginning
+- Switching provider doesn't crash the app
+- Removed an unnecessary string from strings.xml
+- Link to the "Building with Eclipse" file corrected.
+- Clearer message when the provider isn't reachable.
+- Android NDK r9d support added
+- EIP switch doesn't toggle off momentarily while starting VPN
+- About text more readable: space between display's border and text
+- Font sizes scaled up for 10' devices
+- Cancelling a provider setup doesn't crash anymore
+- Providers that only offer authenticated EIP work ok
+- Cancelling a provider setup shows the complete provider list again
+- Providers cannot be added twice.
+
+0.4 Feb 10 2014 - the "early spring cleaning" release
+Features
+- Use token based authentication
+- UI Improvements
+- Show location of VPN gateway
+- About view is now an Activity
+- Removed ics-openvpn references and unused code
+Bugs Fixed
+- Improved handling of Configuration Wizard errors
+- Use strong cert pinning for provider
+- Progress bars layout
+- References to "LEAP Android" changed to Bitmask
+- Login/logout messages clear when complete
+
+0.2.3 Nov 29 2013 - the "three is a magic number" release
+Features
+- Begin integrating tests into repository
+- Clearer wording in some places
+- Show VPN Gateway location in notification
+Bugs Fixed
+- URL parsing error if http entered for custom provider
+- Issues with certificates and gateways when switching providers
+- SEVERE: Routes were not set on VPN connection and traffic was routed in the clear
+
+
+0.2.2 - Nov 15 2013 - the "rampant growth" release:
+Features
+- Rebranded to Bitmask
+- Updated docs
+- Disconnected notification icon
+- Progress bar and other UI improvements
+Bugs Fixed
+- Android PRNG insecurity
+- SRP B value validation
+- VPN reconnect hang
+- Complex certificate verification
+- Remember authentication status
+- Widget shortcut crashes app
+
+
+0.2.1 - Oct 21 2013 - the "get on that rolling bandwagon" release:
+Bugs Fixed
+- SRP tests should be runnable localhost
+- Evaluate testing solution: http://appium.io/
+- EIP fragment is not showed after switching provider
+- Provider down is not differentiated from certificate error
+- EIP switch toggles on screen rotate
+- bug - login dialog should require username
+- Backstack is screwed up by notification tap
+- Inconsistent Cookie Management
+- danger_on is true for assets' provider
+- EIP Service Exported With No Access Control
+- Lack of Input Validation on User Certificates
+- LeapHttpClient Disables Hostname Verification
+Features
+- Tests for ConfigurationWizard
+- Sensible notification handling
+- User friendly EIP status and notifications strings
+- Refactor EIP UI logic into a Fragment
+- Only parse eip-service.json if serial incremented
+- Add progress indicator while VPN connection is being established
+- Refactor EIP switch logic
+- Retry login should retain username
+- Move all ConfigHelper constants to their corresponding classes
+
+
+0.2.0
+
+	Initial release.

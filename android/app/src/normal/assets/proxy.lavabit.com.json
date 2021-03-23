@@ -1,0 +1,37 @@
+{
+  "api_uri": "https://api.proxy.lavabit.com",
+  "api_version": "3",
+  "ca_cert_fingerprint": "SHA256: 984e88bb37ef7cc3f0b28a1ef8badf64c6b5c845ed72865f2ba42f26362d68bf",
+  "ca_cert_uri": "https://api.proxy.lavabit.com/ca.crt",
+  "default_language": "en",
+  "description": {
+    "en": "Lavabit Encrypted Proxy"
+  },
+  "domain": "lavabit.com",
+  "enrollment_policy": "open",
+  "languages": [
+    "en"
+  ],
+  "name": {
+    "en": "Lavabit Encrypted Proxy"
+  },
+  "service": {
+    "allow_anonymous": true,
+    "allow_free": true,
+    "allow_limited_bandwidth": false,
+    "allow_paid": false,
+    "allow_registration": false,
+    "allow_unlimited_bandwidth": true,
+    "bandwidth_limit": 102400,
+    "default_service_level": 1,
+    "levels": {
+      "1": {
+        "description": "Please enjoy.",
+        "name": "free"
+      }
+    }
+  },
+  "services": [
+    "openvpn"
+  ]
+}

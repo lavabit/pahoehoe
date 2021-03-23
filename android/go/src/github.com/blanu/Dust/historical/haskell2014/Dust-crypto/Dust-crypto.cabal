@@ -1,0 +1,55 @@
+Name:                Dust-crypto
+Version:             0.3
+Description:         Cryptographic operations used by the Dust polymorphic protocol engine
+Synopsis:            Cryptographic operations
+Category:            Cryptography
+License:             GPL
+License-file:        LICENSE
+Author:              Brandon Wiley
+Maintainer:          brandon@blanu.net
+Build-Type:          Simple
+Cabal-Version:       >=1.8
+
+Library
+  Build-Depends:
+    base >= 3 && < 5,
+    bytestring,
+    cereal,
+    ghc-prim,
+    nacl,
+    skein,
+    crypto-api,
+    entropy,
+    mtl,
+    cereal,
+    random
+
+  Exposed-modules:
+      Dust.Crypto.Keys,
+      Dust.Crypto.ECDSA,
+      Dust.Crypto.ECDH,
+      Dust.Crypto.Cipher
+      Dust.Crypto.PRNG
+      Dust.Crypto.Hash
+
+test-suite crypto
+  type: exitcode-stdio-1.0
+  main-is: TestCrypto.hs
+  ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
+  hs-source-dirs: tests
+
+  build-depends:
+    base,
+    Dust,
+    HUnit >= 1.2,
+    test-framework       >= 0.6,
+    test-framework-hunit >= 0.2,
+    test-framework-quickcheck2,
+--    test-framework-th,
+    bytestring,
+    threefish,
+    cereal,
+    ghc-prim,
+    QuickCheck,
+    mtl,
+    binary

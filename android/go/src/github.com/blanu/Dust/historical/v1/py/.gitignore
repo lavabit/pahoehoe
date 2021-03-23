@@ -1,0 +1,4 @@
+*.pyc
+*.ip
+*.yaml
+spool
