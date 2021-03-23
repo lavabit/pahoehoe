@@ -17,7 +17,7 @@ FILE_ARM=./go/out/armeabi-v7a/piedispatcherlib
 # look for empty dir
 
 cd $BASE_DIR
-if [[ $(ls -A ${DIR_OVPNASSETS}) && $(ls -A ${DIR_OVPNLIBS}) ]]
+if [[ $(ls -A ${DIR_OVPNASSETS} &> /dev/null) && $(ls -A ${DIR_OVPNLIBS} &> /dev/null) ]]
 then
     echo "Dirty build: skipped externalNativeBuild - reusing existing libs"
 else
