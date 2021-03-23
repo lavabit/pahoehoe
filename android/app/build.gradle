@@ -15,8 +15,8 @@ android {
 
   defaultConfig {
     applicationId "se.leap.bitmaskclient"
-    versionCode 200
-    versionName "1.0.0-RC1"
+    versionCode 152
+    versionName "1.0.8RC1"
     minSdkVersion 16
     targetSdkVersion 30
     vectorDrawables.useSupportLibrary = true
@@ -94,7 +94,69 @@ android {
       //Configurations for custom branded app.
 
       //Change the package name as needed, e.g. "org.example.myapp"
-      //applicationId "se.leap.pahoehoe"
+      applicationId "se.leap.riseupvpn"
+      //Set app name here
+      appName = "Riseup VPN"
+      //Provider base url, e.g. '"https://example.com"'
+      def customProviderUrl = '"https://riseup.net"'
+      buildConfigField "String", "customProviderUrl", customProviderUrl
+      //static ip address of provider, using a commercially validated CA certificate to serve the provider.json
+      def customProviderIp = '"198.252.153.70"'
+      buildConfigField "String", "customProviderIp", customProviderIp
+      //static ip address of the provider api, using a self signed certificate to serve provider.json, eip-service.json etc.
+      def customProviderApiIp = '"198.252.153.107"'
+      buildConfigField "String", "customProviderApiIp", customProviderApiIp
+      def geoipUrl = '"https://api.black.riseup.net:9001/json"'
+      buildConfigField "String", "geoipUrl", geoipUrl
+      //Change the versionCode as needed
+      //versionCode 1
+      //Change the versionName as needed
+      //versionName "0.9.9RC1"
+
+      //skip the account creation / login screen if the provider offers anonymous vpn usage, use directly the anonymous cert instead
+      buildConfigField 'boolean', 'priotize_anonymous_usage', 'true'
+
+      //Build Config Fields for automatic apk update checks
+
+      // static update url pointing to the latest stable release apk
+      def apkURL = '"https://dl.bitmask.net/RiseupVPN/android/RiseupVPN-Android-latest.apk"'
+      buildConfigField "String", "update_apk_url", apkURL
+      // the the pgp signature file of the apk
+      def signatureURL = '"https://dl.bitmask.net/RiseupVPN/android/RiseupVPN-Android-latest.apk.sig"'
+      buildConfigField "String", "signature_url", signatureURL
+      // the version file should contain a single line with the versionCode of the latest release
+      buildConfigField "String", "version_file_url", '"https://dl.bitmask.net/client/android/versioncode.txt"' //'"https://dl.bitmask.net/RiseupVPN/android/versioncode.txt"'
+
+      //Build Config Fields for default donation details
+
+      //This is the donation URL and should be set to the relevant donation page.
+      buildConfigField 'String', 'donation_url', '"https://riseup.net/vpn/donate"'
+      //The field to enable donations in the app.
+      buildConfigField 'boolean', 'enable_donation', 'true'
+      //The field to enable donation reminder popup in the app if enable_donation is set to 'false' this will be disabled.
+      buildConfigField 'boolean', 'enable_donation_reminder', 'true'
+      //The duration in days to trigger the donation reminder
+      buildConfigField 'int', 'donation_reminder_duration', '30'
+
+      // Build apks for each architecture, in addition to one 'fat' apk containing libraries for all all architectures
+      // enable this if you're publishing in gplay
+      ext {
+        splitApk = true
+      }
+
+      //**************************************************************************
+      //**************************************************************************
+
+    }
+
+    lavabit {
+      dimension "branding"
+
+      //**************************************************************************
+      //**************************************************************************
+      //Configurations for custom branded app.
+
+      //Change the package name as needed, e.g. "org.example.myapp"
       applicationId "com.lavabit.pahoehoe"
 
       //Set app name here
@@ -113,8 +175,7 @@ android {
       buildConfigField "String", "customProviderApiIp", customProviderApiIp
 
       //Where to look for location data.
-      //def geoipUrl = '"https://api.proxy.lavabit.com/geoip.json"'
-      def geoipUrl = '"https://api.black.riseup.net:9001/json"'
+      def geoipUrl = '"https://api.proxy.lavabit.com/geoip.json"'
       buildConfigField "String", "geoipUrl", geoipUrl
 
       //Change the versionCode as needed.
