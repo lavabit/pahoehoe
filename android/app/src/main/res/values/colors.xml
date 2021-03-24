@@ -19,7 +19,7 @@
     <color name="white">#ffffff</color>
 
     <color name="colorActionBarTitleFont">@color/white</color>
-    <color name="colorActionBarSubtitleFont">@color/#DADADA</color>
+    <color name="colorActionBarSubtitleFont">#DADADA</color>
 
     <color name="colorWarning">#EE4F55</color>
 
