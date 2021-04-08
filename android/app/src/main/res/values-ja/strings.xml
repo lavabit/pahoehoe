@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">オンにする</string>
   <string name="vpn.button.turn.off">オフにする</string>
   <string name="vpn_button_turn_off_blocking">ブロックを停止</string>
-  <string name="vpn_securely_routed">通信は安全に次の経路でルーティングされます:</string>
+  <string name="vpn_securely_routed">通信は安全に次の経路でルーティングされます</string>
   <string name="vpn_securely_routed_no_internet">インターネット接続が検出されませんでした。回復した時に通信を安全にルーティングします:</string>
   <string name="log_fragment_title">履歴</string>
   <string name="vpn_fragment_title">VPN</string>

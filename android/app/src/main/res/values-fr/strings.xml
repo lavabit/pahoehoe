@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Activer</string>
   <string name="vpn.button.turn.off">Désactiver</string>
   <string name="vpn_button_turn_off_blocking">Arrêter le blocage</string>
-  <string name="vpn_securely_routed">Votre trafic est acheminé en toute sécurité par :</string>
+  <string name="vpn_securely_routed">Votre trafic est acheminé en toute sécurité par</string>
   <string name="vpn_securely_routed_no_internet">Aucune connexion à Internet n’a été détectée. Une fois que vous serez connecté, nous acheminerons votre trafic de façon sécuritaire par :</string>
   <string name="log_fragment_title">Journal</string>
   <string name="vpn_fragment_title">RPV</string>

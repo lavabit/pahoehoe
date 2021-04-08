@@ -313,6 +313,7 @@ public class NavigationDrawerFragment extends Fragment implements SharedPreferen
 
     private void initSaveBatteryEntry() {
         saveBattery = drawerView.findViewById(R.id.battery_switch);
+        saveBattery.setVisibility(GONE);
         saveBattery.showSubtitle(false);
         saveBattery.setChecked(getSaveBattery(getContext()));
         saveBattery.setOnCheckedChangeListener(((buttonView, isChecked) -> {
@@ -340,7 +341,8 @@ public class NavigationDrawerFragment extends Fragment implements SharedPreferen
     private void initAlwaysOnVpnEntry() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             IconTextEntry alwaysOnVpn = drawerView.findViewById(R.id.always_on_vpn);
-            alwaysOnVpn.setVisibility(VISIBLE);
+            alwaysOnVpn.setVisibility(GONE);
+//            alwaysOnVpn.setVisibility(VISIBLE);
             alwaysOnVpn.setOnClickListener((buttonView) -> {
                 closeDrawer();
                 if (getShowAlwaysOnDialog(getContext())) {
@@ -357,7 +359,8 @@ public class NavigationDrawerFragment extends Fragment implements SharedPreferen
     private void initExcludeAppsEntry() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             IconTextEntry excludeApps = drawerView.findViewById(R.id.exclude_apps);
-            excludeApps.setVisibility(VISIBLE);
+            excludeApps.setVisibility(GONE);
+//            excludeApps.setVisibility(VISIBLE);
             Set<String> apps = PreferenceHelper.getExcludedApps(this.getContext());
             if (apps != null) {
                 updateExcludeAppsSubtitle(excludeApps, apps.size());
@@ -377,6 +380,7 @@ public class NavigationDrawerFragment extends Fragment implements SharedPreferen
         textView.setText(showExperimentalFeatures(getContext()) ? R.string.hide_experimental : R.string.show_experimental);
         textView.setOnClickListener(v -> {
             boolean shown = showExperimentalFeatures(getContext());
+            shown = false;
             if (shown) {
                 tethering.setVisibility(GONE);
                 firewall.setVisibility(GONE);
@@ -395,7 +399,8 @@ public class NavigationDrawerFragment extends Fragment implements SharedPreferen
     private void initFirewallEntry() {
         firewall = drawerView.findViewById(R.id.enableIPv6Firewall);
         boolean show = showExperimentalFeatures(getContext());
-        firewall.setVisibility(show ? VISIBLE : GONE);
+        firewall.setVisibility(GONE);
+//        firewall.setVisibility(show ? VISIBLE : GONE);
         firewall.setChecked(PreferenceHelper.useIpv6Firewall(getContext()));
         firewall.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (!buttonView.isPressed()) {
@@ -415,7 +420,8 @@ public class NavigationDrawerFragment extends Fragment implements SharedPreferen
     private void initTetheringEntry() {
         tethering = drawerView.findViewById(R.id.tethering);
         boolean show = showExperimentalFeatures(getContext());
-        tethering.setVisibility(show ? VISIBLE : GONE);
+        tethering.setVisibility(GONE);
+//        tethering.setVisibility(show ? VISIBLE : GONE);
         tethering.setOnClickListener((buttonView) -> {
             showTetheringAlert();
         });
@@ -430,7 +436,8 @@ public class NavigationDrawerFragment extends Fragment implements SharedPreferen
     private void initDonateEntry() {
         if (ENABLE_DONATION) {
             IconTextEntry donate = drawerView.findViewById(R.id.donate);
-            donate.setVisibility(VISIBLE);
+            donate.setVisibility(GONE);
+//            donate.setVisibility(VISIBLE);
             donate.setOnClickListener((buttonView) -> {
                 closeDrawer();
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(DONATION_URL));

@@ -79,7 +79,7 @@
   <string name="vpn.button.turn.off">Desaktibatu</string>
   <string name="vpn_button_turn_off_blocking">Blokeaketa gelditu</string>
   <string name="vpn_securely_routed">Zure trafikoa seguru bideratuta dago hemendik:</string>
-  <string name="vpn_securely_routed_no_internet">Ez da Interneteko konexioa detektatu, itzultzean trafikoa modu seguruan zehar bideratuko dugu:</string>
+  <string name="vpn_securely_routed_no_internet">Ez da Interneteko konexioa detektatu, itzultzean trafikoa modu seguruan zehar bideratuko dugu</string>
   <string name="log_fragment_title">Egunkaria</string>
   <string name="vpn_fragment_title">VPN</string>
   <string name="navigation_drawer_open">Ireki nabigazio-tiradera</string>

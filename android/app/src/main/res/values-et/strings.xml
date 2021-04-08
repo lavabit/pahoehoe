@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Lülita sisse</string>
   <string name="vpn.button.turn.off">Lülita välja</string>
   <string name="vpn_button_turn_off_blocking">Peata blokeerimine</string>
-  <string name="vpn_securely_routed">Sinu liiklus on turvaliselt suunatud läbi:</string>
+  <string name="vpn_securely_routed">Sinu liiklus on turvaliselt suunatud läbi</string>
   <string name="vpn_securely_routed_no_internet">Internetiühendust ei tuvastatud, kui see tuleb tagasi, suuname me su liikluse läbi:</string>
   <string name="log_fragment_title">Logi</string>
   <string name="vpn_fragment_title">VPN</string>

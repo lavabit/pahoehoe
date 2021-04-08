@@ -56,81 +56,82 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:minHeight="20dp"
             android:background="@color/black800_high_transparent"
-            />
+            android:minHeight="20dp"
+            android:visibility="invisible"
+            tools:visibility="invisible" />
 
         <se.leap.bitmaskclient.base.views.IconSwitchEntry
             android:id="@+id/battery_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/save_battery"
-            app:subtitle="@string/subtitle_save_battery"
+            android:visibility="gone"
             app:icon="@drawable/ic_battery_36"
-            />
+            app:subtitle="@string/subtitle_save_battery"
+            app:text="@string/save_battery"
+            tools:visibility="gone" />
 
         <se.leap.bitmaskclient.base.views.IconSwitchEntry
             android:id="@+id/bridges_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/nav_drawer_obfuscated_connection"
-            app:subtitle="@string/nav_drawer_subtitle_obfuscated_connection"
-            app:icon="@drawable/ic_bridge_36"
             android:visibility="gone"
-            />
+            app:icon="@drawable/ic_bridge_36"
+            app:subtitle="@string/nav_drawer_subtitle_obfuscated_connection"
+            app:text="@string/nav_drawer_obfuscated_connection"
+            tools:visibility="gone" />
 
         <se.leap.bitmaskclient.base.views.IconTextEntry
             android:id="@+id/always_on_vpn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/always_on_vpn"
-            app:subtitle="@string/subtitle_always_on_vpn"
-            app:icon="@drawable/ic_always_on_36"
             android:visibility="gone"
-            />
+            app:icon="@drawable/ic_always_on_36"
+            app:subtitle="@string/subtitle_always_on_vpn"
+            app:text="@string/always_on_vpn"
+            tools:visibility="gone" />
 
         <se.leap.bitmaskclient.base.views.IconTextEntry
             android:id="@+id/exclude_apps"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/exclude_apps_fragment_title"
-            app:icon="@drawable/ic_shield_remove_grey600_36dp"
             android:visibility="gone"
-            />
+            app:icon="@drawable/ic_shield_remove_grey600_36dp"
+            app:text="@string/exclude_apps_fragment_title"
+            tools:visibility="gone" />
 
         <TextView
             android:id="@+id/show_experimental_features"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/show_experimental"
-            android:textColor="@color/colorPrimaryDark"
+            android:background="@color/black800_high_transparent"
+            android:gravity="center"
             android:paddingTop="6dp"
             android:paddingBottom="6dp"
-            android:gravity="center"
-            android:background="@color/black800_high_transparent"
-            />
+            android:text="@string/show_experimental"
+            android:textColor="@color/colorPrimaryDark"
+            android:visibility="gone"
+            tools:visibility="gone" />
 
         <se.leap.bitmaskclient.base.views.IconSwitchEntry
             android:id="@+id/enableIPv6Firewall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/ipv6Firewall"
-            app:subtitle="@string/require_root"
-            app:icon="@drawable/ic_cancel"
             android:visibility="gone"
-            tools:visibility="visible"
-            />
+            app:icon="@drawable/ic_cancel"
+            app:subtitle="@string/require_root"
+            app:text="@string/ipv6Firewall"
+            tools:visibility="gone" />
 
         <se.leap.bitmaskclient.base.views.IconTextEntry
             android:id="@+id/tethering"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/tethering"
-            app:subtitle="@string/require_root"
-            app:icon="@drawable/ic_access_point_36"
             android:visibility="gone"
-            tools:visibility="visible"
-            />
+            app:icon="@drawable/ic_access_point_36"
+            app:subtitle="@string/require_root"
+            app:text="@string/tethering"
+            tools:visibility="gone" />
 
         <View
             android:id="@+id/experimental_features_footer"
@@ -138,33 +139,34 @@
             android:layout_height="20dp"
             android:background="@color/black800_high_transparent"
             android:visibility="gone"
-            tools:visibility="visible"
-            />
+            tools:visibility="gone" />
 
         <se.leap.bitmaskclient.base.views.IconTextEntry
             android:id="@+id/donate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/donate_title"
-            app:icon="@drawable/ic_donate_36"
             android:visibility="gone"
-            />
+            app:icon="@drawable/ic_donate_36"
+            app:text="@string/donate_title"
+            tools:visibility="gone" />
 
         <se.leap.bitmaskclient.base.views.IconTextEntry
             android:id="@+id/log"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/log_fragment_title"
+            android:visibility="visible"
             app:icon="@drawable/ic_log_36"
-            />
+            app:text="@string/log_fragment_title"
+            tools:visibility="visible" />
 
         <se.leap.bitmaskclient.base.views.IconTextEntry
             android:id="@+id/about"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:text="@string/about_fragment_title"
+            android:visibility="visible"
             app:icon="@drawable/ic_about_36"
-            />
+            app:text="@string/about_fragment_title"
+            tools:visibility="visible" />
 
 
     </LinearLayout>

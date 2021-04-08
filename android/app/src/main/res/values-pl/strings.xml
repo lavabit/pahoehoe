@@ -74,7 +74,7 @@
   <string name="vpn.button.turn.on">Włącz</string>
   <string name="vpn.button.turn.off">Wyłącz</string>
   <string name="vpn_button_turn_off_blocking">Przestań blokować</string>
-  <string name="vpn_securely_routed">Twoje połączenie jest bezpiecznie przekierowane przez:</string>
+  <string name="vpn_securely_routed">Twoje połączenie jest bezpiecznie przekierowane przez</string>
   <string name="vpn_securely_routed_no_internet">Nie wykryto połączenia z internetem, gdy zostanie ono przywrócone twoje połączenie zostanie bezpiecznie przekierowane przez:</string>
   <string name="log_fragment_title">Logi</string>
   <string name="vpn_fragment_title">VPN</string>

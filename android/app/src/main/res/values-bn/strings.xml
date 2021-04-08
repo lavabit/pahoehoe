@@ -74,7 +74,7 @@
   <string name="vpn.button.turn.on">চালু করুন</string>
   <string name="vpn.button.turn.off">বন্ধ করুন</string>
   <string name="vpn_button_turn_off_blocking">বল্ক করা বন্ধ করুন</string>
-  <string name="vpn_securely_routed">আপনার ট্র্যাফিক নিরাপদে রাউট করার মাধ্যম :</string>
+  <string name="vpn_securely_routed">আপনার ট্র্যাফিক নিরাপদে রাউট করার মাধ্যম </string>
   <string name="vpn_securely_routed_no_internet">কোনও ইন্টারনেট সংযোগ সনাক্ত হয়নি, এটি যখন আসবে তখন আমরা আপনার ট্র্যাফিককে সুরক্ষিতভাবে যে মাধ্যমে রাউট করব:</string>
   <string name="log_fragment_title">লগ</string>
   <string name="vpn_fragment_title">VPN</string>

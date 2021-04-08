@@ -80,7 +80,7 @@ https://www.transifex.com/projects/p/bitmask-android/</string>
   <string name="vpn.button.turn.on">ВКЛ</string>
   <string name="vpn.button.turn.off">ВЫКЛ</string>
   <string name="vpn_button_turn_off_blocking">Остановить блокирование</string>
-  <string name="vpn_securely_routed">Ваш трафик безопасно маршрутизируется через:</string>
+  <string name="vpn_securely_routed">Ваш трафик безопасно маршрутизируется через</string>
   <string name="vpn_securely_routed_no_internet">Подключение к интернету отсутствует. Когда оно восстановится, мы безопасно передадим ваши сообщения:</string>
   <string name="log_fragment_title">Журнал</string>
   <string name="vpn_fragment_title">VPN</string>

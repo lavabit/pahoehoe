@@ -68,7 +68,7 @@
   <string name="vpn.button.turn.on">Activa</string>
   <string name="vpn.button.turn.off">Desactiva</string>
   <string name="vpn_button_turn_off_blocking">Atura el bloqueig</string>
-  <string name="vpn_securely_routed">El trànsit s\'encamina de manera segura a través de:</string>
+  <string name="vpn_securely_routed">El trànsit s\'encamina de manera segura a través de</string>
   <string name="vpn_securely_routed_no_internet">No s\'ha detectat cap connexió a Internet, quan torni, encaminarem el trànsit de manera segura a través de:</string>
   <string name="log_fragment_title">Registre</string>
   <string name="vpn_fragment_title">VPN</string>

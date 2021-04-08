@@ -4,7 +4,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 
-        <item name="textColorError">@color/colorError</item>
+        <item name="textColorError">#9F3539</item>
 
         <!-- progressBar color -->
         <item name="colorAccent">@color/colorPrimary</item>

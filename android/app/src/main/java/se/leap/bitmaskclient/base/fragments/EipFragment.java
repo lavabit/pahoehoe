@@ -107,6 +107,9 @@ public class EipFragment extends Fragment implements Observer {
     @BindView(R.id.vpn_main_button)
     AppCompatButton mainButton;
 
+    @BindView(R.id.eip_label)
+    AppCompatTextView eipLabel;
+
     @BindView(R.id.routed_text)
     AppCompatTextView routedText;
 
@@ -417,6 +420,7 @@ public class EipFragment extends Fragment implements Observer {
             vpnStateImage.setStateIcon(R.drawable.vpn_connected);
             vpnStateImage.stopProgress(false);
             routedText.setText(R.string.vpn_securely_routed);
+            eipLabel.setVisibility(VISIBLE);
             routedText.setVisibility(VISIBLE);
             vpnRoute.setVisibility(VISIBLE);
             setVpnRouteText();
@@ -427,6 +431,7 @@ public class EipFragment extends Fragment implements Observer {
             vpnStateImage.setStateIcon(R.drawable.vpn_disconnected);
             vpnStateImage.stopProgress(false);
             routedText.setText(R.string.vpn_securely_routed_no_internet);
+            eipLabel.setVisibility(VISIBLE);
             routedText.setVisibility(VISIBLE);
             vpnRoute.setVisibility(VISIBLE);
             setVpnRouteText();
@@ -442,6 +447,7 @@ public class EipFragment extends Fragment implements Observer {
             vpnStateImage.setStateIcon(R.drawable.vpn_blocking);
             vpnStateImage.stopProgress(false);
             routedText.setText(getString(R.string.void_vpn_establish, getString(R.string.app_name)));
+            eipLabel.setVisibility(View.INVISIBLE);
             routedText.setVisibility(VISIBLE);
             vpnRoute.setVisibility(GONE);
             colorBackgroundALittle();
@@ -450,6 +456,7 @@ public class EipFragment extends Fragment implements Observer {
             setMainButtonEnabled(true);
             vpnStateImage.setStateIcon(R.drawable.vpn_disconnected);
             vpnStateImage.stopProgress(false);
+            eipLabel.setVisibility(GONE);
             routedText.setVisibility(GONE);
             vpnRoute.setVisibility(GONE);
             greyscaleBackground();
@@ -497,6 +504,7 @@ public class EipFragment extends Fragment implements Observer {
         mainButton.setText(activity.getString(android.R.string.cancel));
         vpnStateImage.setStateIcon(R.drawable.vpn_connecting);
         vpnStateImage.showProgress();
+        eipLabel.setVisibility(GONE);
         routedText.setVisibility(GONE);
         vpnRoute.setVisibility(GONE);
         if (isConnecting) {
@@ -573,6 +581,9 @@ public class EipFragment extends Fragment implements Observer {
         String profileName = VpnStatus.getLastConnectedVpnName();
         if (!TextUtils.isEmpty(profileName)) {
             vpnRouteString += " (" + profileName + ")";
+        }
+        if (!TextUtils.isEmpty(vpnRouteString)) {
+            vpnRouteString += ".";
         }
         vpnRoute.setText(vpnRouteString);
     }

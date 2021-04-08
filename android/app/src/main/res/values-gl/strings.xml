@@ -77,7 +77,7 @@
   <string name="vpn.button.turn.on">Acender</string>
   <string name="vpn.button.turn.off">Apagar</string>
   <string name="vpn_button_turn_off_blocking">Deixar de bloquear</string>
-  <string name="vpn_securely_routed">O seu tráfico está securizado a través de:</string>
+  <string name="vpn_securely_routed">O seu tráfico está securizado a través de</string>
   <string name="vpn_securely_routed_no_internet">Non se detectou conexión a internet, cando volte enrutaremos o seu tráfico de xeito seguro a través de:</string>
   <string name="log_fragment_title">Rexistro</string>
   <string name="vpn_fragment_title">VPN</string>

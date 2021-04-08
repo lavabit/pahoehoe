@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Açıq</string>
   <string name="vpn.button.turn.off">Bağlı</string>
   <string name="vpn_button_turn_off_blocking">Bloku dayandır</string>
-  <string name="vpn_securely_routed">Sizin trafik təhlükəsiz vasitə ilə yönləndiriləcək:</string>
+  <string name="vpn_securely_routed">Sizin trafik təhlükəsiz vasitə ilə yönləndiriləcək</string>
   <string name="vpn_securely_routed_no_internet">İnternet yoxdur. Bağlantısı geri gəldiyi zaman aşkar, biz vasitəsilə təhlükəsiz trafik yönəldəcəyik:</string>
   <string name="log_fragment_title">Loq</string>
   <string name="vpn_fragment_title">VPN</string>

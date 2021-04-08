@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Άνοιγμα</string>
   <string name="vpn.button.turn.off">Κλείσιμο</string>
   <string name="vpn_button_turn_off_blocking">Παύση μπλοκαρίσματος</string>
-  <string name="vpn_securely_routed">Η κίνηση δεδομένων σας δρομολογείται ασφαλώς μέσω:</string>
+  <string name="vpn_securely_routed">Η κίνηση δεδομένων σας δρομολογείται ασφαλώς μέσω</string>
   <string name="vpn_securely_routed_no_internet">Δεν εντοπίστηκε σύνδεση στο διαδίκτυο, όταν επανέλθει θα δρομολογήσουμε την κίνησή σου ασφαλώς μέσω:</string>
   <string name="log_fragment_title">Αρχείο Καταγραφής</string>
   <string name="vpn_fragment_title">VPN</string>

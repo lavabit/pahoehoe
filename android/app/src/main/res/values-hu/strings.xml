@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Bekapcsol</string>
   <string name="vpn.button.turn.off">Kikapcsolt</string>
   <string name="vpn_button_turn_off_blocking">Blokkolás leállítása</string>
-  <string name="vpn_securely_routed">A forgalma biztonságosan keresztül routolt:</string>
+  <string name="vpn_securely_routed">A forgalma biztonságosan keresztül routolt</string>
   <string name="vpn_securely_routed_no_internet">Nem található internet kapcsolat, ha visszajön, a kapcsolatát a következőn keresztül routoljuk:</string>
   <string name="log_fragment_title">Napló</string>
   <string name="vpn_fragment_title">VPN</string>

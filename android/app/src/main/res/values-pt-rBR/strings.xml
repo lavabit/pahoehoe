@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Ligar</string>
   <string name="vpn.button.turn.off">Desligar</string>
   <string name="vpn_button_turn_off_blocking">Parar bloqueio</string>
-  <string name="vpn_securely_routed">Seu tráfego está direcionado com segurança através do:</string>
+  <string name="vpn_securely_routed">Seu tráfego está direcionado com segurança através do</string>
   <string name="vpn_securely_routed_no_internet">Conexão com a internet não detectada, quando a conexão for recuperada seu tráfego será direcionado com segurança através do:</string>
   <string name="log_fragment_title">Log</string>
   <string name="vpn_fragment_title">VPN</string>

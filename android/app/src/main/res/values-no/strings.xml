@@ -66,7 +66,7 @@
   <string name="vpn.button.turn.on">Skru på</string>
   <string name="vpn.button.turn.off">Skru av</string>
   <string name="vpn_button_turn_off_blocking">Slutt å blokkere</string>
-  <string name="vpn_securely_routed">Trafikken din sendes trygt gjennom:</string>
+  <string name="vpn_securely_routed">Trafikken din sendes trygt gjennom</string>
   <string name="vpn_securely_routed_no_internet">Fant ingen internettilknytning, når den forefinnes igjen vil din trafikk bli sendt sikkert gjennom:</string>
   <string name="log_fragment_title">Logg</string>
   <string name="vpn_fragment_title">VPN</string>

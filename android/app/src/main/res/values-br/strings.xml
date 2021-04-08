@@ -66,7 +66,7 @@
   <string name="vpn.button.turn.on">Enaouiñ</string>
   <string name="vpn.button.turn.off">Lazhañ</string>
   <string name="vpn_button_turn_off_blocking">Herzel ar stankadur</string>
-  <string name="vpn_securely_routed">Ho froud a zo kaset en un doare suraet dre:</string>
+  <string name="vpn_securely_routed">Ho froud a zo kaset en un doare suraet dre</string>
   <string name="vpn_securely_routed_no_internet">N\'eus diguzhet kevreadur ebet, ur wech ma tistroio, kas a reomp ho froud e surentez dre:</string>
   <string name="log_fragment_title">Renabl</string>
   <string name="vpn_fragment_title">VPN</string>

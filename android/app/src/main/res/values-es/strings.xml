@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Activar</string>
   <string name="vpn.button.turn.off">Desactivar</string>
   <string name="vpn_button_turn_off_blocking">Detener bloqueo</string>
-  <string name="vpn_securely_routed">Tu tráfico se está enrutando de forma segura a través de:</string>
+  <string name="vpn_securely_routed">Tu tráfico se está enrutando de forma segura a través de</string>
   <string name="vpn_securely_routed_no_internet">No se detectó conexión a Internet, cuando vuelva, enrutaremos tu tráfico de forma segura a través de:</string>
   <string name="log_fragment_title">Registro</string>
   <string name="vpn_fragment_title">VPN</string>

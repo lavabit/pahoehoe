@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Activar.</string>
   <string name="vpn.button.turn.off">Desactivar.</string>
   <string name="vpn_button_turn_off_blocking">Detener bloqueo</string>
-  <string name="vpn_securely_routed">Tu tráfico está ruteado en forma segura a través de:</string>
+  <string name="vpn_securely_routed">Tu tráfico está ruteado en forma segura a través de</string>
   <string name="vpn_securely_routed_no_internet">No hay conexión a Internet, cuando vuelva, tu tráfico será ruteado en forma segura a través de:</string>
   <string name="log_fragment_title">Bitácora</string>
   <string name="vpn_fragment_title">RPV</string>

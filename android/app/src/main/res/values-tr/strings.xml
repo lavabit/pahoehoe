@@ -78,7 +78,7 @@
   <string name="vpn.button.turn.on">Aç</string>
   <string name="vpn.button.turn.off">Kapat</string>
   <string name="vpn_button_turn_off_blocking">Engellemeyi durdur</string>
-  <string name="vpn_securely_routed">Trafiğiniz güvenli bir şekilde yönlendiriliyor:</string>
+  <string name="vpn_securely_routed">Trafiğiniz güvenli bir şekilde yönlendiriliyor</string>
   <string name="vpn_securely_routed_no_internet">İnternet bağlantısı tespit edilmedi, geri döndüğünde trafiğinizi güvenli bir şekilde yönlendireceğiz:</string>
   <string name="log_fragment_title">Günlük</string>
   <string name="vpn_fragment_title">VPN , Sanal özel ağ</string>

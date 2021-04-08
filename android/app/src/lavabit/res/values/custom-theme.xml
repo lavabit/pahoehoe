@@ -2,9 +2,9 @@
 <resources>
     <!--Colors-->
     <!--Color of the action bar-->
-    <color name="colorPrimary">#415562</color>
+    <color name="colorPrimary">#FF1a252b</color>
     <!--Color of the status bar-->
-    <color name="colorPrimaryDark">#2c3942</color>
+    <color name="colorPrimaryDark">#FF1a252b</color>
     <!--Font color of the action bar title-->
     <color name="colorActionBarTitleFont">#FFFFFF</color>
     <!--Font color of the action bar subtitle-->

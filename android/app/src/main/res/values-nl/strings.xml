@@ -80,7 +80,7 @@ Je kan kiezen om te herconfigureren of af te sluiten en bij de volgende start ee
   <string name="vpn.button.turn.on">Inschakelen</string>
   <string name="vpn.button.turn.off">Uitschakelen</string>
   <string name="vpn_button_turn_off_blocking">Stop blokkeren</string>
-  <string name="vpn_securely_routed">Je verkeer wordt beveiligd gerouteerd door:</string>
+  <string name="vpn_securely_routed">Je verkeer wordt beveiligd gerouteerd door</string>
   <string name="vpn_securely_routed_no_internet">Geen internetverbinding gevonden, wanneer deze terugkomt, routeren we uw verkeer veilig via:</string>
   <string name="log_fragment_title">Log</string>
   <string name="vpn_fragment_title">VPN</string>

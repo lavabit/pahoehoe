@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="BitmaskTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/colorActionBarTitleFont</item>
+        <item name="colorPrimaryDark">@color/colorActionBarSubtitleFont</item>
 
-        <item name="textColorError">@color/colorError</item>
+        <item name="textColorError">#9F3539</item>
 
         <!-- progressBar color -->
         <item name="colorAccent">@color/colorPrimary</item>
