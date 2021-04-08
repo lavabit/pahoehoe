@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#415562</color>
-    <color name="colorPrimaryDark">#2c3942</color>
+    <color name="colorPrimary">#b39ddb</color>
+    <color name="colorPrimaryDark">#ac97d2</color>
     <color name="colorPrimary_transparent">#20000000</color>
-    <color name="colorBackground">#415562</color>
-    <color name="colorError">#412F3A</color>
-    <color name="colorSuccess">#4d6457</color>
-    <color name="colorDisabled">#1A262E</color>
+    <color name="colorBackground">#fffafafa</color>
+    <color name="colorError">#ef9a9a</color>
+    <color name="colorSuccess">#a5d6a7</color>
+    <color name="colorDisabled">#AAAAAA</color>
 
-    <color name="black800">#1a262e</color>
-    <color name="black800_secondary">#2A2E37</color>
-    <color name="black800_transparent">#31313BFA</color>
-    <color name="black800_high_transparent">#dadada42</color>
+    <color name="black800">#424242</color>
+    <color name="black800_secondary">#3b3b3b</color>
+    <color name="black800_transparent">#AA424242</color>
+    <color name="black800_high_transparent">#22424242</color>
 
-    <color name="red200">#FF0000</color>
+    <color name="red200">#ef9a9a</color>
     <color name="pink200">#f48fb1</color>
     <color name="purple200">#ce93d8</color>
     <color name="deepPurple200">#b39ddb</color>
@@ -33,7 +33,8 @@
     <color name="white">#ffffff</color>
 
     <color name="colorActionBarTitleFont">@color/white</color>
-    <color name="colorActionBarSubtitleFont">#DADADA</color>
+    <color name="colorActionBarSubtitleFont">@color/black800</color>
 
-    <color name="colorWarning">#EE4F55</color>
+    <color name="colorWarning">#B33A3A</color>
+
 </resources>

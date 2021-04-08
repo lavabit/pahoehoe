@@ -7,16 +7,16 @@
 <resources>
     <!-- Indigo -->
     <!-- OpenVPN colours #203155, #C66D0D -->
-    <color name="primary">#415562</color>      <!--500-->
-    <color name="primary_dark">#2c3942</color> <!--700-->
-    <color name="accent">#ff0000</color>       <!-- Orange 400 -->
-    <color name="gelb">#E2E2E2</color>
+    <color name="primary">#3F51B5</color>      <!--500-->
+    <color name="primary_dark">#303F9F</color> <!--700-->
+    <color name="accent">#FFA726</color>       <!-- Orange 400 -->
+    <color name="gelb">#ffff00</color>
     <color name="rot">#ff0000</color>
 
     <color name="switchbar">@android:color/darker_gray</color>
 
 
-    <color name="background_tab_pressed">#415561</color>
+    <color name="background_tab_pressed">#1AFFFFFF</color>
 
 
     <color name="dataIn">#ff0000</color>

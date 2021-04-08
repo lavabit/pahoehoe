@@ -6,7 +6,7 @@
     android:viewportHeight="48">
 
     <path
-        android:fillColor="#ff0000"
+        android:fillColor="#ffffff"
         android:strokeWidth="1"
         android:pathData="M13.9636,12.4377 L28.7376,28.5002 L32.1662,28.4689 L33.9117,26.3752
 L35.0649,26.3439 L36.9039,28.5314 L38.1195,28.5002 L40.1766,26.1877
@@ -21,7 +21,7 @@ C4.02077,22.721,5.51878,21.219,7.35583,21.219 Z" />
     <group android:name="rotationGroup"
         android:rotation="47.263656">
         <path
-            android:fillColor="#ff0000"
+            android:fillColor="#ffffff"
             android:strokeWidth="1"
             android:pathData="M9.50852,-4.62741 L57.4577,-4.62741 L57.4577,-0.305379 L9.50852,-0.305379 L9.50852,-4.62741 Z" />
     </group>
