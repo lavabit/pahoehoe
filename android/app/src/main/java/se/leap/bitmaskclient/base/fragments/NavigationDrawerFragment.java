@@ -19,6 +19,7 @@ package se.leap.bitmaskclient.base.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -246,6 +247,7 @@ public class NavigationDrawerFragment extends Fragment implements SharedPreferen
                 activity.invalidateOptionsMenu();
             }
         };
+        drawerToggle.getDrawerArrowDrawable().setColor(this.getContext().getResources().getColor(android.R.color.white));
     }
 
     private void setupEntries() {
