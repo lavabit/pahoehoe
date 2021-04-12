@@ -31,6 +31,24 @@ curl --silent --insecure https://api.centos.local/ca.crt > $HOME/android/app/src
 curl --silent --insecure https://api.debian.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/debian.local.json
 curl --silent --insecure https://api.debian.local/ca.crt > $HOME/android/app/src/test/resources/preconfigured/debian.local.pem
 
+cat <<-EOF > $HOME/android/local.properties
+sdk.dir=/opt/android-sdk-linux/
+ndk.dir=/opt/android-sdk-linux/ndk/21.4.7075529/
+cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.daemon=true
+EOF
+
+cat <<-EOF > $HOME/android/app/local.properties
+sdk.dir=/opt/android-sdk-linux/
+ndk.dir=/opt/android-sdk-linux/ndk/21.4.7075529/
+cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.daemon=true
+EOF
+
 ./scripts/build_deps.sh
 #./gradlew --warning-mode none build
 ./gradlew --warning-mode none assemble
@@ -42,6 +60,3 @@ curl --silent --insecure https://api.debian.local/ca.crt > $HOME/android/app/src
 
 echo "All finished."
 sudo fstrim --all
-
-
-

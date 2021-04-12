@@ -101,7 +101,16 @@ local.properties
 /android/currentReleases
 
 /android/go/golang/go
+/android/go/go1.14.2.linux-amd64.tar.gz
+
 /android/go/lib/bitmask-core-sources.jar
 /android/go/lib/bitmask-core.aar
 /android/go/lib/bitmask-web-core-sources.jar
 /android/go/lib/bitmask-web-core.aar
+
+/android/bitmask-core-sources.jar
+/android/bitmask-core.aar
+/android/bitmask-web-core-sources.jar
+/android/bitmask-web-core.aar
+
+android/ics-openvpn/main/build/ovpnassets/.empty
