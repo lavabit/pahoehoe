@@ -65,7 +65,7 @@ EOF
 fi
 
 ./scripts/build_deps.sh
-./gradlew --warning-mode none assembleLavabit
+./gradlew --warning-mode none assembleLavabit assembleNormalProductionFatweb
 ./gradlew --warning-mode none bundleLavabit
 ./gradlew --warning-mode none check
 

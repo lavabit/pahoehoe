@@ -329,7 +329,7 @@ android {
 
   lintOptions {
     abortOnError false
-    disable 'MissingTranslation', 'ExtraTranslation'
+    disable 'MissingTranslation', 'ExtraTranslation', 'UnsafeNativeCodeLocation', 'NewerVersionAvailable'
   }
 
   sourceSets {
