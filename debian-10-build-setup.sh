@@ -179,9 +179,31 @@ sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux
 
 sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --list_installed | awk -F' ' '{print $1}' | tail -n +4
 
+# Setup bundletool.
+sudo curl --silent --location --output /opt/android-sdk-linux/platform-tools/bundletool.jar https://github.com/google/bundletool/releases/download/1.5.0/bundletool-all-1.5.0.jar
+printf "b7452e243a8bb32762ef74017f68291c685be0b3006b4b199fb94a7e7793dc85  /opt/android-sdk-linux/platform-tools/bundletool.jar" | sha256sum -c || exit 1
+sudo tee /opt/android-sdk-linux/platform-tools/bundletool <<-EOF > /dev/null
+#!/bin/bash
+
+java -jar /opt/android-sdk-linux/platform-tools/bundletool.jar $@
+EOF
+
+sudo chmod 755 /opt/android-sdk-linux/platform-tools/bundletool
+sudo chmod 644 /opt/android-sdk-linux/platform-tools/bundletool.jar
+
+# Setup aapt2.
+sudo curl --silent --location --output /opt/android-sdk-linux/platform-tools/aapt2.jar https://dl.google.com/android/maven2/com/android/tools/build/aapt2/4.1.3-6503028/aapt2-4.1.3-6503028-linux.jar
+printf "023326dc41058a283c3092f95f894ca024199579627f85118a39843591ed4196  /opt/android-sdk-linux/platform-tools/aapt2.jar" | sha256sum -c || exit 1
+unzip -q -d /opt/android-sdk-linux/platform-tools/ /opt/android-sdk-linux/platform-tools/aapt2.jar aapt2
+rm --force /opt/android-sdk-linux/platform-tools/aapt2.jar
+
+sudo chmod 755 /opt/android-sdk-linux/platform-tools/aapt2
+
 [ -f /usr/lib/android-sdk/platform-tools/adb ] && sudo update-alternatives --install /usr/bin/adb adb /usr/lib/android-sdk/platform-tools/adb 10
 
 sudo update-alternatives --install /usr/bin/adb adb /opt/android-sdk-linux/platform-tools/adb 20
+sudo update-alternatives --install /usr/bin/aapt2 aapt2 /opt/android-sdk-linux/platform-tools/aapt2 20
+sudo update-alternatives --install /usr/bin/bundletool bundletool /opt/android-sdk-linux/platform-tools/bundletool 20
 sudo update-alternatives --install /usr/bin/emulator emulator /opt/android-sdk-linux/emulator/emulator 20
 sudo update-alternatives --install /usr/bin/sdkmanager sdkmanager /opt/android-sdk-linux/cmdline-tools/latest/bin/sdkmanager 20
 sudo update-alternatives --install /usr/bin/avdmanager avdmanager /opt/android-sdk-linux/cmdline-tools/latest/bin/avdmanager 20
