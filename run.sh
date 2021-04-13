@@ -23,8 +23,8 @@ cd $BASE
 # sudo firewall-cmd --quiet --zone=libvirt --query-service=rpc-bind || sudo firewall-cmd --zone=libvirt --add-service=rpc-bind
 
 # Cleanup.
-[ -d $BASE/android/ ] && sudo umount --force $BASE/android/ &>/dev/null
-[ -d $BASE/android/ ] && rmdir $BASE/android/ &>/dev/null
+# [ -d $BASE/android/ ] && sudo umount --force $BASE/android/ &>/dev/null
+# [ -d $BASE/android/ ] && rmdir $BASE/android/ &>/dev/null
 [ -d $BASE/apk/ ] && rm -rf $BASE/apk/
 
 set -
@@ -37,7 +37,7 @@ vagrant up --provider=libvirt
 # Disable error checking, since the commands below might fail, if your not using libvirt (for example).
 # If you aren't using libvirt, you can comment out the following lines, till you
 # see us enable error checking again.
-set -
+# set -
 
 # if [ "`vagrant provider centos_vpn`" == "libvirt" ]; then
 #   virsh --connect qemu:///system shutdown --domain proxy_centos_vpn &> /dev/null
@@ -58,49 +58,49 @@ set -
 #   done
 #   set -e
 # fi
-
-if [ "`vagrant provider debian_vpn`" == "libvirt" ]; then
-  virsh --connect qemu:///system shutdown --domain proxy_debian_vpn &> /dev/null
-  set -
-  for i in {1..10}; do
-    [ "`virsh --connect qemu:///system domstate --domain proxy_debian_vpn | head -1`" == "shut off" ] && break
-    sleep 1
-  done
-  set -e
-  virt-xml --connect qemu:///system proxy_debian_vpn --quiet --edit --disk /var/lib/libvirt/images/proxy_debian_vpn.img,discard=unmap,detect_zeroes=unmap,cache=unsafe,io=threads,bus=scsi,target=sda,address.type=drive,address.controller=0,address.bus=0,address.target=0,address.unit=0 &> /dev/null
-  virt-xml --connect qemu:///system proxy_debian_vpn --quiet --edit scsi --controller type=scsi,model=virtio-scsi &> /dev/null
-  virsh --connect qemu:///system start --domain proxy_debian_vpn &> /dev/null
-  set -
-  for i in {1..10}; do
-    export STATUS="`vagrant ssh debian_vpn -c 'printf 1' -- -o='ConnectTimeout=1s' -o 'ForwardX11=no' 2> /dev/null | tail -1`"
-    [ -n "$STATUS" ] && [ "$STATUS" == "1" ] && break
-    sleep 1
-  done
-  set -e
-fi
-
-if [ "`vagrant provider debian_build`" == "libvirt" ]; then
-  virsh --connect qemu:///system shutdown --domain proxy_debian_build &> /dev/null
-  set -
-  for i in {1..10}; do
-    [ "`virsh --connect qemu:///system domstate --domain proxy_debian_build | head -1`" == "shut off" ] && break
-    sleep 1
-  done
-  set -e
-  virt-xml --connect qemu:///system proxy_debian_build --quiet --edit --disk /var/lib/libvirt/images/proxy_debian_build.img,discard=unmap,detect_zeroes=unmap,cache=unsafe,io=threads,bus=scsi,target=sda,address.type=drive,address.controller=0,address.bus=0,address.target=0,address.unit=0 &> /dev/null
-  virt-xml --connect qemu:///system proxy_debian_build --quiet --edit scsi --controller type=scsi,model=virtio-scsi &> /dev/null
-  virsh --connect qemu:///system start --domain proxy_debian_build &> /dev/null
-  set -
-  for i in {1..10}; do
-    export STATUS="`vagrant ssh debian_build -c 'printf 1' -- -o='ConnectTimeout=1s' -o 'ForwardX11=no' 2> /dev/null | tail -1`"
-    [ -n "$STATUS" ] && [ "$STATUS" == "1" ] && break
-    sleep 1
-  done
-  set -e
-fi
-
-# Enable error checking again.
-set -e
+#
+# if [ "`vagrant provider debian_vpn`" == "libvirt" ]; then
+#   virsh --connect qemu:///system shutdown --domain proxy_debian_vpn &> /dev/null
+#   set -
+#   for i in {1..10}; do
+#     [ "`virsh --connect qemu:///system domstate --domain proxy_debian_vpn | head -1`" == "shut off" ] && break
+#     sleep 1
+#   done
+#   set -e
+#   virt-xml --connect qemu:///system proxy_debian_vpn --quiet --edit --disk /var/lib/libvirt/images/proxy_debian_vpn.img,discard=unmap,detect_zeroes=unmap,cache=unsafe,io=threads,bus=scsi,target=sda,address.type=drive,address.controller=0,address.bus=0,address.target=0,address.unit=0 &> /dev/null
+#   virt-xml --connect qemu:///system proxy_debian_vpn --quiet --edit scsi --controller type=scsi,model=virtio-scsi &> /dev/null
+#   virsh --connect qemu:///system start --domain proxy_debian_vpn &> /dev/null
+#   set -
+#   for i in {1..10}; do
+#     export STATUS="`vagrant ssh debian_vpn -c 'printf 1' -- -o='ConnectTimeout=1s' -o 'ForwardX11=no' 2> /dev/null | tail -1`"
+#     [ -n "$STATUS" ] && [ "$STATUS" == "1" ] && break
+#     sleep 1
+#   done
+#   set -e
+# fi
+#
+# if [ "`vagrant provider debian_build`" == "libvirt" ]; then
+#   virsh --connect qemu:///system shutdown --domain proxy_debian_build &> /dev/null
+#   set -
+#   for i in {1..10}; do
+#     [ "`virsh --connect qemu:///system domstate --domain proxy_debian_build | head -1`" == "shut off" ] && break
+#     sleep 1
+#   done
+#   set -e
+#   virt-xml --connect qemu:///system proxy_debian_build --quiet --edit --disk /var/lib/libvirt/images/proxy_debian_build.img,discard=unmap,detect_zeroes=unmap,cache=unsafe,io=threads,bus=scsi,target=sda,address.type=drive,address.controller=0,address.bus=0,address.target=0,address.unit=0 &> /dev/null
+#   virt-xml --connect qemu:///system proxy_debian_build --quiet --edit scsi --controller type=scsi,model=virtio-scsi &> /dev/null
+#   virsh --connect qemu:///system start --domain proxy_debian_build &> /dev/null
+#   set -
+#   for i in {1..10}; do
+#     export STATUS="`vagrant ssh debian_build -c 'printf 1' -- -o='ConnectTimeout=1s' -o 'ForwardX11=no' 2> /dev/null | tail -1`"
+#     [ -n "$STATUS" ] && [ "$STATUS" == "1" ] && break
+#     sleep 1
+#   done
+#   set -e
+# fi
+#
+# # Enable error checking again.
+# set -e
 
 # Upload the scripts.
 vagrant upload centos-8-vpnweb.sh vpnweb.sh centos_vpn &> /dev/null
@@ -112,9 +112,13 @@ vagrant upload debian-10-build-setup.sh setup.sh debian_build &> /dev/null
 vagrant upload debian-10-rebuild.sh rebuild.sh debian_build &> /dev/null
 vagrant upload debian-10-build.sh build.sh debian_build &> /dev/null
 
+[ -f debian-10-build-key.sh ] && vagrant upload debian-10-build-key.sh key.sh debian_build &> /dev/null
+
 vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' centos_vpn &> /dev/null
 vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' debian_vpn &> /dev/null
 vagrant ssh -c 'chmod +x setup.sh build.sh rebuild.sh' debian_build &> /dev/null
+
+[ -f debian-10-build-key.sh ] && vagrant ssh -c 'chmod +x key.sh' debian_build &> /dev/null
 
 # Provision the VPN service.
 vagrant ssh --tty -c 'sudo --login bash -e < vpnweb.sh' centos_vpn

@@ -14,13 +14,16 @@ Vagrant.configure("2") do |config|
     # :mount_options => ['nolock,vers=3,tcp,noatime,fsc,actimeo=1,async']
 
     debian_build.vm.provider :libvirt do |v, override|
+      v.default_prefix = "proxy_"
       v.driver = "kvm"
       v.nested = true
       v.memory = 12384
-      v.cpus = 6
-      v.volume_cache = "unsafe"
-      v.default_prefix = "proxy_"
-      # v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
+      v.cpus = 8
+      v.cputopology :sockets => '1', :cores => '4', :threads => '2'
+      # For libvirt plugin versions below 0.4.0.
+      # v.volume_cache = "unsafe"
+      # For libvirt plugin versions equal to, or higher than 0.4.0.
+      v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
     end
 
     debian_build.vm.provider :virtualbox do |v, override|
@@ -53,9 +56,11 @@ Vagrant.configure("2") do |config|
   #     v.nested = true
   #     v.memory = 12384
   #     v.cpus = 4
-  #     v.volume_cache = "unsafe"
   #     v.default_prefix = "proxy_"
-  #     # v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
+  #     # For libvirt plugin versions below 0.4.0.
+  #     # v.volume_cache = "unsafe"
+  #     # For libvirt plugin versions equal to, or higher than 0.4.0.
+  #     v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
   #   end
   #
   #   ubuntu_aosp.vm.provider :virtualbox do |v, override|
@@ -91,9 +96,11 @@ Vagrant.configure("2") do |config|
       v.nested = true
       v.memory = 1024
       v.cpus = 1
-      v.volume_cache = "unsafe"
       v.default_prefix = "proxy_"
-      # v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
+      # For libvirt plugin versions below 0.4.0.
+      # v.volume_cache = "unsafe"
+      # For libvirt plugin versions equal to, or higher than 0.4.0.
+      v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
     end
 
     debian_vpn.vm.provider :virtualbox do |v, override|
@@ -130,9 +137,11 @@ Vagrant.configure("2") do |config|
       v.nested = true
       v.memory = 1024
       v.cpus = 1
-      v.volume_cache = "unsafe"
       v.default_prefix = "proxy_"
-      # v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
+      # For libvirt plugin versions below 0.4.0.
+      # v.volume_cache = "unsafe"
+      # For libvirt plugin versions equal to, or higher than 0.4.0.
+      v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
     end
 
     centos_vpn.vm.provider :virtualbox do |v, override|

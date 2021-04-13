@@ -14,7 +14,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
     package="se.leap.bitmaskclient">
     <!-- package is overwritten in build.gradle -->
 
@@ -28,7 +28,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
 		     android:maxSdkVersion="18"/>
     <!-- Used to show all apps in the allowed Apps selection -->
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
 
     <application
         android:name=".base.BitmaskApp"

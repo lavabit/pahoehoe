@@ -3,10 +3,10 @@
 cd $HOME/android
 
 ./scripts/build_deps.sh
-./gradlew --warning-mode none build
-./gradlew --warning-mode none assembleDebug
-./gradlew --warning-mode none assembleRelease
+./gradlew --warning-mode none assembleLavabit
+./gradlew --warning-mode none bundleLavabit
+./gradlew --warning-mode none check
 
 echo "All finished."
 sudo fstrim --all
-( for i in {1..10}; do printf "\a" ; sleep 1; done ) &
+( for i in {1..5}; do printf "\a" ; sleep 0.2; done ; sleep 2 ; for i in {1..5}; do printf "\a" ; sleep 0.2; done ) &

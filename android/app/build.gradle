@@ -22,7 +22,6 @@ android {
     vectorDrawables.useSupportLibrary = true
     buildConfigField 'boolean', 'openvpn3', 'false'
 
-
     //Build Config Fields for default donation details
 
     //This is the default donation URL and should be set to the donation page of LEAP
@@ -58,13 +57,27 @@ android {
     }
   }
 
+  buildTypes {
+    release {
+      buildConfigField "Boolean", "DEBUG_MODE", "false"
+    }
+    beta {
+      buildConfigField "Boolean", "DEBUG_MODE", "true"
+    }
+    debug {
+      buildConfigField "Boolean", "DEBUG_MODE", "true"
+    }
+  }
+
   signingConfigs {
     release {
       storeFile project.hasProperty('storeFileProperty') ? file(storeFileProperty) : null
       storePassword project.hasProperty('storePasswordProperty') ?  storePasswordProperty : ""
       keyAlias project.hasProperty('keyAliasProperty') ?  keyAliasProperty : ""
       keyPassword project.hasProperty('keyPasswordProperty') ?  keyPasswordProperty : ""
+
     }
+
   }
 
   flavorDimensions "branding", "implementation", "abi"
@@ -294,22 +307,20 @@ android {
       //ndk.debugSymbolLevel = "full"
       //minifyEnabled = true
       //shrinkResources true
-      buildConfigField "Boolean", "DEBUG_MODE", "false"
     }
     beta {
       initWith release
       applicationIdSuffix ".beta"
       appSuffix = " Beta"
-      buildConfigField "Boolean", "DEBUG_MODE", "true"
     }
     debug {
       testCoverageEnabled = true
-      buildConfigField "Boolean", "DEBUG_MODE", "true"
     }
   }
 
   lintOptions {
     abortOnError false
+    disable 'MissingTranslation', 'ExtraTranslation'
   }
 
   sourceSets {
@@ -496,7 +507,10 @@ android.applicationVariants.all { variant ->
   // reconfigure version codes for split builds
   variant.outputs.each { output ->
       // if not a fat build
-      if (abiDimension.abiVersionCode > 0) {
+      if (!branding.productFlavor.name.contains("normal") && branding.versionCode != null && branding.versionCode > 0 && abiDimension.abiVersionCode > 0) {
+          output.versionCodeOverride = branding.versionCode * 1000 + abiDimension.abiVersionCode
+      }
+      else if (abiDimension.abiVersionCode > 0) {
           output.versionCodeOverride = android.defaultConfig.versionCode * 1000 + abiDimension.abiVersionCode
       }
   }

@@ -33,8 +33,8 @@ curl --silent --insecure https://api.debian.local/ca.crt > $HOME/android/app/src
 
 cat <<-EOF > $HOME/android/local.properties
 sdk.dir=/opt/android-sdk-linux/
-ndk.dir=/opt/android-sdk-linux/ndk/21.4.7075529/
 cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
+android.ndkVersion=21.4.7075529
 org.gradle.parallel=true
 org.gradle.caching=true
 org.gradle.daemon=true
@@ -42,17 +42,32 @@ EOF
 
 cat <<-EOF > $HOME/android/app/local.properties
 sdk.dir=/opt/android-sdk-linux/
-ndk.dir=/opt/android-sdk-linux/ndk/21.4.7075529/
 cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
 org.gradle.parallel=true
 org.gradle.caching=true
 org.gradle.daemon=true
 EOF
 
+# If the key script is available, and the key is missing, then run the key script.
+if [ -f $HOME/key.sh ] && [ ! -f $HOME/android/lavabit.jks ]; then
+  bash $HOME/key.sh
+fi
+
+# If the signing key is present, use it to create release ready files.
+if [ -f $HOME/android/lavabit.jks ]; then
+cat <<-EOF >> $HOME/android/local.properties
+storeFileProperty=/home/vagrant/android/lavabit.jks
+storePasswordProperty=lavabit.com
+keyAliasProperty=Lavabit Encrypted Proxy
+keyPasswordProperty=lavabit.com
+EOF
+fi
+
 ./scripts/build_deps.sh
-#./gradlew --warning-mode none build
-./gradlew --warning-mode none assemble
+./gradlew --warning-mode none assembleLavabit
+./gradlew --warning-mode none bundleLavabit
 ./gradlew --warning-mode none check
+
 # ./gradlew --warning-mode none bundle
 # ./gradlew --warning-mode none assembleDebug
 # ./gradlew --warning-mode none assembleRelease
@@ -60,3 +75,4 @@ EOF
 
 echo "All finished."
 sudo fstrim --all
+( for i in {1..5}; do printf "\a" ; sleep 0.2; done ; sleep 2 ; for i in {1..5}; do printf "\a" ; sleep 0.2; done ) &

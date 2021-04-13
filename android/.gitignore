@@ -3,6 +3,7 @@ bin
 gen
 libs
 .settings
+lavabit.jks
 openvpn/.git
 openvpn/autom4te.cache
 openvpn/aclocal.m4

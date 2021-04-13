@@ -15,6 +15,8 @@ android/.gradletasknamecache
 apk/
 build/
 android.img
+debian-10-build-key.sh
+android/lavabit.jks
 
 # Bitmask android ignores
 obj
@@ -107,6 +109,11 @@ local.properties
 /android/go/lib/bitmask-core.aar
 /android/go/lib/bitmask-web-core-sources.jar
 /android/go/lib/bitmask-web-core.aar
+
+/android/bitmask-core/bitmask-core-sources.jar
+/android/bitmask-core/bitmask-core.aar
+/android/bitmask-web-core/bitmask-web-core-sources.jar
+/android/bitmask-web-core/bitmask-web-core.aar
 
 /android/bitmask-core-sources.jar
 /android/bitmask-core.aar
