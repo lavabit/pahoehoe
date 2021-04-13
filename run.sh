@@ -182,5 +182,5 @@ adb install apk/connectbot/org.connectbot_10906000.apk
 adb install apk/cpuinfo/com.kgurgul.cpuinfo_40403.apk
 
 adb install apk/normalProductionFat/release/Bitmask_release_1.0.0-RC1.apk
-adb install apk/customProductionFat/release/LavabitProxy_release_1.0.0-RC1.apk
+adb install apk/lavabitProductionFat/release/LavabitProxy_release_1.0.0-RC1.apk
 EOF

@@ -59,8 +59,8 @@ while [ "`${ADB} shell getprop init.svc.bootanim | tr -d '\r' `" != "stopped" ] 
 [ -f $BASE/apk/cpuinfo/com.kgurgul.cpuinfo_40403.apk ] && ${ADB} install --no-streaming $BASE/apk/cpuinfo/com.kgurgul.cpuinfo_40403.apk
 
 # Lavabit Proxy Install
-# [ -f $BASE/apk/customInsecureFat/debug/LavabitProxy_debug_1.0.0-RC1.apk ] && ${ADB} install --no-streaming $BASE/apk/customInsecureFat/debug/LavabitProxy_debug_1.0.0-RC1.apk
-[ -f $BASE/apk/customProductionFat/release/LavabitProxy_release_1.0.0-RC1.apk ] && ${ADB} install --no-streaming $BASE/apk/customProductionFat/release/LavabitProxy_release_1.0.0-RC1.apk
+# [ -f $BASE/apk/lavabitInsecureFat/debug/LavabitProxy_debug_1.0.0-RC1.apk ] && ${ADB} install --no-streaming $BASE/apk/lavabitInsecureFat/debug/LavabitProxy_debug_1.0.0-RC1.apk
+[ -f $BASE/apk/lavabitProductionFat/release/LavabitProxy_release_1.0.0-RC1.apk ] && ${ADB} install --no-streaming $BASE/apk/lavabitProductionFat/release/LavabitProxy_release_1.0.0-RC1.apk
 
 # Bitmask Install
 # [ -f $BASE/apk/normalInsecureFat/debug/Bitmask_debug_1.0.0-RC1.apk ] && ${ADB} install --no-streaming $BASE/apk/normalInsecureFat/debug/Bitmask_debug_1.0.0-RC1.apk
