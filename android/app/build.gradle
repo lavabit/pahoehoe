@@ -75,7 +75,13 @@ android {
       storePassword project.hasProperty('storePasswordProperty') ?  storePasswordProperty : ""
       keyAlias project.hasProperty('keyAliasProperty') ?  keyAliasProperty : ""
       keyPassword project.hasProperty('keyPasswordProperty') ?  keyPasswordProperty : ""
-
+      v1SigningEnabled true
+      v2SigningEnabled true
+      // Enable v3/v4 signing when we switch to the Gradle plugin v4.2.
+      // enableV1Signing true
+      // enableV2Signing true
+      // enableV3Signing true
+      // enableV4Signing true
     }
 
   }
@@ -307,6 +313,9 @@ android {
       //ndk.debugSymbolLevel = "full"
       //minifyEnabled = true
       //shrinkResources true
+      //zipAlign true
+      //debuggable false
+      //jniDebugBuild false
     }
     beta {
       initWith release
