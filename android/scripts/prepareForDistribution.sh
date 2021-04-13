@@ -16,6 +16,21 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
+# Handle self referencing, sourcing etc.
+if [[ $0 != $BASH_SOURCE ]]; then
+  export CMD=$BASH_SOURCE
+else
+  export CMD=$0
+fi
+
+# Ensure a consistent working directory so relative paths work.
+pushd `dirname $CMD` > /dev/null
+SCRIPT_DIR=`pwd -P`
+popd > /dev/null
+cd $SCRIPT_DIR
+
+BASE_DIR="$SCRIPT_DIR/.."
+
 function quit {
     echo -e "${RED}Task failed. Exit value: $?.${NC}"
     cleanUp
@@ -51,13 +66,13 @@ function sign {
     echo -e "${GREEN} -> apksign ${ALIGNED_UNSIGNED_APK}${NC}"
     ${ANDROID_BUILD_TOOLS}/apksigner sign --ks "${KEY_STORE_STRING}" --out ${ALIGNED_SIGNED_APK} ${ALIGNED_UNSIGNED_APK} || quit
     rm ${ALIGNED_UNSIGNED_APK}
-    
+
     FINGERPRINT=$(unzip -p ${ALIGNED_SIGNED_APK} META-INF/*.RSA | keytool -printcert | grep "SHA256" | tr -d '[:space:]') || quit
-    
-    if [[ ${FINGERPRINT} == ${EXPECTED_FINGERPRINT} ]] 
+
+    if [[ ${FINGERPRINT} == ${EXPECTED_FINGERPRINT} ]]
     then
         echo "Certificate fingerprint matches: ${FINGERPRINT}"
-    else 
+    else
         echo -e "${RED}Certificate fingerprint \n${FINGERPRINT} \ndid not match expected fingerprint \n\t${EXPECTED_FINGERPRINT}${NC}"
         quit
     fi
@@ -65,15 +80,15 @@ function sign {
     echo -e "${GREEN} -> rename aligned signed apk to ${FINAL_APK}${NC}"
     cp ${ALIGNED_SIGNED_APK} ${FINAL_APK} || quit
     cleanUp
-    
+
     #---- GPG SIGNING ----
-    if [[ -z ${GPG_KEY} && -z ${GPG_KEY_USER} ]] 
+    if [[ -z ${GPG_KEY} && -z ${GPG_KEY_USER} ]]
     then
         echo -e "${ORANGE}WARNING: Could not do gpg signing!${NC}"
         exit
     fi
-    
-    if [[ ${GPG_KEY} ]] 
+
+    if [[ ${GPG_KEY} ]]
     then
         echo -e "${GREEN} -> gpg sign using key ${GPG_KEY}${NC}"
         gpg --default-key ${GPG_KEY} --armor --output "${FINAL_APK}.sig" --detach-sign ${FINAL_APK} || quit
@@ -84,14 +99,6 @@ function sign {
 
     echo -e "${GREEN} -> gpg verify ${FINAL_APK}${NC}"
     gpg --verify "${FINAL_APK}.sig" || quit
-}
-
-function base_dir {
-    echo "$(dirname "$0")/.."
-}
-
-function script_dir {
-    echo "$(dirname "$0")"
 }
 
 # ----Main-----
@@ -119,19 +126,19 @@ export -f cleanUp
 
 
 # init parameters
-for ((i=1;i<=$#;i++)); 
+for ((i=1;i<=$#;i++));
 do
-    if [[ ${!i} = "b" || ${!i} = "build" ]] 
-    then 
+    if [[ ${!i} = "b" || ${!i} = "build" ]]
+    then
         DO_BUILD=true
-        
-    elif [[ ${!i} = "s" || ${!i} = "sign" ]] 
-    then 
+
+    elif [[ ${!i} = "s" || ${!i} = "sign" ]]
+    then
         DO_SIGN=true
-        
-    elif [[ ${!i} = "-f" || ${!i} = "-file" ]] 
-    then 
-        ((i++)) 
+
+    elif [[ ${!i} = "-f" || ${!i} = "-file" ]]
+    then
+        ((i++))
         FILE_NAME_STRING=${!i}
         FILE_NAME=${FILE_NAME_STRING##*/} #remove everything till the last '/'
         FILE_DIR=${FILE_NAME_STRING%/*} #remove everything after the last '/'
@@ -141,46 +148,51 @@ do
         ((i++))
         FILE_DIR=${!i}
         MULTIPLE_APKS=true
-    elif [[ ${!i} = "-ks" || ${!i} = "-keystore" ]] 
-    then 
-        ((i++)) 
+    elif [[ ${!i} = "-ks" || ${!i} = "-keystore" ]]
+    then
+        ((i++))
         KEY_STORE_STRING=${!i};
         KEY_STORE_NAME=${KEY_STORE_STRING##*/}
         KEY_STORE_DIR=${KEY_STORE_STRING%/*}
         export KEY_STORE_STRING=${KEY_STORE_STRING}
 
-    elif [[ ${!i} = "-v" || ${!i} = "-version" ]] 
-    then 
-        ((i++)) 
+    elif [[ ${!i} = "-v" || ${!i} = "-version" ]]
+    then
+        ((i++))
         VERSION_NAME=${!i};
-        if [[ -z $(git tag --list | grep -w ${VERSION_NAME}) ]] 
+        if [[ -z $(git tag --list | grep -w ${VERSION_NAME}) ]]
         then
             echo -e "${RED}ERROR: Version name has to be a git tag!${NC}"
             exit
         fi
     elif [[ ${!i} = "-k" || ${!i} = "-key" ]];
-    then 
-        ((i++)) 
+    then
+        ((i++))
         GPG_KEY=${!i}
         export GPG_KEY=${GPG_KEY}
     elif [[ ${!i} = "-u" || ${!i} = "-user" ]];
-    then 
-        ((i++)) 
+    then
+        ((i++))
         GPG_KEY_USER=${!i}
         export GPG_KEY_USER=${GPG_KEY_USER}
     elif [[ ${!i} = "-b" || ${!i} = "-beta" ]];
-    then 
+    then
         BETA=true
     elif [[ ${!i} = "-no-tag" ]];
-    then 
+    then
         NO_TAG=true
     elif [[  ${!i} = "-c" || ${!i} = "-custom" ]]
     then
         ((i++))
         FLAVOR="Custom"
         FLAVOR_LOWERCASE="custom"
+    elif [[  ${!i} = "-l" || ${!i} = "-lavabit" ]]
+    then
+        ((i++))
+        FLAVOR="Lavabit"
+        FLAVOR_LOWERCASE="lavabit"
     elif [[ ${!i} = "-h" || ${!i} = "-help" ]];
-    then 
+    then
         echo -e "
         sign [-ks -fp -f -b -u -k]            sign a given apk (both app signing and GPG signing)
         -ks / -keystore [path] -------------- define path to keystore for signing (required)
@@ -191,29 +203,29 @@ do
         -u / -user [gpguser] ---------------- define the gpg user whose key will be used for GPG signing
                                               (optional)
         -k / -key [gpgkey] ------------------ define the key used for GPG signing. Using this option,
-                                              -u will be ignored (optional)                           
-        
-        
+                                              -u will be ignored (optional)
+
+
         build [-v, -c, -b, -no-tag]
-        -v / -version [gittag] -------------- define the git version tag that needs to be checked out 
-                                              for building. It's also part of the resulting apk file 
+        -v / -version [gittag] -------------- define the git version tag that needs to be checked out
+                                              for building. It's also part of the resulting apk file
                                               name. (required if you don't use -no-tag)
-        -c / -custom ------------------------ build custom Bitmask client instead of main Bitmask client 
+        -c / -custom ------------------------ build custom Bitmask client instead of main Bitmask client
                                               (optional)
         -b / -beta -------------------------- build beta version with .beta appended to applicationId (optional)
         -no-tag ----------------------------- force to build current checked out git commit instead of an
                                               official release version
 
-        
+
         -h / -help                            print out this help
-        
-        
+
+
         example Usages:
         ---------------
-        
+
         * jarsign only:
         ./prepareForDistribution.sh sign -f app/build/outputs/apk/app-production-beta.apk -ks ~/path/to/bitmask-android.keystore
-        
+
         * jarsign and gpg sign only:
         ./prepareForDistribution.sh sign -f app/build/outputs/apk/app-production-beta.apk -ks ~/path/to/bitmask-android.keystore -u GPG_USER
 
@@ -222,16 +234,16 @@ do
 
         * build custom stable
         ./prepareForDistribution.sh build -v 0.9.7 -c
-        
+
         * build and sign custom stable:
         ./prepareForDistribution.sh build sign -ks ~/path/to/bitmask-android.keystore -u GPG_USER -c -v 0.9.7
-        
+
         * build and sign custom beta:
         ./prepareForDistribution.sh build sign -ks ~/path/to/bitmask-android.keystore -u GPG_USER -c -b -v 0.9.7RC2
 
         * build and sign stable:
         ./prepareForDistribution.sh build sign -ks ~/path/to/bitmask-android.keystore -u GPG_USER -v 0.9.7
-        
+
         * build and sign current git HEAD
         ./prepareForDistribution.sh build sign -ks ~/path/to/bitmask-android.keystore -u GPG_USER -no-tag"
         exit
@@ -258,7 +270,7 @@ then
         echo -e "${RED}ERROR: You didn't enter the version (git tag) to be built. If you really want to force building the current checked out commit, use -no-tag.${NC}"
         quit
     fi
-    if [[ ${NO_TAG} == false ]] 
+    if [[ ${NO_TAG} == false ]]
     then
         #---- COMPARE TAG COMMIT WITH CURRENT COMMIT AND CHECK OUT TAG COMMIT IF NECESSARY ----
         TAG_COMMIT=$(git log -n 1 ${VERSION_NAME} --format="%H")
@@ -270,11 +282,11 @@ then
         fi
     fi
 
-    $(script_dir)/cleanProject.sh || quit
-    $(script_dir)/build_deps.sh || quit
-    $(script_dir)/fix_gradle_lock.sh || quit
-    
-    cd $(base_dir)
+    # ${SCRIPT_DIR}/cleanProject.sh || quit
+    ${SCRIPT_DIR}/build_deps.sh || quit
+    ${SCRIPT_DIR}/fix_gradle_lock.sh || quit
+
+    cd ${BASE_DIR}
     BASE_OUTPUT_DIR="./app/build/outputs/apk"
     RELEASES_FILE_DIR="./currentReleases"
     if [[ ! -d $RELEASES_FILE_DIR ]]
@@ -289,7 +301,7 @@ then
         ./gradlew clean assemble${FLAVOR}ProductionFatBeta --stacktrace || quit
  #       echo "copy file:  $(ls $BASE_OUTPUT_DIR/${FLAVOR_LOWERCASE}ProductionFat/beta/*.apk)"
         cp $BASE_OUTPUT_DIR/${FLAVOR_LOWERCASE}ProductionFat/beta/*.apk $RELEASES_FILE_DIR/.
-        
+
         # custom builds might have disabled split apks -> check if build task exist
         if [[ $(./gradlew tasks --console plain | grep ${FLAVOR}ProductionX86Beta) ]]; then
             ./gradlew clean assemble${FLAVOR}ProductionX86Beta --stacktrace || quit
@@ -333,18 +345,18 @@ then
             cp $BASE_OUTPUT_DIR/${FLAVOR_LOWERCASE}ProductionArm64/release/*.apk $RELEASES_FILE_DIR/.
         fi
     fi
-    
+
     cd -
 fi
 
 if [[ ${DO_SIGN} == true ]]
 then
-    cd $(base_dir)
+    cd ${BASE_DIR}
     # check global vars
-    if [[ -z ${ANDROID_BUILD_TOOLS} ]] 
+    if [[ -z ${ANDROID_BUILD_TOOLS} ]]
     then
         echo -e "${RED}ERROR: Environment variable ANDROID_BUILD_TOOLS not set! Please add it to your environment variables. Exiting.${NC}"
-        exit 
+        exit
     fi
 
     if [[ -z ${FILE_NAME} && -z ${FILE_DIR} && ${DO_BUILD} == false ]]
@@ -352,7 +364,7 @@ then
         echo -e "${RED}ERROR: Sign only needs a file name or a directory. Please check ./prepareForDistribution -help!${NC}"
         exit
     fi
-    if [[ -z ${KEY_STORE_NAME} ]] 
+    if [[ -z ${KEY_STORE_NAME} ]]
     then
         echo -e "${RED}ERROR: Key store not set. Please check ./prepareForDistribution -help${NC}"
         exit
@@ -361,7 +373,7 @@ then
     then
         echo -e "${ORANGE}WARNING: Ignoring parameter -file. Built APK will be used instead.${NC}"
     fi
-    
+
     #---- OPT: SELECT APK FROM LAST BUILD ----
     if [[ ${DO_BUILD} == true ]]
     then
