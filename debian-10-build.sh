@@ -38,6 +38,7 @@ android.ndkVersion=21.4.7075529
 org.gradle.parallel=true
 org.gradle.caching=true
 org.gradle.daemon=true
+# org.gradle.configureondemand=true
 EOF
 
 cat <<-EOF > $HOME/android/app/local.properties

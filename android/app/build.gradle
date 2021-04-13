@@ -519,7 +519,7 @@ android.applicationVariants.all { variant ->
   variant.mergeAssetsProvider.get().doLast {
     // if not a fat build
     if (abiDimension.abiVersionCode > 0) {
-      def filesToDelete = fileTree(dir: variant.mergeAssets.outputDir, excludes: ["*pie_openvpn.${abiDimension.abiFilter}",
+      def filesToDelete = fileTree(dir: variant.mergeAssetsProvider.get().outputDir, excludes: ["*pie_openvpn.${abiDimension.abiFilter}",
                                                                                   'urls/',
                                                                                   '*.url',
                                                                                   '*.json',
