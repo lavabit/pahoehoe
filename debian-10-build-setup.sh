@@ -199,12 +199,24 @@ rm --force /opt/android-sdk-linux/platform-tools/aapt2.jar
 
 sudo chmod 755 /opt/android-sdk-linux/platform-tools/aapt2
 
+# Platform Tools
 [ -f /usr/lib/android-sdk/platform-tools/adb ] && sudo update-alternatives --install /usr/bin/adb adb /usr/lib/android-sdk/platform-tools/adb 10
-
 sudo update-alternatives --install /usr/bin/adb adb /opt/android-sdk-linux/platform-tools/adb 20
 sudo update-alternatives --install /usr/bin/aapt2 aapt2 /opt/android-sdk-linux/platform-tools/aapt2 20
 sudo update-alternatives --install /usr/bin/bundletool bundletool /opt/android-sdk-linux/platform-tools/bundletool 20
+
+# Build Tools (Platform Version Specific)
+sudo update-alternatives --install /usr/bin/d8 d8 /opt/android-sdk-linux/build-tools/30.0.3/d8 20
+sudo update-alternatives --install /usr/bin/dx dx /opt/android-sdk-linux/build-tools/30.0.3/dx 20
+sudo update-alternatives --install /usr/bin/aidl aidl /opt/android-sdk-linux/build-tools/30.0.3/aidl 20
+sudo update-alternatives --install /usr/bin/dexdump dexdump /opt/android-sdk-linux/build-tools/30.0.3/dexdump 20
+sudo update-alternatives --install /usr/bin/zipalign zipalign /opt/android-sdk-linux/build-tools/30.0.3/zipalign 20
+sudo update-alternatives --install /usr/bin/apksigner apksigner /opt/android-sdk-linux/build-tools/30.0.3/apksigner 20
+
+# Emulator
 sudo update-alternatives --install /usr/bin/emulator emulator /opt/android-sdk-linux/emulator/emulator 20
+
+# Command Line Tools (SDK/AVD Management)
 sudo update-alternatives --install /usr/bin/sdkmanager sdkmanager /opt/android-sdk-linux/cmdline-tools/latest/bin/sdkmanager 20
 sudo update-alternatives --install /usr/bin/avdmanager avdmanager /opt/android-sdk-linux/cmdline-tools/latest/bin/avdmanager 20
 
@@ -223,8 +235,5 @@ export ANDROID_SDK_HOME=\$HOME/.android
 export ANDROID_PREFS_ROOT=\$HOME/.android
 export ANDROID_HOME=/opt/android-sdk-linux
 export ANDROID_SDK_ROOT=/opt/android-sdk-linux
-
-GRADLE_USER_HOME=\$HOME/.gradle \
-GRADLE_OPTS=-Dorg.gradle.daemon=false
 
 EOF
