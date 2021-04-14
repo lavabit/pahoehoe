@@ -423,7 +423,9 @@ android {
     def names = variant.flavors*.name
     def buildTypeName = variant.buildType.name
     // flavorDimensions "branding" -> 0, "implementation" -> 1, "abi" -> 2
+    //  def productFlavors = variant.flavors[0].name
     def supportsSplitApk = variant.flavors[0].splitApk
+
     // To check for a certain build type, use variant.buildType.name == "<buildType>"
     if (((names.contains("insecure") && !names.contains("fat")) ||
             (names.contains("insecure") && buildTypeName.contains("beta")) ||
@@ -436,9 +438,49 @@ android {
       setIgnore(true)
     }
   }
+
+  packagingOptions {
+    exclude 'META-INF/androidx.customview_customview.version'
+    exclude 'META-INF/androidx.legacy_legacy-support-core-ui.version'
+    exclude 'META-INF/com.google.android.material_material.version'
+    exclude 'META-INF/androidx.slidingpanelayout_slidingpanelayout.version'
+    exclude 'META-INF/androidx.legacy_legacy-support-v4.version'
+    exclude 'META-INF/androidx.versionedparcelable_versionedparcelable.version'
+    exclude 'META-INF/androidx.lifecycle_lifecycle-runtime.version'
+    exclude 'META-INF/androidx.appcompat_appcompat-resources.version'
+    exclude 'META-INF/androidx.appcompat_appcompat.version'
+    exclude 'META-INF/androidx.lifecycle_lifecycle-livedata.version'
+    exclude 'META-INF/androidx.cursoradapter_cursoradapter.version'
+    exclude 'META-INF/androidx.media_media.version'
+    exclude 'META-INF/androidx.savedstate_savedstate.version'
+    exclude 'META-INF/androidx.fragment_fragment.version'
+    exclude 'META-INF/androidx.vectordrawable_vectordrawable.version'
+    exclude 'META-INF/androidx.core_core.version'
+    exclude 'META-INF/androidx.vectordrawable_vectordrawable-animated.version'
+    exclude 'META-INF/androidx.localbroadcastmanager_localbroadcastmanager.version'
+    exclude 'META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version'
+    exclude 'META-INF/androidx.lifecycle_lifecycle-livedata-core.version'
+    exclude 'META-INF/androidx.legacy_legacy-support-core-utils.version'
+    exclude 'META-INF/androidx.viewpager2_viewpager2.version'
+    exclude 'META-INF/androidx.transition_transition.version'
+    exclude 'META-INF/androidx.print_print.version'
+    exclude 'META-INF/androidx.documentfile_documentfile.version'
+    exclude 'META-INF/androidx.recyclerview_recyclerview.version'
+    exclude 'META-INF/androidx.asynclayoutinflater_asynclayoutinflater.version'
+    exclude 'META-INF/androidx.arch.core_core-runtime.version'
+    exclude 'META-INF/androidx.activity_activity.version'
+    exclude 'META-INF/androidx.drawerlayout_drawerlayout.version'
+    exclude 'META-INF/androidx.interpolator_interpolator.version'
+    exclude 'META-INF/androidx.lifecycle_lifecycle-viewmodel.version'
+    exclude 'META-INF/androidx.swiperefreshlayout_swiperefreshlayout.version'
+    exclude 'META-INF/androidx.loader_loader.version'
+    exclude 'META-INF/androidx.viewpager_viewpager.version'
+    exclude 'META-INF/androidx.cardview_cardview.version'
+    exclude 'META-INF/androidx.coordinatorlayout_coordinatorlayout.version'
+    exclude 'META-INF/androidx.annotation_annotation-experimental.version'
+  }
+
 }
-
-
 
 
 dependencies {
