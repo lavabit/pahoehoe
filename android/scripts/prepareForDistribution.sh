@@ -70,7 +70,7 @@ function sign {
     ${ANDROID_BUILD_TOOLS}/apksigner sign --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled true --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --in ${ALIGNED_UNSIGNED_APK} --out ${ALIGNED_SIGNED_APK} || quit
     rm ${ALIGNED_UNSIGNED_APK}
 
-    FINGERPRINT=$(unzip -p "${ALIGNED_SIGNED_APK}" META-INF/*.RSA | keytool -printcert | grep "SHA256" | tr -d '[:space:]') || quit
+    FINGERPRINT=$(unzip -p "${ALIGNED_SIGNED_APK}" META-INF/*.RSA | keytool -printcert | grep -E "SHA256: [0-9A-F\:]{95}" | tr -d '[:space:]') || quit
     EXPECTED_FINGERPRINT=$(keytool -printcert -file "${CERT_STORE_STRING}" | grep -E "SHA256: [0-9A-F\:]{95}" | tr -d '[:space:])') || quit
 
     if [[ ${FINGERPRINT} == ${EXPECTED_FINGERPRINT} ]]
