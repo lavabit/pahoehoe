@@ -17,6 +17,12 @@ build/
 android.img
 debian-10-build-key.sh
 android/lavabit.jks
+android/lavabit.crt
+android/lavabit.key
+android/lavabit.p12
+android/lavabit.pem
+
+android/.run/
 
 # Bitmask android ignores
 obj

@@ -4,6 +4,12 @@ gen
 libs
 .settings
 lavabit.jks
+lavabit.jks
+lavabit.crt
+lavabit.key
+lavabit.p12
+lavabit.pem
+
 openvpn/.git
 openvpn/autom4te.cache
 openvpn/aclocal.m4
@@ -84,7 +90,14 @@ releases
 currentReleases
 
 go/golang/go
+go/go1.14.2.linux-amd64.tar.gz
+
 go/lib/bitmask-core-sources.jar
 go/lib/bitmask-core.aar
 go/lib/bitmask-web-core-sources.jar
 go/lib/bitmask-web-core.aar
+
+bitmask-core/bitmask-core-sources.jar
+bitmask-core/bitmask-core.aar
+bitmask-web-core/bitmask-web-core-sources.jar
+bitmask-web-core/bitmask-web-core.aa

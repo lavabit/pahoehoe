@@ -64,6 +64,12 @@ keyPasswordProperty=lavabit.com
 EOF
 fi
 
+git update-index --assume-unchanged $HOME/android/ics-openvpn/main/build/ovpnassets/.empty
+git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/centos.local.json
+git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/centos.local.pem
+git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/debian.local.json
+git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/debian.local.pem
+
 ./scripts/build_deps.sh
 ./gradlew --warning-mode none assembleLavabit assembleNormalProductionFatweb
 ./gradlew --warning-mode none bundleLavabit
