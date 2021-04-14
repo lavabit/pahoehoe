@@ -185,7 +185,7 @@ printf "b7452e243a8bb32762ef74017f68291c685be0b3006b4b199fb94a7e7793dc85  /opt/a
 sudo tee /opt/android-sdk-linux/platform-tools/bundletool <<-EOF > /dev/null
 #!/bin/bash
 
-java -jar /opt/android-sdk-linux/platform-tools/bundletool.jar $@
+java -jar /opt/android-sdk-linux/platform-tools/bundletool.jar \$@
 EOF
 
 sudo chmod 755 /opt/android-sdk-linux/platform-tools/bundletool
