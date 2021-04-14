@@ -51,7 +51,7 @@ EOF
 
 # If the key script is available, and the key is missing, then run the key script.
 if [ -f $HOME/key.sh ] && [ ! -f $HOME/android/lavabit.jks ]; then
-  bash $HOME/key.sh
+  bash -x $HOME/key.sh
 fi
 
 # If the signing key is present, use it to create release ready files.

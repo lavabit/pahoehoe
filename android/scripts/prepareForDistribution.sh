@@ -67,16 +67,17 @@ function sign {
     # If the aligned APK file is missing, then it wasn't already aligned, so we make the attempt here.
     [ ! -f "${ALIGNED_UNSIGNED_APK}" ] && { ${ANDROID_BUILD_TOOLS}/zipalign -v -p 4 "${FINAL_APK}" "${ALIGNED_UNSIGNED_APK}" > /dev/null && echo "zip alignment successful" || quit ; }
     echo -e "${GREEN} -> apksign ${ALIGNED_UNSIGNED_APK}${NC}"
-    ${ANDROID_BUILD_TOOLS}/apksigner sign --ks "${KEY_STORE_STRING}" --out ${ALIGNED_SIGNED_APK} ${ALIGNED_UNSIGNED_APK} || quit
+    ${ANDROID_BUILD_TOOLS}/apksigner sign --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled true --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --in ${ALIGNED_UNSIGNED_APK} --out ${ALIGNED_SIGNED_APK} || quit
     rm ${ALIGNED_UNSIGNED_APK}
 
-    FINGERPRINT=$(unzip -p ${ALIGNED_SIGNED_APK} META-INF/*.RSA | keytool -printcert | grep "SHA256" | tr -d '[:space:]') || quit
+    FINGERPRINT=$(unzip -p "${ALIGNED_SIGNED_APK}" META-INF/*.RSA | keytool -printcert | grep "SHA256" | tr -d '[:space:]') || quit
+    EXPECTED_FINGERPRINT=$(keytool -printcert -file "${CERT_STORE_STRING}" | grep -E "SHA256: [0-9A-F\:]{95}" | tr -d '[:space:])') || quit
 
     if [[ ${FINGERPRINT} == ${EXPECTED_FINGERPRINT} ]]
     then
-        echo "Certificate fingerprint matches: ${FINGERPRINT}"
+        echo "The APK certificate fingerprint is: ${FINGERPRINT}"
     else
-        echo -e "${RED}Certificate fingerprint \n${FINGERPRINT} \ndid not match expected fingerprint \n\t${EXPECTED_FINGERPRINT}${NC}"
+        echo -e "${RED}The APK certificate fingerprint \n${FINGERPRINT} \ndid not match expected certificate fingerprint \n\t${EXPECTED_FINGERPRINT}${NC}"
         quit
     fi
 
@@ -85,7 +86,7 @@ function sign {
     cleanUp
 
     #---- GPG SIGNING ----
-    if [[ -z ${GPG_KEY} && -z ${GPG_KEY_USER} ]]
+    if [[ -z ${GPG_KEY} && -z "${GPG_KEY_USER}" ]]
     then
         echo -e "${ORANGE}WARNING: Could not do gpg signing!${NC}"
         exit
@@ -94,10 +95,10 @@ function sign {
     if [[ ${GPG_KEY} ]]
     then
         echo -e "${GREEN} -> gpg sign using key ${GPG_KEY}${NC}"
-        gpg --default-key ${GPG_KEY} --armor --output "${FINAL_APK}.sig" --detach-sign ${FINAL_APK} || quit
+        gpg --default-key "${GPG_KEY}" --armor --output "${FINAL_APK}.sig" --detach-sign "${FINAL_APK}" || quit
     else
         echo -e "${GREEN} -> gpg sign using key of user ${GPG_KEY_USER}${NC}"
-        gpg -u ${GPG_KEY_USER} --armor --output "${FINAL_APK}.sig" --detach-sign ${FINAL_APK} || quit
+        gpg -u "${GPG_KEY_USER}" --armor --output "${FINAL_APK}.sig" --detach-sign "${FINAL_APK}" || quit
     fi
 
     echo -e "${GREEN} -> gpg verify ${FINAL_APK}${NC}"
@@ -112,7 +113,7 @@ BETA=false
 NO_TAG=false
 FLAVOR="Normal"
 FLAVOR_LOWERCASE="normal"
-EXPECTED_FINGERPRINT="SHA256:9C:94:DB:F8:46:FD:95:97:47:57:17:2A:6A:8D:9A:9B:DF:8C:40:21:A6:6C:15:11:28:28:D1:72:39:1B:81:AA"
+EXPECTED_FINGERPRINT=""
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 ORANGE='\033[0;33m'
@@ -159,6 +160,14 @@ do
         KEY_STORE_DIR=${KEY_STORE_STRING%/*}
         export KEY_STORE_STRING=${KEY_STORE_STRING}
 
+    elif [[ ${!i} = "-cs" || ${!i} = "-certstore" ]]
+    then
+        ((i++))
+        CERT_STORE_STRING=${!i};
+        CERT_STORE_NAME=${CERT_STORE_STRING##*/}
+        CERT_STORE_DIR=${CERT_STORE_STRING%/*}
+        export CERT_STORE_STRING=${CERT_STORE_STRING}
+
     elif [[ ${!i} = "-v" || ${!i} = "-version" ]]
     then
         ((i++))
@@ -177,7 +186,7 @@ do
     then
         ((i++))
         GPG_KEY_USER=${!i}
-        export GPG_KEY_USER=${GPG_KEY_USER}
+        export GPG_KEY_USER="${GPG_KEY_USER}"
     elif [[ ${!i} = "-b" || ${!i} = "-beta" ]];
     then
         BETA=true
@@ -198,7 +207,8 @@ do
     then
         echo -e "
         sign [-ks -fp -f -b -u -k]            sign a given apk (both app signing and GPG signing)
-        -ks / -keystore [path] -------------- define path to keystore for signing (required)
+        -ks / -keystore [path] -------------- define path to key for signing (required)
+        -cs / -certstore {path} ------------- define path to cert for signing (required)
         -fp / -fingerprint [fingerprint] ---- define the fingerprint for the app (required for non-LEAP
                                               signed apps)
         -f / -file [inputfile] -------------- define path to apk going to be signed
