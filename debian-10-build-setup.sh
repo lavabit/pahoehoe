@@ -194,8 +194,8 @@ sudo chmod 644 /opt/android-sdk-linux/platform-tools/bundletool.jar
 # Setup aapt2.
 sudo curl --silent --location --output /opt/android-sdk-linux/platform-tools/aapt2.jar https://dl.google.com/android/maven2/com/android/tools/build/aapt2/4.1.3-6503028/aapt2-4.1.3-6503028-linux.jar
 printf "023326dc41058a283c3092f95f894ca024199579627f85118a39843591ed4196  /opt/android-sdk-linux/platform-tools/aapt2.jar" | sha256sum -c || exit 1
-unzip -q -d /opt/android-sdk-linux/platform-tools/ /opt/android-sdk-linux/platform-tools/aapt2.jar aapt2
-rm --force /opt/android-sdk-linux/platform-tools/aapt2.jar
+sudo unzip -q -d /opt/android-sdk-linux/platform-tools/ /opt/android-sdk-linux/platform-tools/aapt2.jar aapt2
+sudo rm --force /opt/android-sdk-linux/platform-tools/aapt2.jar
 
 sudo chmod 755 /opt/android-sdk-linux/platform-tools/aapt2
 
