@@ -69,15 +69,41 @@ APT::Get::Assume-Yes "true";
 Dpkg::Use-Pty "0";
 EOF
 
-sudo apt-get -qq -y update && sudo apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null
+sudo apt-get -qq -y update && sudo apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl diffoscope dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null
 
 # Android client build.
 cd $HOME
 
 # Remove history limits.
+sed -i "/HISTSIZE/d" $HOME/.bashrc
 sed -i "/HISTCONTROL/d" $HOME/.bashrc
 sed -i "/HISTFILESIZE/d" $HOME/.bashrc
-sed -i "s/HISTSIZE=.*/export HISTSIZE=100000/g" $HOME/.bashrc
+
+tee -a $HOME/.bashrc <<-EOF > /dev/null
+
+unset HISTCONTROL
+unset HISTIGNORE
+export HISTSIZE=1000000
+export HISTFILESIZE=1000000
+
+shopt -s histappend
+
+EOF
+
+sudo sed -i "/HISTSIZE/d" /root/.bashrc
+sudo sed -i "/HISTCONTROL/d" /root/.bashrc
+sudo sed -i "/HISTFILESIZE/d" /root/.bashrc
+
+sudo tee -a /root/.bashrc <<-EOF > /dev/null
+
+unset HISTCONTROL
+unset HISTIGNORE
+export HISTSIZE=1000000
+export HISTFILESIZE=1000000
+
+shopt -s histappend
+
+EOF
 
 # Setup NFS share
 # sudo tee -a /etc/exports <<-EOF > /dev/null

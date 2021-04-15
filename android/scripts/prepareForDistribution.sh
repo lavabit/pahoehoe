@@ -65,26 +65,23 @@ function sign {
     ALIGNED_UNSIGNED_APK="${FILE_DIR}/aligned-${FILE_NAME}"
     ALIGNED_SIGNED_APK="${FILE_DIR}/aligned-signed-${FILE_NAME}"
 
-    echo -e "${GREEN} -> zip align ${ALIGNED_UNSIGNED_APK}${NC}"
+    echo -e "${GREEN} -> zip align ${ALIGNED_UNSIGNED_APK}${NC}"f
     # Check whether the APK is aligned already. If so we simply copy it.
     ${ANDROID_BUILD_TOOLS}/zipalign -v -p -c 4 "${FINAL_APK}" > /dev/null && cp "${FINAL_APK}" "${ALIGNED_UNSIGNED_APK}" && echo "zip alignment successful" || quit
     # If the aligned APK file is missing, then it wasn't already aligned, so we make the attempt here.
     [ ! -f "${ALIGNED_UNSIGNED_APK}" ] && { ${ANDROID_BUILD_TOOLS}/zipalign -v -p 4 "${FINAL_APK}" "${ALIGNED_UNSIGNED_APK}" > /dev/null && echo "zip alignment successful" || quit ; }
 
     echo -e "${GREEN} -> apksign ${ALIGNED_UNSIGNED_APK}${NC}"
-    # --stamp-signer SHA256-DIGEST
-    # --force-stamp-overwrite true
-    # --debuggable-apk-permitted false
-    ${ANDROID_BUILD_TOOLS}/apksigner sign --verity-enabled true --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled true --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --in ${ALIGNED_UNSIGNED_APK} --out ${ALIGNED_SIGNED_APK} || quit
+    ${ANDROID_BUILD_TOOLS}/apksigner sign --debuggable-apk-permitted false --verity-enabled true --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled true --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --force-stamp-overwrite --stamp-signer --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --set-auth false --set-rollback false --set-permission false --set-shared-uid false --set-installed-data false --in ${ALIGNED_UNSIGNED_APK} --out ${ALIGNED_SIGNED_APK} || quit
 
     echo -e "${GREEN} -> apkverify ${ALIGNED_SIGNED_APK}${NC}"
-    # --verify-source-stamp true
-    # --stamp-cert-digest SHA256-DIGEST
-    ${ANDROID_BUILD_TOOLS}/apksigner verify --verbose --in "${ALIGNED_SIGNED_APK}" --v4-signature-file "${ALIGNED_SIGNED_APK}.idsig" || quit
-    rm ${ALIGNED_UNSIGNED_APK}
 
+    CERTPRINT=$(keytool -printcert -file "${CERT_STORE_STRING}" | grep -E 'SHA256: [0-9A-F\:]{95}' | tr -d '[:space:])' | sed 's/^SHA256\:\|\://g') || quit
     FINGERPRINT=$(unzip -p "${ALIGNED_SIGNED_APK}" META-INF/*.RSA | keytool -printcert | grep -E "SHA256: [0-9A-F\:]{95}" | tr -d '[:space:]') || quit
     EXPECTED_FINGERPRINT=$(keytool -printcert -file "${CERT_STORE_STRING}" | grep -E "SHA256: [0-9A-F\:]{95}" | tr -d '[:space:])') || quit
+
+    ${ANDROID_BUILD_TOOLS}/apksigner verify --verbose --in "${ALIGNED_SIGNED_APK}" --v4-signature-file "${ALIGNED_SIGNED_APK}.idsig" || quit
+    ${ANDROID_BUILD_TOOLS}/apksigner verify --verbose --in "${ALIGNED_SIGNED_APK}" --verify-source-stamp true --stamp-cert-digest "${CERTPRINT}" || quit
 
     if [[ ${FINGERPRINT} == ${EXPECTED_FINGERPRINT} ]]
     then
@@ -93,8 +90,8 @@ function sign {
         echo -e "${RED}The APK certificate fingerprint \n${FINGERPRINT} \ndid not match expected certificate fingerprint \n\t${EXPECTED_FINGERPRINT}${NC}"
         quit
     fi
-
     echo -e "${GREEN} -> rename aligned signed apk to ${FINAL_APK}${NC}"
+    mv "${FINAL_APK}" "${FINAL_APK}.original"
     cp ${ALIGNED_SIGNED_APK} ${FINAL_APK} || quit
     cp ${ALIGNED_SIGNED_APK}.idsig ${FINAL_APK}.idsig || quit
     cleanUp
