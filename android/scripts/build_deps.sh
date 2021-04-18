@@ -36,7 +36,7 @@ then
 else
     echo "Clean build: starting externalNativeBuild"
     cd $BASE_DIR/ics-openvpn || quit "Directory ics-opevpn not found"
-    ./gradlew clean main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease || quit "Build ics-openvpn native libraries failed"
+    ./gradlew --console plain clean main:externalNativeBuildCleanSkeletonRelease main:externalNativeBuildSkeletonRelease || quit "Build ics-openvpn native libraries failed"
     cd ..
 fi
 

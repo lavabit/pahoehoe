@@ -85,9 +85,9 @@ git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconf
 git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/debian.local.pem
 
 ./scripts/build_deps.sh
-./gradlew --warning-mode none assembleLavabit assembleNormalProductionFatweb
-./gradlew --warning-mode none bundleLavabit
-./gradlew --warning-mode none check
+./gradlew --console plain --warning-mode none assembleLavabit assembleNormalProductionFatweb
+./gradlew --console plain --warning-mode none bundleLavabit
+./gradlew --console plain --warning-mode none check
 
 # ./gradlew --warning-mode none bundle
 # ./gradlew --warning-mode none assembleDebug
