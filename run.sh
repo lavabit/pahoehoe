@@ -63,6 +63,8 @@ vagrant ssh -c "test ! -d \$HOME/android/releases/" debian_build &> /dev/null &&
 
 # Download Termux
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/
+
+# Termux version 108 requires at least v24 of the Android SDK.
 curl --silent --location --output $BASE/build/termux/com.termux_108.apk https://f-droid.org/repo/com.termux_108.apk
 printf "0aa703cf809604cf39d7bf7613cdb96fe4c4a91814aeb67aa91aa3763ecda31f  $BASE/build/termux/com.termux_108.apk" | sha256sum -c || exit 1
 
@@ -78,7 +80,11 @@ printf "934cfb004993348d207ad3e21928e94fba07cb8185ba292ab5209eab09c15dcc  $BASE/
 curl --silent --location --output $BASE/build/termux/com.termux.styling_29.apk https://f-droid.org/repo/com.termux.styling_29.apk
 printf "77bafdb6c4374de0cdabe68f103aca37ef7b81e18272ea663bb9842c82920bec  $BASE/build/termux/com.termux.styling_29.apk" | sha256sum -c || exit 1
 
-# Download ConnectBot
+# Termux version 75 requires at least v21 of the Android SDK.
+curl --silent --location --output $BASE/build/termux/com.termux_75.apk https://f-droid.org/archive/com.termux_75.apk
+printf "d88444d9df4049c47f12678feb9579aaf2814a89e411d52653dc0a2509f883b5  $BASE/build/termux/com.termux_75.apk" | sha256sum -c || exit 1
+
+# Download ConnectBot, which will work on devices with at least v14 of the Android SDK.
 [ -d $BASE/build/connectbot/ ] && rm --force --recursive $BASE/build/connectbot/ ; mkdir --parents $BASE/build/connectbot/
 curl --silent --location --output $BASE/build/connectbot/org.connectbot_10906000.apk https://f-droid.org/repo/org.connectbot_10906000.apk
 printf "7b8fb2aa289c99eaa22bcf267c650609660173b244f83636603b2acf231fa25b  $BASE/build/connectbot/org.connectbot_10906000.apk" | sha256sum -c || exit 1
