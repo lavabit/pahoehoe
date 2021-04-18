@@ -72,7 +72,7 @@ function sign {
     [ ! -f "${ALIGNED_UNSIGNED_APK}" ] && { ${ANDROID_BUILD_TOOLS}/zipalign -v -p 4 "${FINAL_APK}" "${ALIGNED_UNSIGNED_APK}" > /dev/null && echo "zip alignment successful" || quit ; }
 
     echo -e "${GREEN} -> apksign ${ALIGNED_UNSIGNED_APK}${NC}"
-    ${ANDROID_BUILD_TOOLS}/apksigner sign --debuggable-apk-permitted false --verity-enabled true --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled true --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --force-stamp-overwrite --stamp-signer --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --set-auth false --set-rollback false --set-permission false --set-shared-uid false --set-installed-data false --in ${ALIGNED_UNSIGNED_APK} --out ${ALIGNED_SIGNED_APK} || quit
+    ${ANDROID_BUILD_TOOLS}/apksigner sign --debuggable-apk-permitted false --verity-enabled true --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled true --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --force-stamp-overwrite true --stamp-signer --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --set-auth false --set-rollback false --set-permission false --set-shared-uid false --set-installed-data false --in ${ALIGNED_UNSIGNED_APK} --out ${ALIGNED_SIGNED_APK} || quit
 
     echo -e "${GREEN} -> apkverify ${ALIGNED_SIGNED_APK}${NC}"
 

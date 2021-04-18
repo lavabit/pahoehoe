@@ -20,6 +20,7 @@ android/lavabit.crt
 android/lavabit.key
 android/lavabit.p12
 android/lavabit.pem
+android/lavabit.pgp
 
 android/.run/
 

@@ -9,6 +9,7 @@ lavabit.crt
 lavabit.key
 lavabit.p12
 lavabit.pem
+lavabit.pgp
 
 openvpn/.git
 openvpn/autom4te.cache
