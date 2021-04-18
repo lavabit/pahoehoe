@@ -254,7 +254,7 @@ do
         ./prepareForDistribution.sh sign -f app/build/outputs/apk/app-production-beta.apk -ks ~/path/to/bitmask-android.keystore -u GPG_USER
 
         * jarsign and gpg sign all apks in directory:
-        ./prepareForDistribution.sh sign -d currentReleases/ -ks ~/path/to/bitmask-android.keystore -u GPG_USER
+        ./prepareForDistribution.sh sign -d releases/ -ks ~/path/to/bitmask-android.keystore -u GPG_USER
 
         * build custom stable
         ./prepareForDistribution.sh build -v 0.9.7 -c
@@ -312,7 +312,7 @@ then
 
     cd ${BASE_DIR}
     BASE_OUTPUT_DIR="./app/build/outputs/apk"
-    RELEASES_FILE_DIR="./currentReleases"
+    RELEASES_FILE_DIR="./releases"
     if [[ ! -d $RELEASES_FILE_DIR ]]
     then
         mkdir $RELEASES_FILE_DIR

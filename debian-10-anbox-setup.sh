@@ -48,7 +48,6 @@ sudo modprobe ashmem_linux
 # sudo snap install --devmode --beta anbox
 # ls -1 /dev/{ashmem,binder}
 # sudo snap install --classic anbox-installer && anbox-installer
-# adb install $HOME/proxy/apk/normalInsecureFat/debug/Bitmask_debug.apk
 # anbox.appmgr
 # export LD_LIBRARY_PATH=/snap/anbox/186/usr/lib/x86_64-linux-gnu/:/snap/anbox/186/lib/:/snap/core/10583/lib/x86_64-linux-gnu/:/snap/anbox/186/usr/lib/x86_64-linux-gnu/pulseaudio/:/snap/anbox/186/usr/lib/x86_64-linux-gnu/:/snap/core/10583/lib/i386-linux-gnu/
 

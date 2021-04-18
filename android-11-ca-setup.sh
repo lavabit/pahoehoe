@@ -1,35 +1,44 @@
 #!/bin/bash -ex
 
-curl --silent --insecure --output ca.pem https://api.proxy.lavabit.com/ca.crt
-curl --silent --cacert ca.pem --output /dev/null https://api.proxy.lavabit.com/provider.json
-
-CERT_HASH=$(openssl x509 -inform PEM -subject_hash_old -in ca.pem | head -1)
-CERT_FILE="$CERT_HASH.0"
-cp ca.pem $CERT_FILE
-
-openssl x509 -inform PEM -text -in ca.pem -out /dev/null >> $CERT_FILE
-
-/home/ladar/Android/Sdk/platform-tools/adb root && sleep 10
-
-/home/ladar/Android/Sdk/platform-tools/adb wait-for-device-sideload
-/home/ladar/Android/Sdk/platform-tools/adb push $CERT_FILE /data/misc/user/0/cacerts-added/$CERT_FILE
-/home/ladar/Android/Sdk/platform-tools/adb shell "su 0 chmod 644 /data/misc/user/0/cacerts-added/$CERT_FILE" && sleep 10
-
-if [ -f $HOME/proxy/apk/normalInsecureFat/debug/Bitmask_debug.apk ]; then
-  /home/ladar/Android/Sdk/platform-tools/adb wait-for-device-sideload
-  /home/ladar/Android/Sdk/platform-tools/adb install -r -g --no-streaming $HOME/proxy/apk/normalInsecureFat/debug/Bitmask_debug.apk && sleep 10
+# Handle self referencing, sourcing etc.
+if [[ $0 != $BASH_SOURCE ]]; then
+  export CMD=$BASH_SOURCE
+else
+  export CMD=$0
 fi
 
-if [ -f $HOME/com.termux_104.apk ]; then
-  /home/ladar/Android/Sdk/platform-tools/adb wait-for-device-sideload
-  /home/ladar/Android/Sdk/platform-tools/adb install -r -g --no-streaming $HOME/com.termux_104.apk && sleep 5
-  /home/ladar/Android/Sdk/platform-tools/adb shell "am start -a android.intent.action.MAIN -n com.termux/.HomeActivity" && sleep 10
-  /home/ladar/Android/Sdk/platform-tools/adb root && sleep 10
+# Ensure a consistent working directory so relative paths work.
+pushd `dirname $CMD` > /dev/null
+BASE=`pwd -P`
+popd > /dev/null
+cd $BASE
 
-  # /home/ladar/Android/Sdk/platform-tools/adb push $CERT_FILE /storage/emulated/0/Download/$CERT_FILE && sleep 5
-  # /home/ladar/Android/Sdk/platform-tools/adb shell "su 0 cat /storage/emulated/0/Download/$CERT_FILE >> /data/data/com.termux/files/usr/etc/tls/cert.pem"
-  /home/ladar/Android/Sdk/platform-tools/adb push $CERT_FILE /data/data/com.termux/files/usr/etc/tls/cert.pem && sleep 10
-fi
+curl --silent --insecure --output $BASE/build/ca.pem https://api.proxy.lavabit.com/ca.crt
+curl --silent --cacert $BASE/build/ca.pem --output /dev/null https://api.proxy.lavabit.com/provider.json
 
-/home/ladar/Android/Sdk/platform-tools/adb reboot
-rm --force ca.pem $CERT_FILE
+CERT_HASH=$(openssl x509 -inform PEM -subject_hash_old -in $BASE/build/ca.pem | head -1)
+CERT_FILE="$BASE/build/$CERT_HASH.0"
+cp $BASE/build/ca.pem $BASE/build/$CERT_FILE
+
+openssl x509 -inform PEM -text -in $BASE/build/ca.pem -out /dev/null >> $CERT_FILE
+
+adb root && sleep 10
+
+adb wait-for-device-sideload
+adb push $CERT_FILE /data/misc/user/0/cacerts-added/$CERT_FILE
+adb shell "su 0 chmod 644 /data/misc/user/0/cacerts-added/$CERT_FILE" && sleep 10
+
+## The commands to preload the certificate into the Termux CA repository.
+# if [ -f $HOME/com.termux_108.apk ]; then
+#   adb wait-for-device-sideload
+#   adb install -r -g --no-streaming $HOME/com.termux_108.apk && sleep 5
+#   adb shell "am start -a android.intent.action.MAIN -n com.termux/.HomeActivity" && sleep 10
+#   adb root && sleep 10
+#
+#   adb push $CERT_FILE /storage/emulated/0/Download/$CERT_FILE && sleep 5
+#   adb shell "su 0 cat /storage/emulated/0/Download/$CERT_FILE >> /data/data/com.termux/files/usr/etc/tls/cert.pem"
+#   adb push $CERT_FILE /data/data/com.termux/files/usr/etc/tls/cert.pem && sleep 10
+# fi
+
+adb reboot
+rm --force $BASE/build/ca.pem $CERT_FILE

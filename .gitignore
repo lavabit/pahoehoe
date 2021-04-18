@@ -12,8 +12,7 @@ android/.gradletasknamecache
 
 # Build assets
 .vagrant/
-apk/
-build/
+/build/
 android.img
 debian-10-build-key.sh
 android/lavabit.jks
