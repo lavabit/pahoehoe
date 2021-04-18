@@ -74,7 +74,7 @@ id.zip
 /build-native.sh~
 
 local.properties
-#gradle.properties*
+gradle.properties
 *~
 *.iml
 .idea

@@ -75,16 +75,11 @@ android {
       storePassword project.hasProperty('storePasswordProperty') ?  storePasswordProperty : ""
       keyAlias project.hasProperty('keyAliasProperty') ?  keyAliasProperty : ""
       keyPassword project.hasProperty('keyPasswordProperty') ?  keyPasswordProperty : ""
-      v1SigningEnabled true
-      v2SigningEnabled true
-      // Enable v3/v4 signing when we switch to the Gradle plugin v4.2.
-      // enableV1Signing true
-      // enableV2Signing true
-      // enableV3Signing true
-      // enableV4Signing true
+      v1SigningEnabled project.hasProperty('v1SigningEnabledProperty') ? Boolean.parseBoolean(v1SigningEnabledProperty) : true
+      v2SigningEnabled project.hasProperty('v2SigningEnabledProperty') ? Boolean.parseBoolean(v2SigningEnabledProperty) : true
     }
-
   }
+
 
   flavorDimensions "branding", "implementation", "abi"
   productFlavors {
@@ -310,6 +305,10 @@ android {
       //runProguard true
       if(signingConfigs.contains(release))
         signingConfig signingConfigs.release.isSigningReady() ? signingConfigs.release : signingConfigs.debug
+//      if (properties.getProperty('v1SigningEnabledProperty', '') != '')
+//        signingConfig.v1SigningEnabled = Boolean.getBoolean(properties.getProperty('v1SigningEnabledProperty'))
+//      if (properties.getProperty('v2SigningEnabledProperty', '') != '')
+//        signingConfig.v2SigningEnabled = Boolean.getBoolean(properties.getProperty('v2SigningEnabledProperty'))
       //ndk.debugSymbolLevel = "full"
       //minifyEnabled = true
       //shrinkResources true
@@ -537,7 +536,7 @@ android.applicationVariants.all { variant ->
   def flavors = variant.productFlavors
   // flavorDimensions "branding" -> 0, "implementation" -> 1, "abi" -> 2
   def branding = flavors[0]
-  def trimmedAppName = branding.appName.replaceAll(' ', '')
+  def trimmedAppName = branding.appName.replaceAll(' ', '_')
   def abiDimension = flavors[2]
   def abiFilter = abiDimension.abiFilter
   if (abiFilter.length() > 0) {
