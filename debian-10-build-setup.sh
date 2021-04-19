@@ -238,6 +238,7 @@ sudo update-alternatives --install /usr/bin/aidl aidl /opt/android-sdk-linux/bui
 sudo update-alternatives --install /usr/bin/dexdump dexdump /opt/android-sdk-linux/build-tools/30.0.3/dexdump 20
 sudo update-alternatives --install /usr/bin/zipalign zipalign /opt/android-sdk-linux/build-tools/30.0.3/zipalign 20
 sudo update-alternatives --install /usr/bin/apksigner apksigner /opt/android-sdk-linux/build-tools/30.0.3/apksigner 20
+sudo update-alternatives --install /usr/bin/apkanalyzer apkanalyzer /opt/android-sdk-linux/tools/bin/apkanalyzer 20
 
 # Emulator
 sudo update-alternatives --install /usr/bin/emulator emulator /opt/android-sdk-linux/emulator/emulator 20

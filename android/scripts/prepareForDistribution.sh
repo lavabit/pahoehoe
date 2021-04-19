@@ -65,14 +65,18 @@ function sign {
     ALIGNED_UNSIGNED_APK="${FILE_DIR}/aligned-${FILE_NAME}"
     ALIGNED_SIGNED_APK="${FILE_DIR}/aligned-signed-${FILE_NAME}"
 
-    echo -e "${GREEN} -> zip align ${ALIGNED_UNSIGNED_APK}${NC}"f
+    echo -e "${GREEN} -> zipalign ${ALIGNED_UNSIGNED_APK}${NC}"f
     # Check whether the APK is aligned already. If so we simply copy it.
-    ${ANDROID_BUILD_TOOLS}/zipalign -v -p -c 4 "${FINAL_APK}" > /dev/null && cp "${FINAL_APK}" "${ALIGNED_UNSIGNED_APK}" && echo "zip alignment successful" || quit
+    ${ANDROID_BUILD_TOOLS}/zipalign -v -p -c 4 "${FINAL_APK}" > /dev/null && cp "${FINAL_APK}" "${ALIGNED_UNSIGNED_APK}" || quit
     # If the aligned APK file is missing, then it wasn't already aligned, so we make the attempt here.
-    [ ! -f "${ALIGNED_UNSIGNED_APK}" ] && { ${ANDROID_BUILD_TOOLS}/zipalign -v -p 4 "${FINAL_APK}" "${ALIGNED_UNSIGNED_APK}" > /dev/null && echo "zip alignment successful" || quit ; }
+    [ ! -f "${ALIGNED_UNSIGNED_APK}" ] && { ${ANDROID_BUILD_TOOLS}/zipalign -v -p 4 "${FINAL_APK}" "${ALIGNED_UNSIGNED_APK}" > /dev/null || quit ; }
+
+    echo " -> zipalign successful"
 
     echo -e "${GREEN} -> apksign ${ALIGNED_UNSIGNED_APK}${NC}"
     ${ANDROID_BUILD_TOOLS}/apksigner sign --debuggable-apk-permitted false --verity-enabled true --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled true --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --force-stamp-overwrite true --stamp-signer --key "${KEY_STORE_STRING}" --cert "${CERT_STORE_STRING}" --set-auth false --set-rollback false --set-permission false --set-shared-uid false --set-installed-data false --in ${ALIGNED_UNSIGNED_APK} --out ${ALIGNED_SIGNED_APK} || quit
+
+    echo " -> apksign successful"
 
     echo -e "${GREEN} -> apkverify ${ALIGNED_SIGNED_APK}${NC}"
 
@@ -80,21 +84,26 @@ function sign {
     FINGERPRINT=$(unzip -p "${ALIGNED_SIGNED_APK}" META-INF/*.RSA | keytool -printcert | grep -E "SHA256: [0-9A-F\:]{95}" | tr -d '[:space:]') || quit
     EXPECTED_FINGERPRINT=$(keytool -printcert -file "${CERT_STORE_STRING}" | grep -E "SHA256: [0-9A-F\:]{95}" | tr -d '[:space:])') || quit
 
-    ${ANDROID_BUILD_TOOLS}/apksigner verify --verbose --in "${ALIGNED_SIGNED_APK}" --v4-signature-file "${ALIGNED_SIGNED_APK}.idsig" || quit
-    ${ANDROID_BUILD_TOOLS}/apksigner verify --verbose --in "${ALIGNED_SIGNED_APK}" --verify-source-stamp true --stamp-cert-digest "${CERTPRINT}" || quit
+    ${ANDROID_BUILD_TOOLS}/apksigner verify --in "${ALIGNED_SIGNED_APK}" --v4-signature-file "${ALIGNED_SIGNED_APK}.idsig" || quit
+    ${ANDROID_BUILD_TOOLS}/apksigner verify --in "${ALIGNED_SIGNED_APK}" --verify-source-stamp true --stamp-cert-digest "${CERTPRINT}" || quit
 
     if [[ ${FINGERPRINT} == ${EXPECTED_FINGERPRINT} ]]
     then
-        echo "The APK certificate fingerprint is: ${FINGERPRINT}"
+        echo "    certificate fingerprint is: ${FINGERPRINT}"
     else
-        echo -e "${RED}The APK certificate fingerprint \n${FINGERPRINT} \ndid not match expected certificate fingerprint \n\t${EXPECTED_FINGERPRINT}${NC}"
+        echo -e "${RED}    certificate fingerprint \n${FINGERPRINT} \ndid not match expected certificate fingerprint \n\t${EXPECTED_FINGERPRINT}${NC}"
         quit
     fi
-    echo -e "${GREEN} -> rename aligned signed apk to ${FINAL_APK}${NC}"
+
+    echo " -> apkverify successful"
+
+    echo -e "${GREEN} -> rename the signed and aligned apk to ${FINAL_APK}${NC}"
     mv "${FINAL_APK}" "${FINAL_APK}.original"
     cp ${ALIGNED_SIGNED_APK} ${FINAL_APK} || quit
     cp ${ALIGNED_SIGNED_APK}.idsig ${FINAL_APK}.idsig || quit
     cleanUp
+
+    echo " -> rename successful"
 
     #---- GPG SIGNING ----
     if [[ -z ${GPG_KEY} && -z "${GPG_KEY_USER}" ]]
@@ -105,15 +114,26 @@ function sign {
 
     if [[ ${GPG_KEY} ]]
     then
-        echo -e "${GREEN} -> gpg sign using key ${GPG_KEY}${NC}"
+        echo -e "${GREEN} -> gpg sign ${NC} (using key ${GPG_KEY})"
         gpg --default-key "${GPG_KEY}" --armor --output "${FINAL_APK}.sig" --detach-sign "${FINAL_APK}" || quit
     else
-        echo -e "${GREEN} -> gpg sign using key of user ${GPG_KEY_USER}${NC}"
+        echo -e "${GREEN} -> gpg sign ${NC} (using key ${GPG_KEY_USER})"
         gpg -u "${GPG_KEY_USER}" --armor --output "${FINAL_APK}.sig" --detach-sign "${FINAL_APK}" || quit
     fi
 
+    echo " -> gpg sign successful"
+
     echo -e "${GREEN} -> gpg verify ${FINAL_APK}${NC}"
     gpg --verify "${FINAL_APK}.sig" || quit
+
+    echo " -> gpg verify successful"
+    # If the apkanalyzer is available generate the version code files for the website.
+    ! which apkanalyzer &> /dev/null || {
+        echo -e "${GREEN} -> vercode ${FINAL_APK}${NC}"
+        apkanalyzer manifest version-code ${FINAL_APK} > "${FINAL_APK}.version"
+        echo " -> vercode successful"
+    }
+
 }
 
 # ----Main-----
