@@ -18,11 +18,13 @@ cd $HOME && rm --recursive --force $HOME/.java/ $HOME/.gradle/ $HOME/.android/ $
 [ -n "`pidof java`" ] && kill `ps -ef | grep -v grep | grep -E "org.gradle.wrapper.GradleWrapperMain|org.gradle.launcher.daemon.bootstrap.GradleDaemon" | awk '{print $2}'`
 
 export VERNUM="200"
-export VERSTR="1.0.0-RC1"
+export VERSTR="1.0.0"
 
 [ -d $HOME/android ] && find $HOME/android -mindepth 1 -depth -exec rm -rf {} \;
 git clone https://github.com/lavabit/pahoehoe.git android && cd android && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter android
-git tag --delete $VERSTR &> /dev/null | git tag $VERSTR
+
+# The version string has to exist as a tag or the build will fail. So we create it here, if it doesn't exist already.
+git rev-parse --quiet --verify "${VERSTR}" &>/dev/null || git tag "${VERSTR}"
 
 # Update the Development Fingerprints
 curl --silent --insecure https://api.centos.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/centos.local.json
@@ -33,29 +35,28 @@ curl --silent --insecure https://api.debian.local/ca.crt > $HOME/android/app/src
 
 cat <<-EOF > $HOME/android/local.properties
 
-sdk.dir=/opt/android-sdk-linux/
+org.gradle.jvmargs=-Xincgc -Xmx8192m -XX:MaxMetaspaceSize=2048m
 cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
+sdk.dir=/opt/android-sdk-linux/
 android.ndkVersion=21.4.7075529
+
+android.enableSeparateAnnotationProcessing=false
 org.gradle.parallel=true
+org.gradle.workers.max=6
 org.gradle.caching=true
 org.gradle.daemon=true
-# org.gradle.configureondemand=true
 
 EOF
 
 cat <<-EOF > $HOME/android/app/local.properties
 
 sdk.dir=/opt/android-sdk-linux/
-cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
-org.gradle.parallel=true
-org.gradle.caching=true
-org.gradle.daemon=true
 
 EOF
 
 # If the key script is available, and the key is missing, then run the key script.
 if [ -f $HOME/key.sh ]; then
-  bash -x $HOME/key.sh
+  bash $HOME/key.sh
 fi
 
 # Remove any key/signing settings that might be in the gradle.properties file to

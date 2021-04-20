@@ -196,7 +196,7 @@ android {
       versionCode 200
 
       //Change the versionName as needed.
-      versionName "1.0.0-RC1"
+      versionName "1.0.0"
 
       //skip the account creation / login screen if the provider offers anonymous vpn usage, use directly the anonymous cert instead
       buildConfigField 'boolean', 'priotize_anonymous_usage', 'true'

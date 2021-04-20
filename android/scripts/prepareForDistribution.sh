@@ -124,7 +124,7 @@ function sign {
     echo " -> gpg sign successful"
 
     echo -e "${GREEN} -> gpg verify ${FINAL_APK}${NC}"
-    gpg --verify "${FINAL_APK}.sig" || quit
+    gpg --quiet --verify "${FINAL_APK}.sig" || quit
 
     echo " -> gpg verify successful"
     # If the apkanalyzer is available generate the version code files for the website.

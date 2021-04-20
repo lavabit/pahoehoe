@@ -59,7 +59,7 @@ vagrant ssh-config debian_build > $BASE/build/config
 printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget -r outputs\n" | sftp -q -F $BASE/build/config debian_build
 
 # If there is a releases folder, we want to download that as well, otherwise we skip this step.
-vagrant ssh -c "test ! -d \$HOME/android/releases/" debian_build &> /dev/null && printf "cd /home/vagrant/android/\nlcd $BASE/build/\nget -r releases\n" | sftp -q -F $BASE/build/config debian_build
+vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && { printf "cd /home/vagrant/android/\nlcd $BASE/build/\nget -r releases\n" | sftp -q -F $BASE/build/config debian_build ; }
 
 # Download Termux
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/
