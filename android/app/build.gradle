@@ -560,8 +560,11 @@ android.applicationVariants.all { variant ->
       if (!branding.productFlavor.name.contains("normal") && branding.versionCode != null && branding.versionCode > 0 && abiDimension.abiVersionCode > 0) {
           output.versionCodeOverride = branding.versionCode * 1000 + abiDimension.abiVersionCode
       }
-      else if (abiDimension.abiVersionCode > 0) {
+      else if (branding.productFlavor.name.contains("normal") && abiDimension.abiVersionCode > 0) {
           output.versionCodeOverride = android.defaultConfig.versionCode * 1000 + abiDimension.abiVersionCode
+      }
+      else if (branding.versionCode != null && branding.versionCode > 0) {
+        output.versionCodeOverride = branding.versionCode
       }
   }
 
