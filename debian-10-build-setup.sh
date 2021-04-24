@@ -173,7 +173,7 @@ printf "87f6dcf41d4e642e37ba03cb2e387a542aa0bd73cb689a9e7152aad40a6e7a08  $HOME/
 sudo unzip -qq $HOME/commandlinetools-linux-6858069_latest.zip -d /opt/ && sudo mv /opt/cmdline-tools/ /opt/android-cmdline-tools/ && rm --force $HOME/commandlinetools-linux-6858069_latest.zip
 
 [ -d /opt/android-sdk-linux/ ] && sudo rm --force --recursive /opt/android-sdk-linux/
-yes | sudo sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --licenses > /dev/null
+yes | sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --licenses > /dev/null
 
 sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --install \
 "extras;google;m2repository" "extras;android;m2repository" "cmdline-tools;latest" \
