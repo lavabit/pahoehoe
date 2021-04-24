@@ -1,0 +1,19 @@
+The <i>Lavabit encrypted proxy</i> service is a simple to use, super fast, completely secure service. The service is a completely free public service. No user account or personal information required. It's simply our way ensuring you no longer have any excuse to let anyone log and bog you (down with ads).
+
+<b>Why should you use the Lavabit Encrypted Proxy?</b>
+
+* We do not record anything about how you use the Internet
+* We do not invade your display with ads
+* We do not sell, give or share your data with anyone
+* We do not have any limits on how much or how fast you can download
+* We do not require a user account
+* We do not charge anything for this free service
+* We use fully encrypted physical servers to provide you with the best service
+* We support IPv4 and IPv6 address
+* We use strong encryption to provide PERFECT FORWARD SECRECY for your surfing sessions.
+
+<b>How does Lavabit Encrypted Proxy work?</b>
+
+With the <i>Lavabit Encrypted Proxy,</i> we use Virtual Private Networking (VPN) technology to provide an encrypted pipeline for all your Internet traffic. It's a secure tunnel between your computer and the Internet backbone. Right past any peepers that might be up to no good. From our servers, you can access the Internet without censorship, or surveillance. What's more, the websites and servers you access will no longer see your identity, or rather your IP address, but will instead see the generic proxy address we provide.
+
+Using a <i>Lavabit Encrypted Proxy</i> is a great first step toward protecting your privacy, and taking backing control over what personal information you share, and with whom.
