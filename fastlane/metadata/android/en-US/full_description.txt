@@ -17,3 +17,5 @@ The <i>Lavabit encrypted proxy</i> service is a simple to use, super fast, compl
 With the <i>Lavabit Encrypted Proxy,</i> we use Virtual Private Networking (VPN) technology to provide an encrypted pipeline for all your Internet traffic. It's a secure tunnel between your computer and the Internet backbone. Right past any peepers that might be up to no good. From our servers, you can access the Internet without censorship, or surveillance. What's more, the websites and servers you access will no longer see your identity, or rather your IP address, but will instead see the generic proxy address we provide.
 
 Using a <i>Lavabit Encrypted Proxy</i> is a great first step toward protecting your privacy, and taking backing control over what personal information you share, and with whom.
+
+Note, both the app and backend services have been built using F/OSS software, however this specific app variant is tied specifically to the VPN servers operated by Lavabit.
