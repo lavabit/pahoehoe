@@ -10,7 +10,7 @@ Why should you use the Lavabit Encrypted Proxy?
 • We do not charge anything for this free service
 
 • We use fully encrypted physical servers to provide you with the best service
-• We support IPv4 and IPv6 address
+• We safely mask IPv4 and IPv6 traffic
 • We use strong encryption to provide PERFECT FORWARD SECRECY for your surfing sessions.
 
 How does Lavabit Encrypted Proxy work?
