@@ -1,4 +1,8 @@
-#!/bin/bash -e
+#!/bin/bash
+
+# If the version string/number aren't setup already, we declare them here.
+[ ! -n "$VERNUM" ] && export VERNUM="202"
+[ ! -n "$VERSTR" ] && export VERSTR="1.0.2-RC"
 
 export ANDROID_AVD_HOME=$HOME/.avd
 export ANDROID_SDK_HOME=$HOME/.android
@@ -16,9 +20,6 @@ export GRADLE_USER_HOME=$HOME/.gradle
 cd $HOME && rm --recursive --force $HOME/.cache/Google/ $HOME/.config/Google/ $HOME/.local/share/Google/ $HOME/.cache/Android\ Open\ Source\ Project/ $HOME/.config/Android\ Open\ Source\ Project $HOME/.local/share/Android\ Open\ Source\ Project/
 cd $HOME && rm --recursive --force $HOME/.java/ $HOME/.gradle/ $HOME/.android/ $HOME/.cache/go-build/ $HOME/.cache/JNA/
 [ -n "`pidof java`" ] && kill `ps -ef | grep -v grep | grep -E "org.gradle.wrapper.GradleWrapperMain|org.gradle.launcher.daemon.bootstrap.GradleDaemon" | awk '{print $2}'`
-
-export VERNUM="201"
-export VERSTR="1.0.1"
 
 [ -d $HOME/android ] && find $HOME/android -mindepth 1 -depth -exec rm -rf {} \;
 git clone https://github.com/lavabit/pahoehoe.git android && cd android && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter android

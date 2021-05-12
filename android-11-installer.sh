@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# If the version string isn't already set, we declare it here.
+[ ! -n "$VERSTR" ] && export VERSTR="1.0.2-RC"
+
 # Handle self referencing, sourcing etc.
 if [[ $0 != $BASH_SOURCE ]]; then
   export CMD=$BASH_SOURCE
@@ -38,8 +41,8 @@ while [ "`${ADB} shell getprop init.svc.bootanim | tr -d '\r' `" != "stopped" ] 
 [ -f $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40403.apk ] && ${ADB} install --no-streaming $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40403.apk
 
 # Lavabit Proxy Install
-# [ -f $BASE/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_1.0.1.apk ] && ${ADB} install --no-streaming $BASE/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_1.0.1.apk
-[ -f $BASE/build/outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_1.0.1.apk ] && ${ADB} install --no-streaming $BASE/build/outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_1.0.1.apk
+# [ -f $BASE/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_${VERSTR}.apk ] && ${ADB} install --no-streaming $BASE/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_${VERSTR}.apk
+[ -f $BASE/build/outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_${VERSTR}.apk ] && ${ADB} install --no-streaming $BASE/build/outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_${VERSTR}.apk
 
 # Start the app.
 ${ADB} shell "am start -a android.intent.action.MAIN -n com.lavabit.pahoehoe/se.leap.bitmaskclient.base.StartActivity"
@@ -57,6 +60,6 @@ adb install build/openvpn/de.blinkt.openvpn_175.apk
 adb install build/connectbot/org.connectbot_10906000.apk
 adb install build/cpuinfo/com.kgurgul.cpuinfo_40403.apk
 
-adb install build/outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_1.0.1.apk
+adb install build/outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_${VERSTR}.apk
 adb shell "am start -a android.intent.action.MAIN -n com.lavabit.pahoehoe/se.leap.bitmaskclient.base.StartActivity"
 EOF
