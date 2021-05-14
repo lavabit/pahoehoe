@@ -3,6 +3,13 @@ The client and server code used by Lavabit to operate its encrypted proxy servic
 
 These same scripts can also be used to setup local VPN instances for testing, or be adapted to setup production VPN servers for those interested in forking the app, and creating their own variation.
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.lavabit.pahoehoe/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="80">](https://play.google.com/store/apps/details?id=com.lavabit.pahoehoe)
+
 ### Building (Easy Method)
 To build the code in this repo, clone the repo and execute the `run.sh` script. That script will setup CentOS and Debian virtual machines as local VPN servers, which you can then test against, and it will setup a third Debian virtual machine with the dependencies needed to build the Android APK files. If you would like to build the APK without using the Vagrant VMs consult the `debian-10-build-setup.sh` to see what dependencies are required, and the `debian-10-build.sh` for how to build the APK using the command line.
 
