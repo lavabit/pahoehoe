@@ -12,7 +12,7 @@ Note that building the APK using Android Studio will fail unless you manually bu
 The `lavabitvpn.sh` script demonstrates how to use retrieve the client config, and generate access keys for the proxy service without the client apps and then connect using the OpenVPN binary. Unfortunately this script currently requires root permissions so it can properly secure itself. We've also found that even with root, it may not work properly on all distros.
 
 ### Security Note
-The production releases keys/creation is handled by the `debian-10-build-key.sh` script module. Since this script is likely to contain sensitive information, like the release signing keys, it should never be committed to the repo, or pushed to a serfver. The git ignore directive should prevent this, but for extra security, consider adding the following script as `.git/hooks/pre-commit` to the production build system git repo:
+The production releases keys/creation is handled by the `debian-10-build-key.sh` script module. Since this script is likely to contain sensitive information, like the release signing keys, it should never be committed to the repo, or pushed to a server. The git ignore directive should prevent this, but for extra security, consider adding the following script as `.git/hooks/pre-commit` to the production build system git repo:
 
 ```
 #! /bin/sh -e
