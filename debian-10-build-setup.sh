@@ -111,7 +111,7 @@ EOF
 # sudo systemctl enable nfs-server && sudo systemctl start nfs-server
 
 # Install Atom editor.
-curl --location --silent https://packagecloud.io/AtomEditor/atom/gpgkey | sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-key add -
+bash -c 'curl --location --silent https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -'
 export GNUPGHOME=$(mktemp -d /tmp/gnupg-XXXXXX)
 [ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 0A0FAB860D48560332EFB581B75442BBDE9E3B09 | wc -l`" != "5" ] && exit 1
 rm --force --recursive $GNUPGHOME
@@ -222,7 +222,7 @@ apm install language-kotlin > /dev/null
 apm install language-openvpn > /dev/null
 
 # Install JDK v8
-curl --location --silent https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -
+bash -c 'curl --location --silent https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -'
 export GNUPGHOME=$(mktemp -d /tmp/gnupg-XXXXXX)
 [ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 8ED17AF5D7E675EB3EE3BCE98AC3B29174885C03 | wc -l`" != "5" ] && exit 1
 rm --force --recursive $GNUPGHOME
