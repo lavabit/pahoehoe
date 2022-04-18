@@ -25,20 +25,20 @@ while [ "`${ADB} shell getprop sys.boot_completed | tr -d '\r' `" != "1" ] ; do 
 while [ "`${ADB} shell getprop init.svc.bootanim | tr -d '\r' `" != "stopped" ] ; do sleep 1 ; done
 
 # Termux install
-[ -f $BASE/build/termux/com.termux_108.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux_108.apk
-[ -f $BASE/build/termux/com.termux_108.apk ] && [ -f $BASE/build/termux/com.termux.api_47.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux.api_47.apk
-[ -f $BASE/build/termux/com.termux_108.apk ] && [ -f $BASE/build/termux/com.termux.boot_7.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux.boot_7.apk
-[ -f $BASE/build/termux/com.termux_108.apk ] && [ -f $BASE/build/termux/com.termux.widget_11.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux.widget_11.apk
-[ -f $BASE/build/termux/com.termux_108.apk ] && [ -f $BASE/build/termux/com.termux.styling_29.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux.styling_29.apk
+[ -f $BASE/build/termux/com.termux_118.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux_118.apk
+[ -f $BASE/build/termux/com.termux_118.apk ] && [ -f $BASE/build/termux/com.termux.api_51.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux.api_51.apk
+[ -f $BASE/build/termux/com.termux_118.apk ] && [ -f $BASE/build/termux/com.termux.boot_7.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux.boot_7.apk
+[ -f $BASE/build/termux/com.termux_118.apk ] && [ -f $BASE/build/termux/com.termux.widget_13.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux.widget_13.apk
+[ -f $BASE/build/termux/com.termux_118.apk ] && [ -f $BASE/build/termux/com.termux.styling_29.apk ] && ${ADB} install --no-streaming $BASE/build/termux/com.termux.styling_29.apk
 
 # Install ConnectBot
-[ -f $BASE/build/connectbot/org.connectbot_10906000.apk ] && ${ADB} install --no-streaming $BASE/build/connectbot/org.connectbot_10906000.apk
+[ -f $BASE/build/connectbot/org.connectbot_10908000.apk ] && ${ADB} install --no-streaming $BASE/build/connectbot/org.connectbot_10908000.apk
 
 # OpenVPN client install
-[ -f $BASE/build/openvpn/de.blinkt.openvpn_175.apk ] && ${ADB} install --no-streaming $BASE/build/openvpn/de.blinkt.openvpn_175.apk
+[ -f $BASE/build/openvpn/de.blinkt.openvpn_189.apk ] && ${ADB} install --no-streaming $BASE/build/openvpn/de.blinkt.openvpn_189.apk
 
 # CPU Info Install
-[ -f $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40403.apk ] && ${ADB} install --no-streaming $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40403.apk
+[ -f $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk ] && ${ADB} install --no-streaming $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk
 
 # Lavabit Proxy Install
 # [ -f $BASE/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_${VERSTR}.apk ] && ${ADB} install --no-streaming $BASE/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_${VERSTR}.apk
@@ -51,14 +51,14 @@ exit 0
 
 # The commands in condensed form, for the purpose of cutting and pasting.
 cat <<-EOF
-adb install build/termux/com.termux_108.apk
-adb install build/termux/com.termux.api_47.apk
+adb install build/termux/com.termux_118.apk
+adb install build/termux/com.termux.api_51.apk
 adb install build/termux/com.termux.boot_7.apk
-adb install build/termux/com.termux.widget_11.apk
+adb install build/termux/com.termux.widget_13.apk
 adb install build/termux/com.termux.styling_29.apk
-adb install build/openvpn/de.blinkt.openvpn_175.apk
-adb install build/connectbot/org.connectbot_10906000.apk
-adb install build/cpuinfo/com.kgurgul.cpuinfo_40403.apk
+adb install build/openvpn/de.blinkt.openvpn_189.apk
+adb install build/connectbot/org.connectbot_10908000.apk
+adb install build/cpuinfo/com.kgurgul.cpuinfo_40500.apk
 
 adb install build/outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_${VERSTR}.apk
 adb shell "am start -a android.intent.action.MAIN -n com.lavabit.pahoehoe/se.leap.bitmaskclient.base.StartActivity"

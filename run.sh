@@ -61,21 +61,19 @@ printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget -r outputs\n"
 # If there is a releases folder, we want to download that as well, otherwise we skip this step.
 vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && { printf "cd /home/vagrant/android/\nlcd $BASE/build/\nget -r releases\n" | sftp -q -F $BASE/build/config debian_build ; }
 
-# Download Termux
+# Termux version 118 requires at least v24 of the Android SDK.
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/
+curl --silent --location --output $BASE/build/termux/com.termux_118.apk https://f-droid.org/repo/com.termux_118.apk
+printf "822ac152bd7c2d9770b87c1feea03f22f2349a91b94481b268c739493a260f0b  $BASE/build/termux/com.termux_118.apk" | sha256sum -c || exit 1
 
-# Termux version 108 requires at least v24 of the Android SDK.
-curl --silent --location --output $BASE/build/termux/com.termux_108.apk https://f-droid.org/repo/com.termux_108.apk
-printf "0aa703cf809604cf39d7bf7613cdb96fe4c4a91814aeb67aa91aa3763ecda31f  $BASE/build/termux/com.termux_108.apk" | sha256sum -c || exit 1
-
-curl --silent --location --output $BASE/build/termux/com.termux.api_47.apk https://f-droid.org/repo/com.termux.api_47.apk
-printf "086b8d7f098cee431bfac615213eae2e2cbb44f6f2543ee38a12e0f36b3098f8  $BASE/build/termux/com.termux.api_47.apk" | sha256sum -c || exit 1
+curl --silent --location --output $BASE/build/termux/com.termux.api_51.apk https://f-droid.org/repo/com.termux.api_51.apk
+printf "781ff805619b104115fbf15499414715b4ea6ceb93c4935086a7e35966024f20  $BASE/build/termux/com.termux.api_51.apk" | sha256sum -c || exit 1
 
 curl --silent --location --output $BASE/build/termux/com.termux.boot_7.apk https://f-droid.org/repo/com.termux.boot_7.apk
 printf "35cae49192d073151e3177956ea4f1d6309c2330fed42ec046cbb44cee072a32  $BASE/build/termux/com.termux.boot_7.apk" | sha256sum -c || exit 1
 
-curl --silent --location --output $BASE/build/termux/com.termux.widget_11.apk https://f-droid.org/repo/com.termux.widget_11.apk
-printf "934cfb004993348d207ad3e21928e94fba07cb8185ba292ab5209eab09c15dcc  $BASE/build/termux/com.termux.widget_11.apk" | sha256sum -c || exit 1
+curl --silent --location --output $BASE/build/termux/com.termux.widget_13.apk https://f-droid.org/repo/com.termux.widget_13.apk
+printf "7ec99c3bd53e1fb8737f688bc26fdd0ae931f1f2f7eb9c855de1a0e4eb6147ae  $BASE/build/termux/com.termux.widget_13.apk" | sha256sum -c || exit 1
 
 curl --silent --location --output $BASE/build/termux/com.termux.styling_29.apk https://f-droid.org/repo/com.termux.styling_29.apk
 printf "77bafdb6c4374de0cdabe68f103aca37ef7b81e18272ea663bb9842c82920bec  $BASE/build/termux/com.termux.styling_29.apk" | sha256sum -c || exit 1
@@ -84,20 +82,20 @@ printf "77bafdb6c4374de0cdabe68f103aca37ef7b81e18272ea663bb9842c82920bec  $BASE/
 curl --silent --location --output $BASE/build/termux/com.termux_75.apk https://f-droid.org/archive/com.termux_75.apk
 printf "d88444d9df4049c47f12678feb9579aaf2814a89e411d52653dc0a2509f883b5  $BASE/build/termux/com.termux_75.apk" | sha256sum -c || exit 1
 
-# Download ConnectBot, which will work on devices with at least v14 of the Android SDK.
+# Download ConnectBot, which will work on devices with Android SDK v14 and higher..
 [ -d $BASE/build/connectbot/ ] && rm --force --recursive $BASE/build/connectbot/ ; mkdir --parents $BASE/build/connectbot/
-curl --silent --location --output $BASE/build/connectbot/org.connectbot_10906000.apk https://f-droid.org/repo/org.connectbot_10906000.apk
-printf "7b8fb2aa289c99eaa22bcf267c650609660173b244f83636603b2acf231fa25b  $BASE/build/connectbot/org.connectbot_10906000.apk" | sha256sum -c || exit 1
+curl --silent --location --output $BASE/build/connectbot/org.connectbot_10908000.apk https://f-droid.org/repo/org.connectbot_10908000.apk
+printf "fa9bda5d707ace0b3fdbf4a66d2a3e2b4ada147f261ed2fcce000e7180426044  $BASE/build/connectbot/org.connectbot_10908000.apk" | sha256sum -c || exit 1
 
 # Download the OpenVPN Android GUI
 [ -d $BASE/build/openvpn/ ] && rm --force --recursive $BASE/build/openvpn/ ; mkdir --parents $BASE/build/openvpn/
-curl --silent --location --output $BASE/build/openvpn/de.blinkt.openvpn_175.apk https://f-droid.org/repo/de.blinkt.openvpn_175.apk
-printf "359dd465e81c796c98f9cb4deb493956715c5834ebf31b643f366dcf6a713037  $BASE/build/openvpn/de.blinkt.openvpn_175.apk" | sha256sum -c || exit 1
+curl --silent --location --output $BASE/build/openvpn/de.blinkt.openvpn_189.apk https://f-droid.org/repo/de.blinkt.openvpn_189.apk
+printf "a67fbbb73f1a0bcacc5dd51f8aaf8ee52454094a86b019a93bf0f44c44202d5a  $BASE/build/openvpn/de.blinkt.openvpn_189.apk" | sha256sum -c || exit 1
 
 # Download CPU Info App
 [ -d $BASE/build/cpuinfo/ ] && rm --force --recursive $BASE/build/cpuinfo/ ; mkdir --parents $BASE/build/cpuinfo/
-curl --silent --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40403.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40403.apk
-printf "6c0f6bff9ffd3416ab66b705dca0cff6f02af2ca153a1922b91c2287b8516fc0  $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40403.apk" | sha256sum -c || exit 1
+curl --silent --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40500.apk
+printf "3f70b2cccf987f91e1e6887f66781040e00e76ea6a11cd9024b9b4573cd26855  $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk" | sha256sum -c || exit 1
 
 [ ! -d $BASE/build/source/ ] && mkdir $BASE/build/source/
 sshfs vagrant@192.168.221.50:/home/vagrant/android $BASE/build/source -o uidfile=1000 -o gidfile=1000 \

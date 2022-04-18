@@ -29,9 +29,9 @@ adb push $CERT_FILE /data/misc/user/0/cacerts-added/$CERT_FILE
 adb shell "su 0 chmod 644 /data/misc/user/0/cacerts-added/$CERT_FILE" && sleep 10
 
 ## The commands to preload the certificate into the Termux CA repository.
-# if [ -f $HOME/com.termux_108.apk ]; then
+# if [ -f $HOME/com.termux_118.apk ]; then
 #   adb wait-for-device-sideload
-#   adb install -r -g --no-streaming $HOME/com.termux_108.apk && sleep 5
+#   adb install -r -g --no-streaming $HOME/com.termux_118.apk && sleep 5
 #   adb shell "am start -a android.intent.action.MAIN -n com.termux/.HomeActivity" && sleep 10
 #   adb root && sleep 10
 #
