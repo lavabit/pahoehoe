@@ -1,0 +1,17 @@
+O serviço  Proxy criptografado Lavabit  é um serviço simples de usar, muito rápido e totalmente seguro. O serviço é um serviço público totalmente gratuito. Nenhuma conta de usuário ou informações pessoais são necessárias. É simplesmente a nossa forma de garantir que você não tenha mais nenhuma desculpa para deixar ninguém logar e entediar você (com anúncios).
+
+ Por que você deve usar o Proxy Criptografado Lavabit? 
+
+* Não registramos nada sobre como você usa a Internet
+* Não invadimos sua tela com anúncios
+* Não vendemos, damos ou compartilhamos seus dados com ninguém
+* Não temos limites de quanto ou quão rápido você pode baixar
+* Não exigimos uma conta de usuário
+* Não cobramos nada por este serviço gratuito
+* Usamos servidores físicos totalmente criptografados para fornecer o melhor serviço
+• Nós mascaramos com segurança o tráfego IPv4 e IPv6
+* Usamos criptografia forte para fornecer SEGREDO DIREITO PERFEITO para suas sessões de surf.
+
+ Como funciona o Proxy Criptografado Lavabit? 
+
+Com o  Lavabit Encrypted Proxy , usamos a tecnologia Virtual Private Networking (VPN) para fornecer um pipeline criptografado para todo o tráfego da Internet. É um túnel seguro entre o seu computador e o backbone da Internet. Passando por qualquer observador que possa não servir para nada. De nossos servidores, você pode acessar a Internet sem censura ou vigilância. Além do mais, os sites e servidores que você acessa não verão mais sua identidade, ou melhor, seu endereço IP, mas verão o endereço de proxy genérico que fornecemos.

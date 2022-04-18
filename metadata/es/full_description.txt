@@ -1,0 +1,21 @@
+El servicio <i> proxy cifrado de Lavabit </i> es un servicio fácil de usar, súper rápido y completamente seguro. El servicio es un servicio público completamente gratuito. No se requiere una cuenta de usuario o información personal. Es solo nuestra forma de asegurarnos de que nadie más inicie sesión o se atasque con anuncios.
+
+<b> ¿Por qué debería utilizar el proxy cifrado Lavabit? </b>
+
+* No registramos nada sobre cómo usa Internet.
+* No invadimos su pantalla con anuncios.
+* No vendemos, cedemos ni compartimos sus datos con nadie
+* No tenemos ningún límite sobre cuánto o qué tan rápido puede descargar
+* No requerimos una cuenta de usuario
+* No cobramos nada por este servicio gratuito
+* Usamos servidores físicos totalmente encriptados para brindarle el mejor servicio
+• Enmascaramos de forma segura el tráfico IPv4 e IPv6
+* Usamos un cifrado fuerte para proporcionar un SECRETO ADELANTE PERFECTO para sus sesiones de navegación.
+
+<b> ¿Cómo funciona el proxy cifrado Lavabit? </b>
+
+Con el <i> proxy cifrado de Lavabit </i>, utilizamos la tecnología de redes privadas virtuales (VPN) para proporcionar una canalización cifrada para todo su tráfico de Internet. Es un túnel seguro entre su computadora y la red troncal de Internet. Pasando por delante de los mirones que podrían no estar tramando nada bueno. Desde nuestros servidores, puede acceder a Internet sin censura ni vigilancia. Además, los sitios web y servidores a los que acceda ya no verán su identidad, o más bien su dirección IP, sino que verán la dirección proxy genérica que proporcionamos.
+
+El uso de un <i> proxy cifrado de Lavabit </i> es un excelente primer paso para proteger su privacidad y tomar el control de respaldo sobre la información personal que comparte y con quién.
+
+Tenga en cuenta que tanto la aplicación como los servicios de backend se han creado con el software F / OSS; sin embargo, esta variante de aplicación específica está vinculada específicamente a los servidores VPN operados por Lavabit.

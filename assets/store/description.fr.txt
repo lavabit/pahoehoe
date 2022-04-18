@@ -1,0 +1,21 @@
+Le service proxy chiffré Lavabit est un service simple à utiliser, ultra rapide et entièrement sécurisé. Le service est un service public entièrement gratuit. Aucun compte d'utilisateur ou information personnelle requis. C'est simplement notre façon de nous assurer que vous n'êtes pas connecté par quelqu'un d'autre ou que vous ne vous enlisez pas avec des publicités.
+
+Pourquoi devriez-vous utiliser le proxy crypté Lavabit ?
+
+* Nous n'enregistrons rien sur la façon dont vous utilisez Internet
+* Nous n'envahissons pas votre affichage avec des publicités
+* Nous ne vendons, ne donnons ni ne partageons vos données avec qui que ce soit
+* Nous n'avons aucune limite sur la quantité ou la vitesse à laquelle vous pouvez télécharger
+* Nous n'avons pas besoin d'un compte utilisateur
+* Nous ne facturons rien pour ce service gratuit
+* Nous utilisons des serveurs physiques entièrement cryptés pour vous fournir le meilleur service
+• Nous masquons en toute sécurité le trafic IPv4 et IPv6
+* Nous utilisons un cryptage fort pour fournir un PARFAIT SECRET DE TRANSFERT pour vos sessions de navigation.
+
+Comment fonctionne le proxy crypté Lavabit ?
+
+Avec le proxy crypté Lavabit, nous utilisons la technologie de réseau privé virtuel (VPN) pour fournir un pipeline crypté pour tout votre trafic Internet. Il s'agit d'un tunnel sécurisé entre votre ordinateur et la dorsale Internet. Juste après tous les voyeurs qui pourraient ne rien faire de bon. Depuis nos serveurs, vous pouvez accéder à Internet sans censure ni surveillance. De plus, les sites Web et serveurs auxquels vous accédez ne verront plus votre identité, ou plutôt votre adresse IP, mais verront plutôt l'adresse proxy générique que nous fournissons.
+
+L'utilisation d'un proxy crypté Lavabit est un premier pas important vers la protection de votre vie privée et le contrôle des informations personnelles que vous partagez et avec qui.
+
+Notez que l'application et les services principaux ont été créés à l'aide du logiciel F/OSS, mais cette variante d'application spécifique est spécifiquement liée aux serveurs VPN exploités par Lavabit.

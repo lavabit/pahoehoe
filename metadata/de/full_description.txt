@@ -1,0 +1,21 @@
+Der <i>Lavabit-verschlüsselte Proxy</i>-Dienst ist ein einfach zu bedienender, superschneller und absolut sicherer Dienst. Der Dienst ist ein völlig kostenloser öffentlicher Dienst. Kein Benutzerkonto oder persönliche Informationen erforderlich. Es ist einfach unsere Art sicherzustellen, dass Sie sich, nicht mehr von jemandem Loggen zu lassen oder mit Werbung verzetteln werden.
+
+<b>Warum sollten Sie den Lavabit Encrypted Proxy verwenden?</b>
+
+* Wir erfassen nichts darüber, wie Sie das Internet nutzen
+* Wir überfluten Ihr Display nicht mit Anzeigen
+* Wir verkaufen, geben oder teilen Ihre Daten mit niemandem
+* Wir haben keine Beschränkungen, wie viel oder wie schnell Sie herunterladen können
+* Wir benötigen kein Benutzerkonto
+* Für diesen kostenlosen Service berechnen wir nichts
+* Wir verwenden vollständig verschlüsselte physische Server, um Ihnen den besten Service zu bieten
+• Wir maskieren IPv4- und IPv6-Datenverkehr sicher
+* Wir verwenden eine starke Verschlüsselung, um PERFEKTE VORWÄRTSSICHERHEIT für Ihre Surfsitzungen zu gewährleisten.
+
+<b>Wie funktioniert Lavabit Encrypted Proxy?</b>
+
+Mit dem <i>Lavabit Encrypted Proxy</i> verwenden wir die Virtual Private Networking (VPN)-Technologie, um eine verschlüsselte Pipeline für Ihren gesamten Internetverkehr bereitzustellen. Es ist ein sicherer Tunnel zwischen Ihrem Computer und dem Internet-Backbone. Direkt an allen Spähern vorbei, die nichts Gutes im Schilde führen könnten. Von unseren Servern können Sie ohne Zensur oder Überwachung auf das Internet zugreifen. Darüber hinaus sehen die Websites und Server, auf die Sie zugreifen, nicht mehr Ihre Identität bzw. Ihre IP-Adresse, sondern die von uns bereitgestellte generische Proxy-Adresse.
+
+Die Verwendung eines <i>verschlüsselten Lavabit-Proxys</i> ist ein großartiger erster Schritt, um Ihre Privatsphäre zu schützen und die Kontrolle darüber zu erlangen, welche persönlichen Informationen Sie mit wem teilen.
+
+Beachten Sie, dass sowohl die App als auch die Backend-Dienste mit F/OSS-Software erstellt wurden, diese spezielle App-Variante jedoch speziell an die von Lavabit betriebenen VPN-Server gebunden ist.
