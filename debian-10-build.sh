@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# If the version string/number aren't setup already, we declare them here.
-[ ! -n "$VERNUM" ] && export VERNUM="202"
-[ ! -n "$VERSTR" ] && export VERSTR="1.0.2-RC"
-
 export ANDROID_AVD_HOME=$HOME/.avd
 export ANDROID_SDK_HOME=$HOME/.android
 export ANDROID_PREFS_ROOT=$HOME/.android
@@ -15,6 +11,12 @@ export GRADLE_USER_HOME=$HOME/.gradle
 
 # alias javac='javac -Xlint:-deprecation -Xlint:-unchecked'
 # export JDK_JAVAC_OPTIONS="-Xlint:-deprecation -Xlint:-unchecked"
+
+if [ ! -n "$VERNUM" ] || [ ! -n "$VERSTR" ]; then
+  printf "The VERNUM or VERSTR strings are empty. Error.\n"
+  exit 1
+fi
+
 
 # Remove everything that might be left over from a previous build.
 cd $HOME && rm --recursive --force $HOME/.cache/Google/ $HOME/.config/Google/ $HOME/.local/share/Google/ $HOME/.cache/Android\ Open\ Source\ Project/ $HOME/.config/Android\ Open\ Source\ Project $HOME/.local/share/Android\ Open\ Source\ Project/

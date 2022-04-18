@@ -16,6 +16,12 @@ cd $BASE
 # Set libvirt as the default provider, but allow an environment variable to override it.
 [ ! -n "$PROVIDER" ] && export PROVIDER="libvirt"
 
+# If the version string/number aren't setup already, we declare them here. Note the default values
+# should match the values inside the android/app/build.gradle file. Specifically, the 
+# android -> lavabit -> versionName and android -> lavabit -> versionCode values.
+[ ! -n "$VERNUM" ] && export VERNUM="202"
+[ ! -n "$VERSTR" ] && export VERSTR="1.0.2"
+
 # Cleanup.
 [ -d $BASE/build/source/ ] && sudo umount --force $BASE/build/source/ &>/dev/null
 [ -d $BASE/build/source/ ] && rmdir $BASE/build/source/ &>/dev/null
@@ -26,7 +32,7 @@ vagrant destroy -f &>/dev/null
 
 # # Create virtual machines..
 set -e
-vagrant up --provider=libvirt
+vagrant up --provider=$PROVIDER
 
 # Upload the scripts.
 vagrant upload centos-8-vpnweb.sh vpnweb.sh centos_vpn &> /dev/null
