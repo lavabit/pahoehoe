@@ -8,13 +8,13 @@ fs.inotify.max_user_watches = 100000
 user.max_inotify_watches = 100000
 EOF
 
-sudo sysctl -p --system
+sudo sysctl --quiet -p --system
 sudo sed -i "s/1024/3072/g" /etc/default/haveged
 sudo sed -i "s/ENABLED=.*/ENABLED=\"true\"/g" /etc/default/sysstat
-sudo systemctl restart haveged && sudo systemctl restart sysstat
+sudo systemctl--quiet restart haveged && sudo systemctl --quiet restart sysstat
 
 # Point us at the development environment.
-sudo tee --append /etc/hosts <<-EOF
+sudo tee --append /etc/hosts <<-EOF > /dev/null
 192.168.221.146 api.debian.local
 192.168.221.142 vpn.debian.local
 192.168.221.142 142.vpn.debian.local
@@ -46,8 +46,8 @@ sudo tee -a /etc/sysctl.conf <<-EOF > /dev/null
 vm.swappiness=10
 vm.vfs_cache_pressure=50
 EOF
-sudo sysctl vm.vfs_cache_pressure=50 > /dev/null
-sudo sysctl vm.swappiness=10 > /dev/null
+sudo sysctl --quiet vm.vfs_cache_pressure=50
+sudo sysctl --quiet vm.swappiness=10
 
 # Trim the drive to free space.
 sudo sed -i "s/OnCalendar.*/OnCalendar=hourly/g" /lib/systemd/system/fstrim.timer

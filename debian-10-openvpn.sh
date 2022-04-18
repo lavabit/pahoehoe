@@ -24,10 +24,10 @@ tls_www_server
 EOF
 
 # VPN
-certtool --sec-param=high --bits=4096 --generate-privkey --outfile /etc/openvpn/vpn-key.pem --template /etc/openvpn/vpn-cert.cfg
-certtool --generate-request --load-privkey /etc/openvpn/vpn-key.pem --outfile /etc/openvpn/vpn-request.pem --template /etc/openvpn/vpn-cert.cfg
-certtool --generate-certificate --load-request=/etc/openvpn/vpn-request.pem --load-privkey /etc/openvpn/vpn-key.pem --outfile /etc/openvpn/vpn-cert.pem \
-  --load-ca-certificate /etc/vpnweb/ca-cert.pem --load-ca-privkey /etc/vpnweb/ca-key.pem --template /etc/openvpn/vpn-cert.cfg
+certtool --stdout-info --sec-param=high --bits=4096 --generate-privkey --outfile /etc/openvpn/vpn-key.pem --template /etc/openvpn/vpn-cert.cfg 1>/dev/null
+certtool --stdout-info --generate-request --load-privkey /etc/openvpn/vpn-key.pem --outfile /etc/openvpn/vpn-request.pem --template /etc/openvpn/vpn-cert.cfg 1>/dev/null
+certtool --stdout-info --generate-certificate --load-request=/etc/openvpn/vpn-request.pem --load-privkey /etc/openvpn/vpn-key.pem --outfile /etc/openvpn/vpn-cert.pem \
+  --load-ca-certificate /etc/vpnweb/ca-cert.pem --load-ca-privkey /etc/vpnweb/ca-key.pem --template /etc/openvpn/vpn-cert.cfg 1>/dev/null
 
 # DH Params
 # Pre-generated DH values for use on test servers. Uncomment
@@ -408,8 +408,8 @@ net.ipv6.conf.all.disable_ipv6 = 0
 
 EOF
 
-sed -i '/all.disable_ipv6/d' /etc/sysctl.conf && sysctl net.ipv6.conf.all.disable_ipv6=0
-sysctl -p < /etc/sysctl.d/10-forwarding.conf
+sed -i '/all.disable_ipv6/d' /etc/sysctl.conf && sysctl --quiet net.ipv6.conf.all.disable_ipv6=0
+sysctl --quiet -p < /etc/sysctl.d/10-forwarding.conf
 
 # Increase the system limits so TOR can make better use the hardware.
 cat <<-EOF > /etc/security/limits.d/50-global.conf
@@ -432,15 +432,15 @@ cat <<-EOF > /etc/systemd/system/openvpn-server@.service.d/override.conf
 LimitNOFILE=65535
 EOF
 
-systemctl daemon-reload
-systemctl enable openvpn-server@tcp.142.service && systemctl start openvpn-server@tcp.142.service
-systemctl enable openvpn-server@tcp.143.service && systemctl start openvpn-server@tcp.143.service
-systemctl enable openvpn-server@tcp.144.service && systemctl start openvpn-server@tcp.144.service
-systemctl enable openvpn-server@tcp.145.service && systemctl start openvpn-server@tcp.145.service
-systemctl enable openvpn-server@udp.142.service && systemctl start openvpn-server@udp.142.service
-systemctl enable openvpn-server@udp.143.service && systemctl start openvpn-server@udp.143.service
-systemctl enable openvpn-server@udp.144.service && systemctl start openvpn-server@udp.144.service
-systemctl enable openvpn-server@udp.145.service && systemctl start openvpn-server@udp.145.service
+systemctl --quiet daemon-reload
+systemctl --quiet enable openvpn-server@tcp.142.service && systemctl --quiet start openvpn-server@tcp.142.service
+systemctl --quiet enable openvpn-server@tcp.143.service && systemctl --quiet start openvpn-server@tcp.143.service
+systemctl --quiet enable openvpn-server@tcp.144.service && systemctl --quiet start openvpn-server@tcp.144.service
+systemctl --quiet enable openvpn-server@tcp.145.service && systemctl --quiet start openvpn-server@tcp.145.service
+systemctl --quiet enable openvpn-server@udp.142.service && systemctl --quiet start openvpn-server@udp.142.service
+systemctl --quiet enable openvpn-server@udp.143.service && systemctl --quiet start openvpn-server@udp.143.service
+systemctl --quiet enable openvpn-server@udp.144.service && systemctl --quiet start openvpn-server@udp.144.service
+systemctl --quiet enable openvpn-server@udp.145.service && systemctl --quiet start openvpn-server@udp.145.service
 
 
 # env DEBCONF_NONINTERACTIVE_SEEN=true DEBIAN_FRONTEND=noninteractive apt-get -qq -y install dnsmasq < /dev/null > /dev/null
@@ -458,7 +458,7 @@ systemctl enable openvpn-server@udp.145.service && systemctl start openvpn-serve
 # bind-interfaces
 # EOF
 
-# systemctl enable dnsmasq.service && systemctl start dnsmasq.service
+# systemctl --quiet enable dnsmasq.service && systemctl --quiet start dnsmasq.service
 
 iptables --append FORWARD -i tun0 -j ACCEPT
 iptables --append FORWARD -i tun1 -j ACCEPT
@@ -505,9 +505,6 @@ iptables --table nat --append POSTROUTING -s 10.85.0.0/24 -o eth1 -j MASQUERADE
 iptables-save > /etc/iptables/rules.v4
 ip6tables-save > /etc/iptables/rules.v6
 
-# firewall-cmd --add-port=443/tcp && firewall-cmd --add-port=443/tcp --permanent
-# firewall-cmd --add-port=443/udp && firewall-cmd --add-port=443/udp --permanent
-
 # Discard swap pages to free space.
 sudo swapoff --all
 sudo sed -i "s/swap    sw/swap    pri=1,discard,sw/g" /etc/fstab
@@ -516,7 +513,7 @@ sudo swapon --all
 # Trim the drive to free space.
 sudo sed -i "s/OnCalendar.*/OnCalendar=hourly/g" /lib/systemd/system/fstrim.timer
 sudo sed -i "s/AccuracySec.*/AccuracySec=5m/g" /lib/systemd/system/fstrim.timer
-sudo systemctl daemon-reload && sudo systemctl enable fstrim.timer
+sudo systemctl --quiet daemon-reload && sudo systemctl --quiet enable fstrim.timer
 sudo fstrim --all
 
 

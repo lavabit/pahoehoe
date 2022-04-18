@@ -424,8 +424,8 @@ net.ipv6.conf.all.disable_ipv6 = 0
 
 EOF
 
-sed -i '/all.disable_ipv6/d' /etc/sysctl.conf && sysctl net.ipv6.conf.all.disable_ipv6=0
-sysctl -p < /etc/sysctl.d/10-forwarding.conf
+sed -i '/all.disable_ipv6/d' /etc/sysctl.conf && sysctl --quiet net.ipv6.conf.all.disable_ipv6=0
+sysctl --quiet -p < /etc/sysctl.d/10-forwarding.conf
 
 # Increase the system limits so TOR can make better use the hardware.
 cat <<-EOF > /etc/security/limits.d/50-global.conf
@@ -496,19 +496,19 @@ systemctl --quiet enable dnsmasq.service && systemctl --quiet start dnsmasq.serv
 
 # Firewall rules.
 DEVICE=$(ip route | awk '/^default via/ {print $5}')
-firewall-cmd --add-port=53/udp && firewall-cmd --add-port=53/udp --permanent 1>/dev/null
-firewall-cmd --add-port=443/tcp && firewall-cmd --add-port=443/tcp --permanent 1>/dev/null
+firewall-cmd --add-port=53/udp 1>/dev/null && firewall-cmd --add-port=53/udp --permanent 1>/dev/null
+firewall-cmd --add-port=443/tcp 1>/dev/null && firewall-cmd --add-port=443/tcp --permanent 1>/dev/null
 
-firewall-cmd --zone=trusted --add-interface=tun0 && firewall-cmd --permanent --zone=trusted --add-interface=tun0 1>/dev/null
-firewall-cmd --zone=trusted --add-interface=tun1 && firewall-cmd --permanent --zone=trusted --add-interface=tun1 1>/dev/null
-firewall-cmd --zone=trusted --add-interface=tun2 && firewall-cmd --permanent --zone=trusted --add-interface=tun2 1>/dev/null
-firewall-cmd --zone=trusted --add-interface=tun3 && firewall-cmd --permanent --zone=trusted --add-interface=tun3 1>/dev/null
-firewall-cmd --zone=trusted --add-interface=tun4 && firewall-cmd --permanent --zone=trusted --add-interface=tun4 1>/dev/null
-firewall-cmd --zone=trusted --add-interface=tun5 && firewall-cmd --permanent --zone=trusted --add-interface=tun5 1>/dev/null
-firewall-cmd --zone=trusted --add-interface=tun6 && firewall-cmd --permanent --zone=trusted --add-interface=tun6 1>/dev/null
-firewall-cmd --zone=trusted --add-interface=tun7 && firewall-cmd --permanent --zone=trusted --add-interface=tun7 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun0 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun0 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun1 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun1 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun2 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun2 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun3 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun3 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun4 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun4 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun5 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun5 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun6 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun6 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun7 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun7 1>/dev/null
 
-firewall-cmd --add-masquerade && firewall-cmd --add-masquerade --permanent
+firewall-cmd --add-masquerade 1>/dev/null && firewall-cmd --add-masquerade --permanent 1>/dev/null
 firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.142.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
 firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.143.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
 firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.144.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null

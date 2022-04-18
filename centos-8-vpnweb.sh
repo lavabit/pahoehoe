@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 sed -i "s/1024/3072 -b 1024 -d 1024 -i 1024/g" /usr/lib/systemd/system/haveged.service
-systemctl daemon-reload && systemctl restart haveged && sudo systemctl restart sysstat
+systemctl --quiet daemon-reload && systemctl restart haveged && sudo systemctl --quiet restart sysstat
 
 # Point us at the development environment.
 tee --append /etc/hosts <<-EOF > /dev/null
@@ -91,7 +91,7 @@ rm --force /etc/vpnweb/ca.cfg
 rm --force /etc/vpnweb/tls-cert.cfg
 rm --force /etc/vpnweb/tls-request.pem
 
-export FINGERPRINT="`certtool --certificate-info --infile /etc/vpnweb/ca-cert.pem | grep 'sha256:' | head -1 | tr -d '[:space:]' | awk -F':' '{print $2}'`"
+export FINGERPRINT="`certtool --stdout-info --certificate-info --infile /etc/vpnweb/ca-cert.pem | grep 'sha256:' | head -1 | tr -d '[:space:]' | awk -F':' '{print $2}'`"
 
 cat <<-EOF > /etc/vpnweb/provider.yaml
 auth: anon
@@ -254,8 +254,8 @@ EOF
 
 chcon system_u:object_r:systemd_unit_file_t:s0 /usr/lib/systemd/system/vpnweb.service
 
-systemctl daemon-reload
-systemctl enable vpnweb.service && systemctl start vpnweb.service
+systemctl --quiet daemon-reload
+systemctl --quiet enable vpnweb.service && systemctl --quiet start vpnweb.service
 
 echo "VPN web service installed."
 echo "Starting unit tests."
