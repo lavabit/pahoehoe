@@ -60,7 +60,7 @@ vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -e < openvpn.sh
 
 # Compile the Android client.
 vagrant ssh --no-color --no-tty -c 'TERM=vt100 bash -e setup.sh' debian_build
-vagrant ssh --no-color --no-tty -c 'TERM=vt100 bash -e build.sh' debian_build
+vagrant ssh --no-color --no-tty -c "VERNUM=$VERNUM VERSTR=$VERSTR TERM=vt100 bash -e build.sh" debian_build
 
 # Extract the Android APKs from the build environment.
 [ -d $BASE/build/ ] && rm --force --recursive $BASE/build/ ; mkdir $BASE/build/
