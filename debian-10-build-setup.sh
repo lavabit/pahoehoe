@@ -168,9 +168,9 @@ sudo update-alternatives --set javac /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/b
 sudo apt-file update &> /dev/null
 
 # Install the Android command line tools.
-curl --silent --show-error --location --output $HOME/commandlinetools-linux-6858069_latest.zip https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip
-printf "87f6dcf41d4e642e37ba03cb2e387a542aa0bd73cb689a9e7152aad40a6e7a08  $HOME/commandlinetools-linux-6858069_latest.zip" | sha256sum -c || exit 1
-sudo unzip -qq $HOME/commandlinetools-linux-6858069_latest.zip -d /opt/ && sudo mv /opt/cmdline-tools/ /opt/android-cmdline-tools/ && rm --force $HOME/commandlinetools-linux-6858069_latest.zip
+curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip
+printf "d71f75333d79c9c6ef5c39d3456c6c58c613de30e6a751ea0dbd433e8f8b9cbf  $HOME/commandlinetools-linux-8092744_latest.zip" | sha256sum -c || exit 1
+sudo unzip -qq $HOME/commandlinetools-linux-8092744_latest.zip -d /opt/ && sudo mv /opt/cmdline-tools/ /opt/android-cmdline-tools/ && rm --force $HOME/commandlinetools-linux-8092744_latest.zip
 
 [ -d /opt/android-sdk-linux/ ] && sudo rm --force --recursive /opt/android-sdk-linux/
 yes | sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --licenses > /dev/null
