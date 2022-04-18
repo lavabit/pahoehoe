@@ -32,7 +32,7 @@ vagrant destroy -f &>/dev/null
 
 # # Create virtual machines..
 set -e
-vagrant up --no-tty --provider=$PROVIDER
+vagrant up --no-color --no-tty --provider=$PROVIDER 1>/dev/null
 
 # Upload the scripts.
 vagrant upload centos-8-vpnweb.sh vpnweb.sh centos_vpn &> /dev/null
@@ -53,14 +53,14 @@ vagrant ssh -c 'chmod +x setup.sh build.sh rebuild.sh' debian_build &> /dev/null
 [ -f debian-10-build-key.sh ] && vagrant ssh -c 'chmod +x key.sh' debian_build &> /dev/null
 
 # Provision the VPN service.
-vagrant ssh --no-tty -c 'sudo --login TERM=vt100 bash -e < vpnweb.sh' centos_vpn
-vagrant ssh --no-tty -c 'sudo --login TERM=vt100 bash -e < openvpn.sh' centos_vpn
-vagrant ssh --no-tty -c 'sudo --login TERM=vt100 bash -e < vpnweb.sh' debian_vpn
-vagrant ssh --no-tty -c 'sudo --login TERM=vt100 bash -e < openvpn.sh' debian_vpn
+vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -e < vpnweb.sh' centos_vpn
+vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -e < openvpn.sh' centos_vpn
+vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -e < vpnweb.sh' debian_vpn
+vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -e < openvpn.sh' debian_vpn
 
 # Compile the Android client.
-vagrant ssh --no-tty -c 'TERM=vt100 bash -e setup.sh' debian_build
-vagrant ssh --no-tty -c 'TERM=vt100 bash -e build.sh' debian_build
+vagrant ssh --no-color --no-tty -c 'TERM=vt100 bash -e setup.sh' debian_build
+vagrant ssh --no-color --no-tty -c 'TERM=vt100 bash -e build.sh' debian_build
 
 # Extract the Android APKs from the build environment.
 [ -d $BASE/build/ ] && rm --force --recursive $BASE/build/ ; mkdir $BASE/build/

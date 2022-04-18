@@ -1,8 +1,5 @@
 #!/bin/bash -e
 
-export DEBIAN_FRONTEND=noninteractive
-export DEBCONF_NONINTERACTIVE_SEEN=true
-
 sudo tee /etc/modprobe.d/nested.conf <<-EOF > /dev/null
 options kvm_intel nested=1
 EOF
@@ -49,13 +46,13 @@ sudo tee -a /etc/sysctl.conf <<-EOF > /dev/null
 vm.swappiness=10
 vm.vfs_cache_pressure=50
 EOF
-sudo sysctl vm.vfs_cache_pressure=50
-sudo sysctl vm.swappiness=10
+sudo sysctl vm.vfs_cache_pressure=50 > /dev/null
+sudo sysctl vm.swappiness=10 > /dev/null
 
 # Trim the drive to free space.
 sudo sed -i "s/OnCalendar.*/OnCalendar=hourly/g" /lib/systemd/system/fstrim.timer
 sudo sed -i "s/AccuracySec.*/AccuracySec=5m/g" /lib/systemd/system/fstrim.timer
-sudo systemctl daemon-reload && sudo systemctl enable fstrim.timer
+sudo systemctl --quiet daemon-reload && sudo systemctl --quiet enable fstrim.timer
 
 # Prevent an error.
 #sudo mkdir --parents /etc/ssl/certs/java/cacerts
@@ -69,7 +66,7 @@ APT::Get::Assume-Yes "true";
 Dpkg::Use-Pty "0";
 EOF
 
-sudo apt-get -qq -y update && sudo apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl diffoscope dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl diffoscope dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null
 
 # Android client build.
 cd $HOME
@@ -114,12 +111,13 @@ EOF
 # sudo systemctl enable nfs-server && sudo systemctl start nfs-server
 
 # Install Atom editor.
-curl --location --silent https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+curl --location --silent https://packagecloud.io/AtomEditor/atom/gpgkey | sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-key add -
 export GNUPGHOME=$(mktemp -d /tmp/gnupg-XXXXXX)
 [ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 0A0FAB860D48560332EFB581B75442BBDE9E3B09 | wc -l`" != "5" ] && exit 1
 rm --force --recursive $GNUPGHOME
-sudo add-apt-repository --yes 'deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main'
-sudo apt-get -qq -y update < /dev/null > /dev/null && sudo apt-get -qq -y install atom < /dev/null > /dev/null
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-repository --yes 'deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main'
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update < /dev/null > /dev/null && \
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install atom < /dev/null > /dev/null
 
 # Setup Atom with an initial config, that matches our personal preferences.
 [ ! -d $HOME/.atom/ ] && mkdir $HOME/.atom/
@@ -228,8 +226,8 @@ curl --location --silent https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/
 export GNUPGHOME=$(mktemp -d /tmp/gnupg-XXXXXX)
 [ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 8ED17AF5D7E675EB3EE3BCE98AC3B29174885C03 | wc -l`" != "5" ] && exit 1
 rm --force --recursive $GNUPGHOME
-sudo add-apt-repository --yes 'deb [arch=amd64] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main'
-sudo apt-get -qq -y update && sudo apt-get -qq -y install adoptopenjdk-8-hotspot < /dev/null > /dev/null
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-repository --yes 'deb [arch=amd64] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main'
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install adoptopenjdk-8-hotspot < /dev/null > /dev/null
 
 sudo update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/java
 sudo update-alternatives --set javac /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/javac
