@@ -11,7 +11,7 @@ EOF
 sudo sysctl --quiet -p --system
 sudo sed -i "s/1024/3072/g" /etc/default/haveged
 sudo sed -i "s/ENABLED=.*/ENABLED=\"true\"/g" /etc/default/sysstat
-sudo systemctl--quiet restart haveged && sudo systemctl --quiet restart sysstat
+sudo systemctl --quiet restart haveged && sudo systemctl --quiet restart sysstat
 
 # Point us at the development environment.
 sudo tee --append /etc/hosts <<-EOF > /dev/null
