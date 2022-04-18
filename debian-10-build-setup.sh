@@ -121,12 +121,35 @@ rm --force --recursive $GNUPGHOME
 sudo add-apt-repository --yes 'deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main'
 sudo apt-get -qq -y update && sudo apt-get -qq -y install atom < /dev/null > /dev/null
 
-mkdir $HOME/.atom/
+# Setup Atom with an initial config, that matches our personal preferences.
+[ ! -d $HOME/.atom/ ] && mkdir $HOME/.atom/
 cat <<-EOF > $HOME/.atom/config.cson
 "*":
+  "atom-beautify":
+    html:
+      indent_size: 2
+  "atom-material-ui":
+    colors:
+      paintCursor: true
+    tabs:
+      compactTabs: true
+  "autocomplete-plus":
+    enableAutoConfirmSingleSuggestion: false
+  autosave: {}
   core:
-    autoHideMenuBar: true
+    autoHideMenuBar: false
+    automaticallyUpdate: false
+    closeEmptyWindows: false
+    disabledPackages: [
+      "welcome"
+      "metrics"
+      "exception-reporting"
+      "github"
+    ]
     telemetryConsent: "no"
+    useTreeSitterParsers: true
+    reopenProjectMenuCount: 30
+    useTreeSitterParsers: false
   editor:
     atomicSoftTabs: false
     defaultFontSize: 16
@@ -134,24 +157,71 @@ cat <<-EOF > $HOME/.atom/config.cson
     maxScreenLineLength: 1000
     showIndentGuide: true
     showInvisibles: true
-  "exception-reporting":
-    userId: "1b012ae8-7202-4b35-8d00-74c601e90fc1"
+    softWrap: false
+    tabType: "soft"
+  "find-and-replace": {}
+  "git-diff":
+    showIconsInEditorGutter: true
+  "spell-check":
+    addKnownWords: true
+    grammars: [
+      "source.shell"
+      "source.c"
+    ]
+    knownWords: [
+      "runtime"
+      "virtualization"
+    ]
+    localePaths: [
+      "/usr/share/myspell/"
+    ]
+    locales: [
+      "en-US"
+    ]
+    useSystem: false
+  github:
+    showDiffIconGutter: true
+  "one-dark-ui":
+    fontSize: 16
+  "open-recent":
+    maxRecentDirectories: 30
+    maxRecentFiles: 100
+  "tree-view":
+    squashDirectoryNames: true
   welcome:
     showOnStartup: false
   whitespace:
-    removeTrailingWhitespace: false
     ensureSingleTrailingNewline: false
+    removeTrailingWhitespace: false
 EOF
 
-# Atom Packages
-apm install sort-lines
-apm install open-recent
-apm install atom-beautify
-apm install language-cmake
-apm install language-groovy
-apm install language-gradle
-apm install language-kotlin
-apm install language-openvpn
+# Hide the tree view when Atom loads.
+cat <<-EOF > $HOME/.atom/init.coffee
+
+# waitForPackageActivation = (causeTreeToggle) ->
+#   disposable = atom.workspace.onDidOpen ({item}) ->
+#     atom.commands.dispatch atom.views.getView(atom.workspace), 'tree-view:toggle'
+#     disposable.dispose()
+# waitForPackageActivation()
+
+atom.workspace.onDidOpen ({item}) ->
+  itemName = item.constructor.name
+  if (itemName  != 'TreeView')
+    dock = atom.workspace.paneContainerForURI('atom://tree-view')
+    if dock && dock.isVisible()
+      dock.hide()
+
+EOF
+
+# Install the Atom packages we like having.
+apm install sort-lines > /dev/null
+apm install open-recent > /dev/null
+apm install atom-beautify > /dev/null
+apm install language-cmake > /dev/null
+apm install language-groovy > /dev/null
+apm install language-gradle > /dev/null
+apm install language-kotlin > /dev/null
+apm install language-openvpn > /dev/null
 
 # Install JDK v8
 curl --location --silent https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -
@@ -169,6 +239,8 @@ sudo apt-file update &> /dev/null
 
 # Install the Android command line tools.
 curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip
+printf "d71f75333d79c9c6ef5c39d3456c6c58c613de30e6a751ea0dbd433e8f8b9cbf  $HOME/commandlinetools-linux-8092744_latest.zip" | sha256sum -c || \
+( rm -f $HOME/commandlinetools-linux-8092744_latest.zip ; curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://dl-ssl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip )
 printf "d71f75333d79c9c6ef5c39d3456c6c58c613de30e6a751ea0dbd433e8f8b9cbf  $HOME/commandlinetools-linux-8092744_latest.zip" | sha256sum -c || exit 1
 sudo unzip -qq $HOME/commandlinetools-linux-8092744_latest.zip -d /opt/ && sudo mv /opt/cmdline-tools/ /opt/android-cmdline-tools/ && rm --force $HOME/commandlinetools-linux-8092744_latest.zip
 
