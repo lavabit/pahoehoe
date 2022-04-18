@@ -15,6 +15,9 @@ To build the code in this repo, clone the repo and execute the `run.sh` script. 
 
 Note that building the APK using Android Studio will fail unless you manually build the VPN libraries using the command line, before importing the project. Use the `android/scripts/build_deps.sh` to build the binary libraries via the command line.
 
+**Release Checklist**   
+To create a new release, update the `android/app/build.gradle` file. Update the `android -> lavabit -> versionName` and the `android -> lavabit -> versionCode` values, and commit the change. Then create a corresponding Git tag for the commit  which matches the version name. Once finished, kickoff the `run.sh` script, with the proper `debian-10-build-key.sh` file in place.
+
 ### Direct Access
 The `lavabitvpn.sh` script demonstrates how to use retrieve the client config, and generate access keys for the proxy service without the client apps and then connect using the OpenVPN binary. Unfortunately this script currently requires root permissions so it can properly secure itself. We've also found that even with root, it may not work properly on all distros.
 
