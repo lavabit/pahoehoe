@@ -1,6 +1,9 @@
 #!/bin/bash -e
 
-env DEBCONF_NONINTERACTIVE_SEEN=true DEBIAN_FRONTEND=noninteractive apt-get -qq -y install golang gnutls-bin git gnupg nload net-tools toxiproxy-cli expect build-essential pkg-config golang-go ca-certificates openvpn python3-pysodium python3-jinja2 python3-netaddr python3-openssl python3-yaml python3-six python3-crypto jq daemon < /dev/null > /dev/null
+export DEBCONF_NONINTERACTIVE_SEEN=true 
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get -qq -y install golang gnutls-bin git gnupg nload net-tools toxiproxy-cli expect build-essential pkg-config golang-go ca-certificates openvpn python3-pysodium python3-jinja2 python3-netaddr python3-openssl python3-yaml python3-six python3-crypto jq daemon < /dev/null > /dev/null
 
 sed -i "s/1024/3072 -b 1024 -d 1024 -i 1024/g" /etc/default/haveged
 sed -i "s/ENABLED=.*/ENABLED=\"true\"/g" /etc/default/sysstat

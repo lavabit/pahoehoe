@@ -53,14 +53,14 @@ vagrant ssh -c 'chmod +x setup.sh build.sh rebuild.sh' debian_build &> /dev/null
 [ -f debian-10-build-key.sh ] && vagrant ssh -c 'chmod +x key.sh' debian_build &> /dev/null
 
 # Provision the VPN service.
-vagrant ssh --tty -c 'sudo --login bash -e < vpnweb.sh' centos_vpn
-vagrant ssh --tty -c 'sudo --login bash -e < openvpn.sh' centos_vpn
-vagrant ssh --tty -c 'sudo --login bash -e < vpnweb.sh' debian_vpn
-vagrant ssh --tty -c 'sudo --login bash -e < openvpn.sh' debian_vpn
+vagrant ssh --no-tty -c 'sudo --login TERM=vt100 bash -e < vpnweb.sh' centos_vpn
+vagrant ssh --no-tty -c 'sudo --login TERM=vt100 bash -e < openvpn.sh' centos_vpn
+vagrant ssh --no-tty -c 'sudo --login TERM=vt100 bash -e < vpnweb.sh' debian_vpn
+vagrant ssh --no-tty -c 'sudo --login TERM=vt100 bash -e < openvpn.sh' debian_vpn
 
 # Compile the Android client.
-vagrant ssh --tty -c 'bash -e setup.sh' debian_build
-vagrant ssh --tty -c 'bash -e build.sh' debian_build
+vagrant ssh --no-tty -c 'TERM=vt100 bash -e setup.sh' debian_build
+vagrant ssh --no-tty -c 'TERM=vt100 bash -e build.sh' debian_build
 
 # Extract the Android APKs from the build environment.
 [ -d $BASE/build/ ] && rm --force --recursive $BASE/build/ ; mkdir $BASE/build/

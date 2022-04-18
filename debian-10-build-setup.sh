@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+
 sudo tee /etc/modprobe.d/nested.conf <<-EOF > /dev/null
 options kvm_intel nested=1
 EOF
@@ -58,9 +61,6 @@ sudo systemctl daemon-reload && sudo systemctl enable fstrim.timer
 #sudo mkdir --parents /etc/ssl/certs/java/cacerts
 
 # swap swap defaults
-export DEBIAN_FRONTEND=noninteractive
-export DEBCONF_NONINTERACTIVE_SEEN=true
-
 sudo tee /etc/apt/apt.conf.d/99options <<-EOF > /dev/null
 APT::Install-Recommends "0";
 APT::Install-Suggests "0";
@@ -119,7 +119,7 @@ export GNUPGHOME=$(mktemp -d /tmp/gnupg-XXXXXX)
 [ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 0A0FAB860D48560332EFB581B75442BBDE9E3B09 | wc -l`" != "5" ] && exit 1
 rm --force --recursive $GNUPGHOME
 sudo add-apt-repository --yes 'deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main'
-sudo apt-get -qq -y update && sudo apt-get -qq -y install atom < /dev/null > /dev/null
+sudo apt-get -qq -y update < /dev/null > /dev/null && sudo apt-get -qq -y install atom < /dev/null > /dev/null
 
 # Setup Atom with an initial config, that matches our personal preferences.
 [ ! -d $HOME/.atom/ ] && mkdir $HOME/.atom/
