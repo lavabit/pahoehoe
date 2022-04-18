@@ -247,21 +247,35 @@ sudo unzip -qq $HOME/commandlinetools-linux-8092744_latest.zip -d /opt/ && sudo 
 [ -d /opt/android-sdk-linux/ ] && sudo rm --force --recursive /opt/android-sdk-linux/
 yes | sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --licenses > /dev/null
 
+# Required tools/packages.
 sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --install \
-"extras;google;m2repository" "extras;android;m2repository" "cmdline-tools;latest" \
+"extras;google;m2repository" "extras;android;m2repository" 
+
+sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --install \
+"cmdline-tools;latest" \
 "ndk;21.4.7075529" "cmake;3.10.2.4988404" \
 "build-tools;30.0.3" "platforms;android-30" \
-"build-tools;29.0.2" "platforms;android-29"
+"build-tools;29.0.3" "platforms;android-29"
 
-# The alternatve install command.
+# New tools/packages.
+sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --install \
+"ndk;24.0.8215888" "cmake;3.18.1" \
+"build-tools;32.0.0" "platforms;android-32" \
+"build-tools;31.0.0" "platforms;android-31"
+
+# The alternative install command.
 # sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --install \
 # "extras;google;simulators" "extras;google;webdriver" \
 # "extras;google;m2repository" "extras;android;m2repository" \
-# "cmdline-tools;latest" "ndk;21.4.7075529" "cmake;3.10.2.4988404" "skiaparser;1" \
+# "cmdline-tools;latest" "ndk;21.4.7075529" "ndk;24.0.8215888" \
+# "cmake;3.10.2.4988404" "cmake;3.18.1" \
+# "skiaparser;1" "skiaparser;2" "skiaparser;3" \
 # "build-tools;23.0.3" "build-tools;24.0.3" "build-tools;25.0.3" "build-tools;26.0.3" \
 # "build-tools;27.0.3" "build-tools;28.0.3" "build-tools;29.0.3" "build-tools;30.0.3" \
+# "build-tools;31.0.0" "build-tools;32.0.0" \
 # "platforms;android-23" "platforms;android-24" "platforms;android-25" "platforms;android-26" \
 # "platforms;android-27" "platforms;android-28" "platforms;android-29" "platforms;android-30" \
+# "platforms;android-31" "platforms;android-32" \
 # "system-images;android-26;default;x86" "system-images;android-26;default;x86_64" \
 # "system-images;android-26;google_apis;x86" "system-images;android-26;google_apis_playstore;x86" \
 # "system-images;android-27;default;x86" "system-images;android-27;default;x86_64" \
@@ -273,7 +287,10 @@ sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux
 # "system-images;android-29;google_apis;x86" "system-images;android-29;google_apis;x86_64" \
 # "system-images;android-29;google_apis_playstore;x86" "system-images;android-29;google_apis_playstore;x86_64" \
 # "system-images;android-30;google_apis;x86" "system-images;android-30;google_apis;x86_64" \
-# "system-images;android-30;google_apis_playstore;x86" "system-images;android-30;google_apis_playstore;x86_64"
+# "system-images;android-30;google_apis_playstore;x86" "system-images;android-30;google_apis_playstore;x86_64" \
+# "system-images;android-31;default;x86_64" \
+# "system-images;android-31;google_apis;x86_64" "system-images;android-31;google_apis_playstore;x86_64" \
+# "system-images;android-32;google_apis;x86_64" "system-images;android-32;google_apis_playstore;x86_64"
 
 sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --list_installed | awk -F' ' '{print $1}' | tail -n +4
 

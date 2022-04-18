@@ -28,8 +28,8 @@ Vagrant.configure("2") do |config|
 
     debian_build.vm.provider :virtualbox do |v, override|
       v.gui = false
-      v.customize ["modifyvm", :id, "--memory", 12384]
-      v.customize ["modifyvm", :id, "--cpus", 6]
+      v.customize ["modifyvm", :id, "--memory", 8192]
+      v.customize ["modifyvm", :id, "--cpus", 4]
     end
 
     debian_build.vm.provision "shell", inline: <<-SHELL
