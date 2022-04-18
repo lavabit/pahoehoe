@@ -13,15 +13,15 @@ tee --append /etc/hosts <<-EOF > /dev/null
 192.168.221.245 245.vpn.centos.local
 EOF
 
-dnf -q -y module enable go-toolset
-dnf -q -y install jq git gcc curl make expect golang coreutils gnutls-utils python3-jinja2 python3-netaddr python3-yaml python3-six
+dnf -q -y module enable go-toolset 1>/dev/null
+dnf -q -y install jq git gcc curl make expect golang coreutils gnutls-utils python3-jinja2 python3-netaddr python3-yaml python3-six 1>/dev/null
 
 [ -d $HOME/daemon ] && rm --force --recursive $HOME/daemon
-cd $HOME && git clone https://github.com/lavabit/pahoehoe.git $HOME/daemon && cd $HOME/daemon && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter daemon
+cd $HOME && git clone --quiet https://github.com/lavabit/pahoehoe.git $HOME/daemon && cd $HOME/daemon && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter daemon
 ./configure && make install && cd $HOME
 
 [ -d $HOME/vpnweb ] && rm --force --recursive $HOME/vpnweb
-cd $HOME && git clone https://github.com/lavabit/pahoehoe.git $HOME/vpnweb && cd $HOME/vpnweb && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter vpnweb
+cd $HOME && git clone --quiet https://github.com/lavabit/pahoehoe.git $HOME/vpnweb && cd $HOME/vpnweb && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter vpnweb
 
 [ -d /etc/vpnweb/ ] && rm --force --recursive /etc/vpnweb/
 mkdir --parents /etc/vpnweb/public/
@@ -288,4 +288,4 @@ echo "Unit tests completed."
 
 # Cleanup.
 rm --force --recursive $HOME/go/ $HOME/.cache/ $HOME/vpnweb/ $HOME/daemon/
-dnf -q -y module disable go-toolset && dnf -q -y remove jq git gcc make golang expect gnutls-utils python3-jinja2 python3-netaddr python3-yaml patch
+dnf -q -y module disable go-toolset && dnf -q -y remove jq git gcc make golang expect gnutls-utils python3-jinja2 python3-netaddr python3-yaml patch 1>/dev/null

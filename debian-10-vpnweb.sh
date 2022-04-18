@@ -21,7 +21,7 @@ sed -i "/HISTFILESIZE/d" $HOME/.bashrc
 sed -i "s/HISTSIZE=.*/export HISTSIZE=100000/g" $HOME/.bashrc
 
 [ -d $HOME/vpnweb ] && rm --force --recursive $HOME/vpnweb
-cd $HOME && git clone https://github.com/lavabit/pahoehoe.git $HOME/vpnweb && cd $HOME/vpnweb && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter vpnweb
+cd $HOME && git clone --quiet https://github.com/lavabit/pahoehoe.git $HOME/vpnweb && cd $HOME/vpnweb && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter vpnweb
 
 [ -d /etc/vpnweb/ ] && rm --force --recursive /etc/vpnweb/
 mkdir --parents /etc/vpnweb/public/

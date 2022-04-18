@@ -24,7 +24,7 @@ cd $HOME && rm --recursive --force $HOME/.java/ $HOME/.gradle/ $HOME/.android/ $
 [ -n "`pidof java`" ] && kill `ps -ef | grep -v grep | grep -E "org.gradle.wrapper.GradleWrapperMain|org.gradle.launcher.daemon.bootstrap.GradleDaemon" | awk '{print $2}'`
 
 [ -d $HOME/android ] && find $HOME/android -mindepth 1 -depth -exec rm -rf {} \;
-git clone https://github.com/lavabit/pahoehoe.git android && cd android && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter android
+git clone --quiet https://github.com/lavabit/pahoehoe.git android && cd android && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter android
 
 # The version string has to exist as a tag or the build will fail. So we create it here, if it doesn't exist already.
 git rev-parse --quiet --verify "${VERSTR}" &>/dev/null || git tag "${VERSTR}"
