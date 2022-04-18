@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-dnf -q -y install checkpolicy openvpn gnutls-utils dnsmasq
+dnf -q -y install checkpolicy openvpn gnutls-utils dnsmasq 1>/dev/null
 
 cat <<-EOF > /etc/openvpn/vpn-cert.cfg
 organization = "Lavabit LLC"
@@ -24,10 +24,10 @@ tls_www_server
 EOF
 
 # VPN
-certtool --sec-param=high --bits=4096 --generate-privkey --outfile /etc/openvpn/vpn-key.pem --template /etc/openvpn/vpn-cert.cfg
-certtool --generate-request --load-privkey /etc/openvpn/vpn-key.pem --outfile /etc/openvpn/vpn-request.pem --template /etc/openvpn/vpn-cert.cfg
-certtool --generate-certificate --load-request=/etc/openvpn/vpn-request.pem --load-privkey /etc/openvpn/vpn-key.pem --outfile /etc/openvpn/vpn-cert.pem \
-  --load-ca-certificate /etc/vpnweb/ca-cert.pem --load-ca-privkey /etc/vpnweb/ca-key.pem --template /etc/openvpn/vpn-cert.cfg
+certtool --stdout-info --sec-param=high --bits=4096 --generate-privkey --outfile /etc/openvpn/vpn-key.pem --template /etc/openvpn/vpn-cert.cfg 1>/dev/null
+certtool --stdout-info --generate-request --load-privkey /etc/openvpn/vpn-key.pem --outfile /etc/openvpn/vpn-request.pem --template /etc/openvpn/vpn-cert.cfg 1>/dev/null
+certtool --stdout-info --generate-certificate --load-request=/etc/openvpn/vpn-request.pem --load-privkey /etc/openvpn/vpn-key.pem --outfile /etc/openvpn/vpn-cert.pem \
+  --load-ca-certificate /etc/vpnweb/ca-cert.pem --load-ca-privkey /etc/vpnweb/ca-key.pem --template /etc/openvpn/vpn-cert.cfg 1>/dev/null
 
 # DH Params
 # Pre-generated DH values for use on test servers. Uncomment
@@ -469,15 +469,15 @@ semodule_package -o $HOME/my-openvpn.pp -m $HOME/my-openvpn.mod
 semodule -X 300 -i $HOME/my-openvpn.pp
 rm --force $HOME/my-openvpn.mod $HOME/my-openvpn.pp $HOME/my-openvpn.te
 
-systemctl daemon-reload
-systemctl enable openvpn-server@tcp.242.service && systemctl start openvpn-server@tcp.242.service
-systemctl enable openvpn-server@tcp.243.service && systemctl start openvpn-server@tcp.243.service
-systemctl enable openvpn-server@tcp.244.service && systemctl start openvpn-server@tcp.244.service
-systemctl enable openvpn-server@tcp.245.service && systemctl start openvpn-server@tcp.245.service
-systemctl enable openvpn-server@udp.242.service && systemctl start openvpn-server@udp.242.service
-systemctl enable openvpn-server@udp.243.service && systemctl start openvpn-server@udp.243.service
-systemctl enable openvpn-server@udp.244.service && systemctl start openvpn-server@udp.244.service
-systemctl enable openvpn-server@udp.245.service && systemctl start openvpn-server@udp.245.service
+systemctl --quiet daemon-reload
+systemctl --quiet enable openvpn-server@tcp.242.service && systemctl start openvpn-server@tcp.242.service
+systemctl --quiet enable openvpn-server@tcp.243.service && systemctl start openvpn-server@tcp.243.service
+systemctl --quiet enable openvpn-server@tcp.244.service && systemctl start openvpn-server@tcp.244.service
+systemctl --quiet enable openvpn-server@tcp.245.service && systemctl start openvpn-server@tcp.245.service
+systemctl --quiet enable openvpn-server@udp.242.service && systemctl start openvpn-server@udp.242.service
+systemctl --quiet enable openvpn-server@udp.243.service && systemctl start openvpn-server@udp.243.service
+systemctl --quiet enable openvpn-server@udp.244.service && systemctl start openvpn-server@udp.244.service
+systemctl --quiet enable openvpn-server@udp.245.service && systemctl start openvpn-server@udp.245.service
 
 cat <<-EOF > /etc/dnsmasq.d/interfaces.conf
 interface=tun0
@@ -492,38 +492,38 @@ interface=tun7
 bind-interfaces
 EOF
 
-systemctl enable dnsmasq.service && systemctl start dnsmasq.service
+systemctl --quiet enable dnsmasq.service && systemctl --quiet start dnsmasq.service
 
 # Firewall rules.
 DEVICE=$(ip route | awk '/^default via/ {print $5}')
-firewall-cmd --add-port=53/udp && firewall-cmd --add-port=53/udp --permanent
-firewall-cmd --add-port=443/tcp && firewall-cmd --add-port=443/tcp --permanent
+firewall-cmd --add-port=53/udp && firewall-cmd --add-port=53/udp --permanent 1>/dev/null
+firewall-cmd --add-port=443/tcp && firewall-cmd --add-port=443/tcp --permanent 1>/dev/null
 
-firewall-cmd --zone=trusted --add-interface=tun0 && firewall-cmd --permanent --zone=trusted --add-interface=tun0
-firewall-cmd --zone=trusted --add-interface=tun1 && firewall-cmd --permanent --zone=trusted --add-interface=tun1
-firewall-cmd --zone=trusted --add-interface=tun2 && firewall-cmd --permanent --zone=trusted --add-interface=tun2
-firewall-cmd --zone=trusted --add-interface=tun3 && firewall-cmd --permanent --zone=trusted --add-interface=tun3
-firewall-cmd --zone=trusted --add-interface=tun4 && firewall-cmd --permanent --zone=trusted --add-interface=tun4
-firewall-cmd --zone=trusted --add-interface=tun5 && firewall-cmd --permanent --zone=trusted --add-interface=tun5
-firewall-cmd --zone=trusted --add-interface=tun6 && firewall-cmd --permanent --zone=trusted --add-interface=tun6
-firewall-cmd --zone=trusted --add-interface=tun7 && firewall-cmd --permanent --zone=trusted --add-interface=tun7
+firewall-cmd --zone=trusted --add-interface=tun0 && firewall-cmd --permanent --zone=trusted --add-interface=tun0 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun1 && firewall-cmd --permanent --zone=trusted --add-interface=tun1 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun2 && firewall-cmd --permanent --zone=trusted --add-interface=tun2 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun3 && firewall-cmd --permanent --zone=trusted --add-interface=tun3 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun4 && firewall-cmd --permanent --zone=trusted --add-interface=tun4 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun5 && firewall-cmd --permanent --zone=trusted --add-interface=tun5 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun6 && firewall-cmd --permanent --zone=trusted --add-interface=tun6 1>/dev/null
+firewall-cmd --zone=trusted --add-interface=tun7 && firewall-cmd --permanent --zone=trusted --add-interface=tun7 1>/dev/null
 
 firewall-cmd --add-masquerade && firewall-cmd --add-masquerade --permanent
-firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.142.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.143.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.144.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.145.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.242.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.243.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.244.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.245.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.142.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.143.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.144.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.145.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.242.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.243.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.244.0.0/21 -o $DEVICE -j MASQUERADE
-firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.245.0.0/21 -o $DEVICE -j MASQUERADE
+firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.142.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.143.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.144.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.145.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.242.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.243.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.244.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.245.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.142.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.144.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.143.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.145.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.242.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.243.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.244.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
+firewall-cmd --permanent --direct --passthrough ipv4 -t nat -A POSTROUTING -s 10.245.0.0/21 -o $DEVICE -j MASQUERADE 1>/dev/null
 
-dnf -q -y remove checkpolicy gnutls-utils 
+dnf -q -y remove checkpolicy gnutls-utils 1>/dev/null

@@ -7,7 +7,7 @@ apt-get -qq -y install golang gnutls-bin git gnupg nload net-tools toxiproxy-cli
 
 sed -i "s/1024/3072 -b 1024 -d 1024 -i 1024/g" /etc/default/haveged
 sed -i "s/ENABLED=.*/ENABLED=\"true\"/g" /etc/default/sysstat
-sudo systemctl restart haveged && sudo systemctl restart sysstat
+sudo systemctl --quiet restart haveged && sudo systemctl --quiet restart sysstat
 
 # Point us at the development environment.
 sudo tee --append /etc/hosts <<-EOF > /dev/null
@@ -81,20 +81,20 @@ tls_www_server
 EOF
 
 # CA
-certtool --sec-param=ultra --generate-privkey --outfile /etc/vpnweb/ca-key.pem
-certtool --sec-param=ultra --generate-self-signed --load-privkey /etc/vpnweb/ca-key.pem --outfile /etc/vpnweb/ca-cert.pem --template /etc/vpnweb/ca.cfg
+certtool --stdout-info --sec-param=ultra --generate-privkey --outfile /etc/vpnweb/ca-key.pem 1>/dev/null
+certtool --stdout-info --sec-param=ultra --generate-self-signed --load-privkey /etc/vpnweb/ca-key.pem --outfile /etc/vpnweb/ca-cert.pem --template /etc/vpnweb/ca.cfg 1>/dev/null
 
 # TLS
-certtool --sec-param=ultra --generate-privkey --outfile /etc/vpnweb/tls-key.pem --template /etc/vpnweb/tls-cert.cfg
-certtool --sec-param=ultra --generate-request --load-privkey /etc/vpnweb/tls-key.pem --outfile /etc/vpnweb/tls-request.pem --template /etc/vpnweb/tls-cert.cfg
-certtool --sec-param=ultra --generate-certificate --load-request=/etc/vpnweb/tls-request.pem --load-privkey /etc/vpnweb/tls-key.pem --outfile /etc/vpnweb/tls-cert.pem \
-  --load-ca-certificate /etc/vpnweb/ca-cert.pem --load-ca-privkey /etc/vpnweb/ca-key.pem --template /etc/vpnweb/tls-cert.cfg
+certtool --stdout-info --sec-param=ultra --generate-privkey --outfile /etc/vpnweb/tls-key.pem --template /etc/vpnweb/tls-cert.cfg 1>/dev/null
+certtool --stdout-info --sec-param=ultra --generate-request --load-privkey /etc/vpnweb/tls-key.pem --outfile /etc/vpnweb/tls-request.pem --template /etc/vpnweb/tls-cert.cfg 1>/dev/null
+certtool --stdout-info --sec-param=ultra --generate-certificate --load-request=/etc/vpnweb/tls-request.pem --load-privkey /etc/vpnweb/tls-key.pem --outfile /etc/vpnweb/tls-cert.pem \
+  --load-ca-certificate /etc/vpnweb/ca-cert.pem --load-ca-privkey /etc/vpnweb/ca-key.pem --template /etc/vpnweb/tls-cert.cfg 1>/dev/null
 
 rm --force /etc/vpnweb/ca.cfg
 rm --force /etc/vpnweb/tls-cert.cfg
 rm --force /etc/vpnweb/tls-request.pem
 
-export FINGERPRINT="`certtool --certificate-info --infile /etc/vpnweb/ca-cert.pem | grep 'sha256:' | head -1 | tr -d '[:space:]' | awk -F':' '{print $2}'`"
+export FINGERPRINT="`certtool --stdout-info --certificate-info --infile /etc/vpnweb/ca-cert.pem | grep 'sha256:' | head -1 | tr -d '[:space:]' | awk -F':' '{print $2}'`"
 
 cat <<-EOF > /etc/vpnweb/provider.yaml
 auth: anon
@@ -213,8 +213,8 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload
-systemctl enable vpnweb.service && systemctl start vpnweb.service
+systemctl --quiet daemon-reload
+systemctl --quiet enable vpnweb.service && systemctl --quiet start vpnweb.service
 
 echo "VPN web service installed."
 echo "Starting unit tests."

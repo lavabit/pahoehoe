@@ -32,7 +32,7 @@ vagrant destroy -f &>/dev/null
 
 # # Create virtual machines..
 set -e
-vagrant up --provider=$PROVIDER
+vagrant up --no-tty --provider=$PROVIDER
 
 # Upload the scripts.
 vagrant upload centos-8-vpnweb.sh vpnweb.sh centos_vpn &> /dev/null
