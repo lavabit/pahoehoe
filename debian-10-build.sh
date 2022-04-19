@@ -3,6 +3,7 @@
 export TOTALMEM=`free -m | grep -E "^Mem:" | awk -F' ' '{print $2}'`
 export HALFMEM=`echo $(($TOTALMEM/2))`
 export QUARTERMEM=`echo $(($TOTALMEM/4))`
+export EIGHTMEM=`echo $(($TOTALMEM/8))`
 
 export ANDROID_AVD_HOME=$HOME/.avd
 export ANDROID_SDK_HOME=$HOME/.android
@@ -45,7 +46,6 @@ curl --silent --insecure https://api.debian.local/ca.crt > $HOME/android/app/src
 
 cat <<-EOF > $HOME/android/local.properties
 
-org.gradle.jvmargs=-Xincgc -Xmx${HALFMEM}m -XX:MaxMetaspaceSize=${QUARTERMEM}m
 cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
 sdk.dir=/opt/android-sdk-linux/
 android.ndkVersion=21.4.7075529
@@ -88,6 +88,12 @@ v2SigningEnabledProperty=true
 
 EOF
 fi
+
+# Override the default JVM options.
+sed -i -e 's/org.gradle.jvmargs/d' $HOME/android/local.properties
+sed -i -e 's/org.gradle.jvmargs/d' $HOME/android/gradle.properties
+sed -i -e 's/org.gradle.jvmargs/d' $HOME/android/ics-openvpn/gradle.properties
+export DEFAULT_JVM_OPTS="-XX:+UseG1GC -XX:+AggressiveHeap -XX:ParallelGCThreads=4 -Xmn${EIGHTMEM}m -Xms${QUARTERMEM}m -XX:MaxMetaspaceSize=${QUARTERMEM}m -Xmx${HALFMEM}m"
 
 git update-index --assume-unchanged $HOME/android/ics-openvpn/main/build/ovpnassets/.empty
 git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/centos.local.json

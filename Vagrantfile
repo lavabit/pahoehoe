@@ -21,6 +21,7 @@ Vagrant.configure("2") do |config|
       v.memory = 12384
       v.cpus = 8
       v.cputopology :sockets => '1', :cores => '4', :threads => '2'
+      v.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :disabled => false
       # For libvirt plugin versions below 0.4.0.
       # v.volume_cache = "unsafe"
       # For libvirt plugin versions equal to, or higher than 0.4.0.
@@ -98,6 +99,7 @@ Vagrant.configure("2") do |config|
       v.memory = 1024
       v.cpus = 1
       v.default_prefix = "proxy_"
+      v.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :disabled => true
       # For libvirt plugin versions below 0.4.0.
       # v.volume_cache = "unsafe"
       # For libvirt plugin versions equal to, or higher than 0.4.0.
@@ -139,6 +141,7 @@ Vagrant.configure("2") do |config|
       v.memory = 1024
       v.cpus = 1
       v.default_prefix = "proxy_"
+      v.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :disabled => true
       # For libvirt plugin versions below 0.4.0.
       # v.volume_cache = "unsafe"
       # For libvirt plugin versions equal to, or higher than 0.4.0.
