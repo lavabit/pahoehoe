@@ -1,4 +1,8 @@
 #!/bin/bash
+# Calculate how much memory we have so we can tune Java appropriately.
+export TOTALMEM=`free -m | grep -E "^Mem:" | awk -F' ' '{print $2}'`
+export HALFMEM=`echo $(($TOTALMEM/2))`
+export QUARTERMEM=`echo $(($TOTALMEM/4))`
 
 export ANDROID_AVD_HOME=$HOME/.avd
 export ANDROID_SDK_HOME=$HOME/.android
@@ -41,7 +45,7 @@ curl --silent --insecure https://api.debian.local/ca.crt > $HOME/android/app/src
 
 cat <<-EOF > $HOME/android/local.properties
 
-org.gradle.jvmargs=-Xincgc -Xmx8192m -XX:MaxMetaspaceSize=2048m
+org.gradle.jvmargs=-Xincgc -Xmx${HALFMEM}m -XX:MaxMetaspaceSize=${QUARTERMEM}m
 cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
 sdk.dir=/opt/android-sdk-linux/
 android.ndkVersion=21.4.7075529
