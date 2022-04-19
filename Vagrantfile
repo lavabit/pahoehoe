@@ -5,11 +5,12 @@ Vagrant.configure("2") do |config|
 
   config.ssh.forward_x11 = true
   config.ssh.forward_agent = true
-
+  pahoehoe_network_name = "pahoehoe_#{SecureRandom.random_number(99999999)}"
+  
   config.vm.define "debian_build" do |debian_build|
     debian_build.vm.box = "generic/debian10"
     debian_build.vm.hostname = "debian-build"
-    debian_build.vm.network :private_network, :ip => "192.168.221.50"
+    debian_build.vm.network :private_network, :ip => "192.168.221.50", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     # debian_build.vm.synced_folder "android/", "/home/vagrant/android/", create: true, disabled: false, type: "nfs", nfs_udp: false, nfs_version: "3", :mount_options => ['nolock,noatime,fsc,ac,actimeo=120,async,retrans=10']
     # :mount_options => ['nolock,vers=3,tcp,noatime,fsc,actimeo=1,async']
 
@@ -85,11 +86,11 @@ Vagrant.configure("2") do |config|
   config.vm.define "debian_vpn" do |debian_vpn|
     debian_vpn.vm.box = "generic/debian10"
     debian_vpn.vm.hostname = "debian-vpn"
-    debian_vpn.vm.network :private_network, :ip => "192.168.221.142"
-    debian_vpn.vm.network :private_network, :ip => "192.168.221.143"
-    debian_vpn.vm.network :private_network, :ip => "192.168.221.144"
-    debian_vpn.vm.network :private_network, :ip => "192.168.221.145"
-    debian_vpn.vm.network :private_network, :ip => "192.168.221.146"
+    debian_vpn.vm.network :private_network, :ip => "192.168.221.142", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    debian_vpn.vm.network :private_network, :ip => "192.168.221.143", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    debian_vpn.vm.network :private_network, :ip => "192.168.221.144", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    debian_vpn.vm.network :private_network, :ip => "192.168.221.145", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    debian_vpn.vm.network :private_network, :ip => "192.168.221.146", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
 
     debian_vpn.vm.provider :libvirt do |v, override|
       v.driver = "kvm"
@@ -126,11 +127,11 @@ Vagrant.configure("2") do |config|
   config.vm.define "centos_vpn" do |centos_vpn|
     centos_vpn.vm.box = "generic/centos8"
     centos_vpn.vm.hostname = "centos-vpn"
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.242"
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.243"
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.244"
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.245"
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.246"
+    centos_vpn.vm.network :private_network, :ip => "192.168.221.242", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    centos_vpn.vm.network :private_network, :ip => "192.168.221.243", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    centos_vpn.vm.network :private_network, :ip => "192.168.221.244", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    centos_vpn.vm.network :private_network, :ip => "192.168.221.245", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    centos_vpn.vm.network :private_network, :ip => "192.168.221.246", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
 
     centos_vpn.vm.provider :libvirt do |v, override|
       v.driver = "kvm"
