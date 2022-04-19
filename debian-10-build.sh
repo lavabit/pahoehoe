@@ -98,7 +98,12 @@ git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconf
 ./scripts/build_deps.sh
 ./gradlew --console plain --warning-mode none assembleLavabit assembleNormalProductionFatweb
 ./gradlew --console plain --warning-mode none bundleLavabit
-./gradlew --console plain --warning-mode none check
+./gradlew --console plain --warning-mode none check 2>&1 | \
+grep -v "without required default value." | grep -v "multiple substitutions specified in non-positional format" | \
+grep -v "Make sure all annotation processors are incremental to improve your build speed." | \
+grep -v "The following annotation processors are not incremental: jetified-dagger-compiler-1.2.2.jar" | \
+grep -v "Some input files use or override a deprecated API." | grep -v "Some input files use unchecked or unsafe operations." | \
+grep -v "Recompile with -Xlint:unchecked for details."
 
 # ./gradlew --warning-mode none bundle
 # ./gradlew --warning-mode none assembleDebug
