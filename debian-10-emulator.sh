@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # If the version string isn't already set, we declare it here.
-[ ! -n "$VERSTR" ] && export VERSTR="1.0.2-RC"
+[ ! -n "$VERSTR" ] && export VERSTR="1.0.2"
 
 # Handle self referencing, sourcing etc.
 if [[ $0 != $BASH_SOURCE ]]; then

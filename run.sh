@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# If the version string/numbers aren't setup already, we declare them here. The version 
+# string is what defines this build. The version number will be used as the version code
+# for F-Droid builds. The APK files uploaded to Google Play will use the build.gradle
+# logic to generate unique version numbers (aka codes) for each ABI variant.
+
+# The values used here should match the android/app/build.gradle file. Specifically, the 
+# android -> lavabit -> versionName and android -> lavabit -> versionCode values. 
+[ ! -n "$VERNUM" ] && export VERNUM="202"
+[ ! -n "$VERSTR" ] && export VERSTR="1.0.2"
+
 # Handle self referencing, sourcing etc.
 if [[ $0 != $BASH_SOURCE ]]; then
   export CMD=$BASH_SOURCE
@@ -15,12 +25,6 @@ cd $BASE
 
 # Set libvirt as the default provider, but allow an environment variable to override it.
 [ ! -n "$PROVIDER" ] && export PROVIDER="libvirt"
-
-# If the version string/number aren't setup already, we declare them here. Note the default values
-# should match the values inside the android/app/build.gradle file. Specifically, the 
-# android -> lavabit -> versionName and android -> lavabit -> versionCode values.
-[ ! -n "$VERNUM" ] && export VERNUM="202"
-[ ! -n "$VERSTR" ] && export VERSTR="1.0.2"
 
 # Cleanup.
 [ -d $BASE/build/source/ ] && sudo umount --force $BASE/build/source/ &>/dev/null

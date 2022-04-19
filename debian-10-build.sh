@@ -12,11 +12,12 @@ export GRADLE_USER_HOME=$HOME/.gradle
 # alias javac='javac -Xlint:-deprecation -Xlint:-unchecked'
 # export JDK_JAVAC_OPTIONS="-Xlint:-deprecation -Xlint:-unchecked"
 
-if [ ! -n "$VERNUM" ] || [ ! -n "$VERSTR" ]; then
-  printf "The VERNUM or VERSTR strings are empty. Error.\n"
+if [ -f $HOME/key.sh ] && [ ! -n "$VERSTR" ]; then
+  printf "A production signing key was provided, but the required VERSTR (version string) variable is missing.\n"
   exit 1
+elif [ ! -n "$VERSTR" ]; then
+  printf "The VERSTR variable is empty. The build.gradle value will be used instead.\n"
 fi
-
 
 # Remove everything that might be left over from a previous build.
 cd $HOME && rm --recursive --force $HOME/.cache/Google/ $HOME/.config/Google/ $HOME/.local/share/Google/ $HOME/.cache/Android\ Open\ Source\ Project/ $HOME/.config/Android\ Open\ Source\ Project $HOME/.local/share/Android\ Open\ Source\ Project/
@@ -27,7 +28,9 @@ cd $HOME && rm --recursive --force $HOME/.java/ $HOME/.gradle/ $HOME/.android/ $
 git clone --quiet https://github.com/lavabit/pahoehoe.git android && cd android && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --subdirectory-filter android
 
 # The version string has to exist as a tag or the build will fail. So we create it here, if it doesn't exist already.
-git rev-parse --quiet --verify "${VERSTR}" &>/dev/null || git tag "${VERSTR}"
+if [ -n "$VERSTR" ]; then
+  git rev-parse --quiet --verify "${VERSTR}" &>/dev/null || git tag "${VERSTR}"
+fi
 
 # Update the Development Fingerprints
 curl --silent --insecure https://api.centos.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/centos.local.json
@@ -100,4 +103,5 @@ git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconf
 
 echo "All finished."
 sudo fstrim --all
-( for i in {1..5}; do printf "\a" ; sleep 0.2; done ; sleep 2 ; for i in {1..5}; do printf "\a" ; sleep 0.2; done ) &
+
+
