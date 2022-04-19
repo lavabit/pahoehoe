@@ -111,13 +111,14 @@ EOF
 # sudo systemctl enable nfs-server && sudo systemctl start nfs-server
 
 # Install Atom editor.
-bash -c 'curl --location --silent https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -'
 export GNUPGHOME=$(mktemp -d /tmp/gnupg-XXXXXX)
-[ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 0A0FAB860D48560332EFB581B75442BBDE9E3B09 | wc -l`" != "5" ] && exit 1
+( bash -c 'curl --location --silent https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -' && \
+  [ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 0A0FAB860D48560332EFB581B75442BBDE9E3B09 | wc -l`" == "5" ] && \
+  sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-repository --yes 'deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main' && \
+  sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update < /dev/null > /dev/null && \
+  sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install atom < /dev/null > /dev/null ) || \
+  echo 'atom install failed ... non-critical ... continuing.'
 rm --force --recursive $GNUPGHOME
-sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-repository --yes 'deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main'
-sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update < /dev/null > /dev/null && \
-sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install atom < /dev/null > /dev/null
 
 # Setup Atom with an initial config, that matches our personal preferences.
 [ ! -d $HOME/.atom/ ] && mkdir $HOME/.atom/
@@ -212,14 +213,14 @@ atom.workspace.onDidOpen ({item}) ->
 EOF
 
 # Install the Atom packages we like having.
-apm install sort-lines > /dev/null
-apm install open-recent > /dev/null
-apm install atom-beautify > /dev/null
-apm install language-cmake > /dev/null
-apm install language-groovy > /dev/null
-apm install language-gradle > /dev/null
-apm install language-kotlin > /dev/null
-apm install language-openvpn > /dev/null
+apm install sort-lines > /dev/null || echo 'sort-lines package install failed ... non-critical ... continuing.'
+apm install open-recent > /dev/null || echo 'open-recent package install failed ... non-critical ... continuing.'
+apm install atom-beautify > /dev/null || echo 'atom-beautify package install failed ... non-critical ... continuing.'
+apm install language-cmake > /dev/null || echo 'language-cmake package install failed ... non-critical ... continuing.'
+apm install language-groovy > /dev/null || echo 'language-groovy package install failed ... non-critical ... continuing.'
+apm install language-gradle > /dev/null || echo 'language-gradle package install failed ... non-critical ... continuing.'
+apm install language-kotlin > /dev/null || echo 'language-kotlin package install failed ... non-critical ... continuing.'
+apm install language-openvpn > /dev/null || echo 'language-openvpn package install failed ... non-critical ... continuing.'
 
 # Install JDK v8
 bash -c 'curl --location --silent https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -'
@@ -233,7 +234,7 @@ sudo update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bi
 sudo update-alternatives --set javac /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/javac
 
 # Update the apt-file cache.
-sudo apt-file update &> /dev/null
+sudo apt-file update &> /dev/null || echo 'apt-file update failed ... non-critical ... continuing.'
 
 # Install the Android command line tools.
 curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip
