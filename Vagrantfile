@@ -141,12 +141,12 @@ Vagrant.configure("2") do |config|
       # set -x
       export DEBIAN_FRONTEND=noninteractive
       export DEBCONF_NONINTERACTIVE_SEEN=true
-      apt-get -qq update && apt-get -qq -y upgrade < /dev/null > /dev/null
+      apt-get -qq update &> /dev/null && apt-get -qq -y upgrade < /dev/null > /dev/null
       echo "* * * * * root command bash -c '/etc/cron.daily/mlocate'" > /etc/cron.d/updatedb
       sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11DisplayOffset.*/X11DisplayOffset 10/g' /etc/ssh/sshd_config
-      sudo systemctl restart sshd.service
+      sudo systemctl restart sshd.service 2> /dev/null
     SHELL
 
   end
@@ -189,12 +189,12 @@ Vagrant.configure("2") do |config|
 
     centos_vpn.vm.provision "shell", inline: <<-SHELL
       # set -x
-      dnf -q -y update
+      dnf -q -y update 2> /dev/null
       echo "* * * * * root command bash -c '/usr/bin/updatedb'" > /etc/cron.d/updatedb
       sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11DisplayOffset.*/X11DisplayOffset 10/g' /etc/ssh/sshd_config
-      sudo systemctl restart sshd.service
+      sudo systemctl restart sshd.service 2> /dev/null
     SHELL
 
   end

@@ -104,6 +104,9 @@ printf "Debian VPN stage complete.\n"
 # Compile the Android client.
 vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM bash -ex setup.sh" debian_build &> "$BASE/build/logs/debian_build.txt" || \
  { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ SETUP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+ 
+printf "Android build setup complete.\n"
+ 
 vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM VERNUM=$VERNUM VERSTR=$VERSTR bash -ex build.sh" debian_build &>> "$BASE/build/logs/debian_build.txt" || \
  { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ BUILD = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
@@ -114,11 +117,11 @@ vagrant ssh-config debian_build > $BASE/build/config
 
 # If there is an output folder, extract the development APKs from the build environment.
 vagrant ssh -c "test -d \$HOME/android/app/build/outputs/" debian_build &> /dev/null && \
-{ printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget -r outputs\n" | sftp -q -F $BASE/build/config debian_build 1>/dev/null ; }
+{ printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget -r outputs\n" | sftp -F $BASE/build/config debian_build 1>/dev/null ; }
 
 # If there is a releases folder, extract the signed release APKs files from the build environment.
 vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && \
-{ printf "cd /home/vagrant/android/\nlcd $BASE/build/\nget -r releases\n" | sftp -q -F $BASE/build/config debian_build 1>/dev/null ; }
+{ printf "cd /home/vagrant/android/\nlcd $BASE/build/\nget -r releases\n" | sftp -F $BASE/build/config debian_build 1>/dev/null ; }
 
 # Termux version 118 requires at least v24 of the Android SDK.
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/
