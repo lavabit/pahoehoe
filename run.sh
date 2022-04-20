@@ -39,15 +39,19 @@ vagrant destroy -f &>/dev/null
 [ ! -d $BASE/build/ ] && mkdir $BASE/build/
 [ ! -d $BASE/build/logs/ ] && mkdir $BASE/build/logs/
 
-# Try and download each box file three times. This should reduce the number of CI failures resulting 
-# from corrupted/interrupted downloads.
-vagrant box add --provider $PROVIDER "generic/centos8" &> "$BASE/build/logs/vagrant_box_add.txt" || \
+# Try and update the box. If we already have the current version, proceed. Otherwise
+# download the latest box file. If the box is missing, or the download fails, we 
+# use the add command to download it, and we try that three times, which will hopefully
+# reduce the number of CI failures caused by temporal cloud issues.
+vagrant box update --provider $PROVIDER --box "generic/centos8" &> "$BASE/build/logs/vagrant_box_add.txt" || \
+  { vagrant box add --clean --force --provider $PROVIDER "generic/centos8" &> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
   { sleep 120 ; vagrant box add --clean --force --provider $PROVIDER "generic/centos8" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
   { sleep 180 ; vagrant box add --clean --force --provider $PROVIDER "generic/centos8" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
   { tput setaf 1 ; printf "\nBox download failed. [ BOX = generic/centos8 ]\n\n" ; tput sgr0 ; \
   vagrant box remove --force --all --provider $PROVIDER "generic/centos8" &> /dev/null ; exit 1 ; }
 
-vagrant box add --provider $PROVIDER "generic/debian10" &>> "$BASE/build/logs/vagrant_box_add.txt" || \
+vagrant box update --provider $PROVIDER --box "generic/debian10" &> "$BASE/build/logs/vagrant_box_add.txt" || \
+  { vagrant box add --clean --force --provider $PROVIDER "generic/debian10" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
   { sleep 120 ; vagrant box add --clean --force --provider $PROVIDER "generic/debian10" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
   { sleep 180 ; vagrant box add --clean --force --provider $PROVIDER "generic/debian10" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
   { tput setaf 1 ; printf "\nBox download failed. [ BOX = generic/debian10 ]\n\n" ; tput sgr0 ; \
