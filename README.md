@@ -18,6 +18,9 @@ Note that building the APK using Android Studio will fail unless you manually bu
 **Release Checklist**   
 To create a new release, update the `android/app/build.gradle` file. Update the `android -> lavabit -> versionName` and the `android -> lavabit -> versionCode` values. Then update the `run.sh` script, to ensure the `VERNUM` and `VERSTR` values match. Finally, commit the change, and create a corresponding Git tag which matches the version name. Once finished, kickoff the `run.sh` script. If a valid `debian-10-build-key.sh` file is available, then signed, upload ready APKs will also be generated.
 
+**Future Release Work**
+Integrate support for the [Google Play Publisher](https://github.com/Triple-T/gradle-play-publisher/blob/master/README.md#managing-play-store-metadata) Gradle radleplugin which will allow us to automate the submission of new builds and the management of metadata in the same way we already integrate with the F-Droid store.
+
 ### Direct Access
 The `lavabitvpn.sh` script demonstrates how to use retrieve the client config, and generate access keys for the proxy service without the client apps and then connect using the OpenVPN binary. Unfortunately this script currently requires root permissions so it can properly secure itself. We've also found that even with root, it may not work properly on all distros.
 
