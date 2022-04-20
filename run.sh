@@ -164,8 +164,8 @@ printf "c091f6b50318c4cfb8d2edc175264cd82e03b9e2469889f8bbb9467bc2d405a2  $BASE/
 curl --silent --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40500.apk
 printf "3f70b2cccf987f91e1e6887f66781040e00e76ea6a11cd9024b9b4573cd26855  $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk" | sha256sum -c --quiet || exit 1
 
-[ ! -d $BASE/build/source/ ] && mkdir $BASE/build/source/
-sshfs vagrant@192.168.221.50:/home/vagrant/android $BASE/build/source -o uidfile=1000 -o gidfile=1000 \
--o StrictHostKeyChecking=no -o IdentityFile=$BASE/.vagrant/machines/debian_build/libvirt/private_key
+# [ ! -d $BASE/build/source/ ] && mkdir $BASE/build/source/
+# sshfs vagrant@192.168.221.50:/home/vagrant/android $BASE/build/source -o uidfile=1000 -o gidfile=1000 \
+# -o StrictHostKeyChecking=no -o IdentityFile=$BASE/.vagrant/machines/debian_build/libvirt/private_key
 
 tput setaf 2; printf "Lavabit encrypted proxy build complete.\n"; tput sgr0
