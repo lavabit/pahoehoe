@@ -1,9 +1,9 @@
 #!/bin/bash
+
 # Calculate how much memory we have so we can tune Java appropriately.
 export TOTALMEM=`free -m | grep -E "^Mem:" | awk -F' ' '{print $2}'`
-export HALFMEM=`echo $(($TOTALMEM/2))`
+export MOSTMEM=`echo $(($TOTALMEM/3))`
 export QUARTERMEM=`echo $(($TOTALMEM/4))`
-export EIGHTMEM=`echo $(($TOTALMEM/8))`
 
 export ANDROID_AVD_HOME=$HOME/.avd
 export ANDROID_SDK_HOME=$HOME/.android
@@ -50,7 +50,6 @@ cmake.dir=/opt/android-sdk-linux/cmake/3.10.2.4988404/
 sdk.dir=/opt/android-sdk-linux/
 android.ndkVersion=21.4.7075529
 
-android.enableSeparateAnnotationProcessing=false
 org.gradle.parallel=true
 org.gradle.workers.max=6
 org.gradle.caching=true
@@ -90,10 +89,12 @@ EOF
 fi
 
 # Override the default JVM options.
-sed -i -e 's/org.gradle.jvmargs/d' $HOME/android/local.properties
-sed -i -e 's/org.gradle.jvmargs/d' $HOME/android/gradle.properties
-sed -i -e 's/org.gradle.jvmargs/d' $HOME/android/ics-openvpn/gradle.properties
-export DEFAULT_JVM_OPTS="-XX:+UseG1GC -XX:+AggressiveHeap -XX:ParallelGCThreads=4 -Xmn${EIGHTMEM}m -Xms${QUARTERMEM}m -XX:MaxMetaspaceSize=${QUARTERMEM}m -Xmx${HALFMEM}m"
+sed -i -e '/org.gradle.jvmargs/d' $HOME/android/local.properties
+sed -i -e '/org.gradle.jvmargs/d' $HOME/android/gradle.properties
+sed -i -e '/org.gradle.jvmargs/d' $HOME/android/ics-openvpn/gradle.properties
+printf "org.gradle.jvmargs=-Xmx${MOSTMEM}m -XX:MaxPermSize=${QUARTERMEM}m -XX:MaxMetaspaceSize=${QUARTERMEM}m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> $HOME/android/local.properties
+printf "org.gradle.jvmargs=-Xmx${MOSTMEM}m -XX:MaxPermSize=${QUARTERMEM}m -XX:MaxMetaspaceSize=${QUARTERMEM}m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> $HOME/android/gradle.properties
+printf "org.gradle.jvmargs=-Xmx${MOSTMEM}m -XX:MaxPermSize=${QUARTERMEM}m -XX:MaxMetaspaceSize=${QUARTERMEM}m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> $HOME/android/ics-openvpn/gradle.properties
 
 git update-index --assume-unchanged $HOME/android/ics-openvpn/main/build/ovpnassets/.empty
 git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/centos.local.json
@@ -101,20 +102,59 @@ git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconf
 git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/debian.local.json
 git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/debian.local.pem
 
-./scripts/build_deps.sh
-./gradlew --console plain --warning-mode none assembleLavabit assembleNormalProductionFatweb
-./gradlew --console plain --warning-mode none bundleLavabit
-./gradlew --console plain --warning-mode none check 2>&1 | \
-grep -v "without required default value." | grep -v "multiple substitutions specified in non-positional format" | \
-grep -v "Make sure all annotation processors are incremental to improve your build speed." | \
-grep -v "The following annotation processors are not incremental: jetified-dagger-compiler-1.2.2.jar" | \
-grep -v "Some input files use or override a deprecated API." | grep -v "Some input files use unchecked or unsafe operations." | \
-grep -v "Recompile with -Xlint:unchecked for details."
+./scripts/build_deps.sh || \
+  { RESULT=$? ; tput setaf 1 ; printf "Android dependencies failed to build. [ DEPS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+ 
+./gradlew --console plain --warning-mode none assembleLavabit || \
+  { RESULT=$? ; tput setaf 1 ; printf "Android app packages failed to build. [ APKS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+ 
+./gradlew --console plain --warning-mode none bundleLavabit || \
+  { RESULT=$? ; tput setaf 1 ; printf "Android app bundles failed to build. [ BUNDLES = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
-# ./gradlew --warning-mode none bundle
-# ./gradlew --warning-mode none assembleDebug
-# ./gradlew --warning-mode none assembleRelease
-# ./gradlew --warning-mode none connectedCheck
+# Test the secure and insecure fat debug, and a secure fatweb debug builds.
+./gradlew --console plain --warning-mode none \
+  testLavabitInsecureFatDebugUnitTest \
+  testLavabitProductionFatDebugUnitTest \
+  testLavabitProductionFatwebDebugUnitTest || \
+  { RESULT=$? ; tput setaf 1 ; printf "Android unit tests failed. [ DEBUG = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
+# Test the beta builds, first the ABI variants, then the combined fat version.
+./gradlew --console plain --warning-mode none \
+  testLavabitProductionX86BetaUnitTest testLavabitProductionX86_64BetaUnitTest \
+  testLavabitProductionArmv7BetaUnitTest testLavabitProductionArm64BetaUnitTest \
+  testLavabitProductionFatBetaUnitTest || \
+  { RESULT=$? ; tput setaf 1 ; printf "Android unit tests failed. [ BETA = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
+# Finally, test the release builds, first the ABI variants, then the fat and fatweb versions.
+./gradlew --console plain --warning-mode none \
+  testLavabitProductionX86ReleaseUnitTest testLavabitProductionX86_64ReleaseUnitTest \
+  testLavabitProductionArmv7ReleaseUnitTest testLavabitProductionArm64ReleaseUnitTest \
+  testLavabitProductionFatReleaseUnitTest testLavabitProductionFatwebReleaseUnitTest || \
+  { RESULT=$? ; tput setaf 1 ; printf "Android unit tests failed. [ RELEASE = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
+# Build the Bitmask Fatweb variant for comparison testing.
+PAHOEHOE_NORMAL=$(echo $PAHOEHOE_NORMAL | tr "[:lower:]" "[:upper:]")
+if [ "$PAHOEHOE_NORMAL" == "YES" ]; then
+  ./gradlew --warning-mode none assembleNormalInsecureFat assembleNormalProductionFat || \
+    { RESULT=$? ; tput setaf 1 ; printf "Android bitmask app packages failed to build. [ APKS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
+  ./gradlew --warning-mode none bundleNormalInsecureFat bundleNormalProductionFat || \
+    { RESULT=$? ; tput setaf 1 ; printf "Android bitmask app bundles failed to build. [ BUNDLES = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
+  ./gradlew --warning-mode none testNormalInsecureFatDebugUnitTest testNormalProductionFatReleaseUnitTest || \
+    { RESULT=$? ; tput setaf 1 ; printf "Android bitmask unit tests failed. [ FAT = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+fi
+
+# The lint checks provide too much info at the moment so don't run them for every CI build.
+PAHOEHOE_LINT=$(echo $PAHOEHOE_LINT | tr "[:lower:]" "[:upper:]")
+if [ "$PAHOEHOE_LINT" == "YES" ]; then
+  ./gradlew --console plain --warning-mode none check 2>&1 | \
+  grep -v "without required default value." | grep -v "multiple substitutions specified in non-positional format" | \
+  grep -v "Make sure all annotation processors are incremental to improve your build speed." | \
+  grep -v "The following annotation processors are not incremental: jetified-dagger-compiler-1.2.2.jar" | \
+  grep -v "Some input files use or override a deprecated API." | grep -v "Some input files use unchecked or unsafe operations." | \
+  grep -v "Recompile with -Xlint:unchecked for details."
+fi
 
 echo "All finished."
 sudo fstrim --all

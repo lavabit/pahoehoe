@@ -212,15 +212,16 @@ atom.workspace.onDidOpen ({item}) ->
 
 EOF
 
-# Install the Atom packages we like having.
-apm install sort-lines > /dev/null || echo 'sort-lines package install failed ... non-critical ... continuing.'
-apm install open-recent > /dev/null || echo 'open-recent package install failed ... non-critical ... continuing.'
-apm install atom-beautify > /dev/null || echo 'atom-beautify package install failed ... non-critical ... continuing.'
-apm install language-cmake > /dev/null || echo 'language-cmake package install failed ... non-critical ... continuing.'
-apm install language-groovy > /dev/null || echo 'language-groovy package install failed ... non-critical ... continuing.'
-apm install language-gradle > /dev/null || echo 'language-gradle package install failed ... non-critical ... continuing.'
-apm install language-kotlin > /dev/null || echo 'language-kotlin package install failed ... non-critical ... continuing.'
-apm install language-openvpn > /dev/null || echo 'language-openvpn package install failed ... non-critical ... continuing.'
+# Install the Atom packages we like having. Fork it to the background because the Atom is server 
+# isn't working at the moment, and we don't want these errors to slow down the setup process.
+( apm install sort-lines &> /dev/null || echo 'sort-lines package install failed ... non-critical ... continuing.' ; \
+apm install open-recent &> /dev/null || echo 'open-recent package install failed ... non-critical ... continuing.' ; \
+apm install atom-beautify &> /dev/null || echo 'atom-beautify package install failed ... non-critical ... continuing.' ; \
+apm install language-cmake &> /dev/null || echo 'language-cmake package install failed ... non-critical ... continuing.' ; \
+apm install language-groovy &> /dev/null || echo 'language-groovy package install failed ... non-critical ... continuing.' ; \
+apm install language-gradle &> /dev/null || echo 'language-gradle package install failed ... non-critical ... continuing.' ; \
+apm install language-kotlin &> /dev/null || echo 'language-kotlin package install failed ... non-critical ... continuing.' ; \
+apm install language-openvpn &> /dev/null || echo 'language-openvpn package install failed ... non-critical ... continuing.' ) &
 
 # Install JDK v8
 bash -c 'curl --location --silent https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -'

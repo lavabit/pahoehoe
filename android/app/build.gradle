@@ -54,6 +54,7 @@ android {
     dexOptions {
       jumboMode true
       multiDexEnabled true
+      javaMaxHeapSize "2048m"
     }
   }
 
@@ -421,18 +422,29 @@ android {
 
     def names = variant.flavors*.name
     def buildTypeName = variant.buildType.name
+    
     // flavorDimensions "branding" -> 0, "implementation" -> 1, "abi" -> 2
     //  def productFlavors = variant.flavors[0].name
+    
     def supportsSplitApk = variant.flavors[0].splitApk
 
     // To check for a certain build type, use variant.buildType.name == "<buildType>"
-    if (((names.contains("insecure") && !names.contains("fat")) ||
+    if ((
+            // We only allow insecure fat and fatweb buiilds.
+            (names.contains("insecure") && !(names.contains("fatweb") || names.contains("fat"))) ||
+            
+            // We also only allow debug fat and fatweb debug variants.
+            (buildTypeName.contains("debug") && !(names.contains("fatweb") || names.contains("fat"))) ||
+            
+            // Block insecure beta and release variants.
             (names.contains("insecure") && buildTypeName.contains("beta")) ||
             (names.contains("insecure") && buildTypeName.contains("release")) ||
-            (buildTypeName.contains("debug") && !(names.contains("fatweb") || names.contains("fat"))) ||
+            
+            // Block fatweb beta builds. If we ever release a beta build, we don't want it to auto-update via the web.
             (names.contains("fatweb") && buildTypeName.contains("beta")) ||
-            (!supportsSplitApk && !names.contains("fat")))
-    ) {
+            
+            // The fat and fatweb builds, by definition shouldn't be split based on a target ABI.
+            (!supportsSplitApk && !names.contains("fat")))) {
       // Gradle ignores any variants that satisfy the conditions above.
       setIgnore(true)
     }

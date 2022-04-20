@@ -23,21 +23,47 @@ BASE=`pwd -P`
 popd > /dev/null
 cd $BASE
 
+# Ignore errors during the init phase.
+set -
+
 # Set libvirt as the default provider, but allow an environment variable to override it.
 [ ! -n "$PROVIDER" ] && export PROVIDER="libvirt"
 
 # Cleanup.
 [ -d $BASE/build/source/ ] && sudo umount --force $BASE/build/source/ &>/dev/null
 [ -d $BASE/build/source/ ] && rmdir $BASE/build/source/ &>/dev/null
-[ -d $BASE/build/ ] && rm -rf $BASE/build/
-
-set -
+[ -d $BASE/build/ ] && rm --force --recursive $BASE/build/
 vagrant destroy -f &>/dev/null
 
-# # Create virtual machines..
-set -e
-vagrant up --no-color --no-tty --provider=$PROVIDER 1>/dev/null
+# Create a build directory, and a log subdirectory.
+[ ! -d $BASE/build/ ] && mkdir $BASE/build/
+[ ! -d $BASE/build/logs/ ] && mkdir $BASE/build/logs/
 
+# Try and download each box file three times. This should reduce the number of CI failures resulting 
+# from corrupted/interrupted downloads.
+vagrant box add --provider $PROVIDER "generic/centos8" &> "$BASE/build/logs/vagrant_box_add.txt" || \
+  { sleep 120 ; vagrant box add --clean --force --provider $PROVIDER "generic/centos8" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
+  { sleep 180 ; vagrant box add --clean --force --provider $PROVIDER "generic/centos8" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
+  { tput setaf 1 ; printf "\nBox download failed. [ BOX = generic/centos8 ]\n\n" ; tput sgr0 ; \
+  vagrant box remove --force --all --provider $PROVIDER "generic/centos8" &> /dev/null ; exit 1 ; }
+
+vagrant box add --provider $PROVIDER "generic/debian10" &>> "$BASE/build/logs/vagrant_box_add.txt" || \
+  { sleep 120 ; vagrant box add --clean --force --provider $PROVIDER "generic/debian10" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
+  { sleep 180 ; vagrant box add --clean --force --provider $PROVIDER "generic/debian10" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
+  { tput setaf 1 ; printf "\nBox download failed. [ BOX = generic/debian10 ]\n\n" ; tput sgr0 ; \
+  vagrant box remove --force --all --provider $PROVIDER "generic/debian10" &> /dev/null ; exit 1 ; }
+
+printf "\nBox download complete.\n"
+
+# Create the virtual machines.
+vagrant up --provider=$PROVIDER &> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 || \
+ { RESULT=$? ; tput setaf 1 ; printf "Box startup error. [ UP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+ 
+printf "Box startup complete.\n"
+
+ # Any errors past this point would be critical failures.
+ set -e
+ 
 # Upload the scripts.
 vagrant upload centos-8-vpnweb.sh vpnweb.sh centos_vpn &> /dev/null
 vagrant upload centos-8-openvpn.sh openvpn.sh centos_vpn &> /dev/null
@@ -57,24 +83,38 @@ vagrant ssh -c 'chmod +x setup.sh build.sh rebuild.sh' debian_build &> /dev/null
 [ -f debian-10-build-key.sh ] && vagrant ssh -c 'chmod +x key.sh' debian_build &> /dev/null
 
 # Provision the VPN service.
-vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -ex < vpnweb.sh' centos_vpn
-vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -ex < openvpn.sh' centos_vpn
-vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -ex < vpnweb.sh' debian_vpn
-vagrant ssh --no-color --no-tty -c 'sudo --login TERM=vt100 bash -ex < openvpn.sh' debian_vpn
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" centos_vpn &> "$BASE/build/logs/centos_vpn.txt" || \
+ { RESULT=$? ; tput setaf 1 ; printf "CentOS VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < openvpn.sh" centos_vpn &>> "$BASE/build/logs/centos_vpn.txt" || \
+ { RESULT=$? ; tput setaf 1 ; printf "CentOS VPN error. [ OPENVPN = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
+printf "CentOS VPN stage complete.\n"
+
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" debian_vpn &> "$BASE/build/logs/debian_vpn.txt" || \
+ { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < openvpn.sh" debian_vpn &>> "$BASE/build/logs/debian_vpn.txt" || \
+ { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ OPENVPN = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+ 
+printf "Debian VPN stage complete.\n"
 
 # Compile the Android client.
-vagrant ssh --no-color --no-tty -c 'TERM=vt100 bash -ex setup.sh' debian_build
-vagrant ssh --no-color --no-tty -c "VERNUM=$VERNUM VERSTR=$VERSTR TERM=vt100 bash -ex build.sh" debian_build
+vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM bash -ex setup.sh" debian_build &> "$BASE/build/logs/debian_build.txt" || \
+ { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ SETUP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM VERNUM=$VERNUM VERSTR=$VERSTR bash -ex build.sh" debian_build &>> "$BASE/build/logs/debian_build.txt" || \
+ { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ BUILD = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
+printf "Android build stage complete.\n"
 
 # Save an SSH config file so we can extract the build artifacts.
-[ -d $BASE/build/ ] && rm --force --recursive $BASE/build/ ; mkdir $BASE/build/
 vagrant ssh-config debian_build > $BASE/build/config
 
 # If there is an output folder, extract the development APKs from the build environment.
-vagrant ssh -c "test -d \$HOME/android/app/build/outputs/" debian_build &> /dev/null && { printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget -r outputs\n" | sftp -q -F $BASE/build/config debian_build 1>/dev/null ; }
+vagrant ssh -c "test -d \$HOME/android/app/build/outputs/" debian_build &> /dev/null && \
+{ printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget -r outputs\n" | sftp -q -F $BASE/build/config debian_build 1>/dev/null ; }
 
 # If there is a releases folder, extract the signed release APKs files from the build environment.
-vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && { printf "cd /home/vagrant/android/\nlcd $BASE/build/\nget -r releases\n" | sftp -q -F $BASE/build/config debian_build 1>/dev/null ; }
+vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && \
+{ printf "cd /home/vagrant/android/\nlcd $BASE/build/\nget -r releases\n" | sftp -q -F $BASE/build/config debian_build 1>/dev/null ; }
 
 # Termux version 118 requires at least v24 of the Android SDK.
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/

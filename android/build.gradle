@@ -6,7 +6,7 @@ buildscript {
     }
     mavenCentral()
     jcenter()
-      google()
+    google()
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:4.1.2'
@@ -14,6 +14,7 @@ buildscript {
 }
 
 plugins {
+  id "java"
   id "org.ajoberstar.grgit" version "1.2.0-milestone.5"
 }
 
@@ -31,6 +32,7 @@ allprojects {
 tasks.withType(JavaCompile).configureEach {
   options.fork = true
   options.incremental = true
+  options.compilerArgs += ['-Xdoclint:none', '-Xlint:none', '-nowarn', '-Xmx2048m -XX:MaxPermSize=512m', '-XX:MaxMetaspaceSize=512m', '-XX:+HeapDumpOnOutOfMemoryError', '-Dfile.encoding=UTF-8']
 }
 
 /**

@@ -10,6 +10,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "debian_build" do |debian_build|
     debian_build.vm.box = "generic/debian10"
     debian_build.vm.hostname = "debian-build"
+    debian_build.vm.boot_timeout = 1200
+    debian_build.vm.synced_folder ".", "/vagrant", disabled: true
+    debian_build.vm.network "forwarded_port", guest: 22, host: 35000, id: "ssh", auto_correct: true
     debian_build.vm.network :private_network, :ip => "192.168.221.50", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     # debian_build.vm.synced_folder "android/", "/home/vagrant/android/", create: true, disabled: false, type: "nfs", nfs_udp: false, nfs_version: "3", :mount_options => ['nolock,noatime,fsc,ac,actimeo=120,async,retrans=10']
     # :mount_options => ['nolock,vers=3,tcp,noatime,fsc,actimeo=1,async']
@@ -20,12 +23,17 @@ Vagrant.configure("2") do |config|
       v.nested = true
       v.memory = 12384
       v.cpus = 8
-      v.cputopology :sockets => '1', :cores => '4', :threads => '2'
+      v.cputopology :sockets => "1", :cores => "4", :threads => "2"
+      if Vagrant.has_plugin?( "vagrant-libvirt", ">= 0.7.0" )
+        v.disk_bus = "scsi"
+        v.disk_driver :cache => "unsafe", :discard => "unmap", :detect_zeroes => "unmap", :io => "threads"
+      end
+
       # v.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :disabled => false
       # For libvirt plugin versions below 0.4.0.
       # v.volume_cache = "unsafe"
       # For libvirt plugin versions equal to, or higher than 0.4.0.
-      v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
+      # v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
     end
 
     debian_build.vm.provider :virtualbox do |v, override|
@@ -51,14 +59,23 @@ Vagrant.configure("2") do |config|
   # config.vm.define "ubuntu_aosp" do |debian_build|
   #   ubuntu_aosp.vm.box = "generic/ubuntu1804"
   #   ubuntu_aosp.vm.hostname = "ubuntu-aosp"
-  #   ubuntu_aosp.vm.network :private_network, :ip => "192.168.221.51"
+  #   ubuntu_aosp.vm.boot_timeout = 1200
+  #   ubuntu_aosp.vm.synced_folder ".", "/vagrant", disabled: true
+  #   ubuntu_aosp.vm.network "forwarded_port", guest: 22, host: 34000, id: "ssh", auto_correct: true
+  #   ubuntu_aosp.vm.network :private_network, :ip => "192.168.221.51", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
   #
   #   ubuntu_aosp.vm.provider :libvirt do |v, override|
+  #     v.default_prefix = "proxy_"
   #     v.driver = "kvm"
   #     v.nested = true
   #     v.memory = 12384
   #     v.cpus = 4
-  #     v.default_prefix = "proxy_"
+  #     v.cputopology :sockets => '1', :cores => '4', :threads => '2'
+  #     if Vagrant.has_plugin?( "vagrant-libvirt", ">= 0.7.0" )
+  #       v.disk_bus = "scsi"
+  #       v.disk_driver :cache => "unsafe", :discard => "unmap", :detect_zeroes => "unmap", :io => "threads"
+  #     end
+  #     v.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :disabled => false
   #     # For libvirt plugin versions below 0.4.0.
   #     # v.volume_cache = "unsafe"
   #     # For libvirt plugin versions equal to, or higher than 0.4.0.
@@ -87,6 +104,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "debian_vpn" do |debian_vpn|
     debian_vpn.vm.box = "generic/debian10"
     debian_vpn.vm.hostname = "debian-vpn"
+    debian_vpn.vm.boot_timeout = 1200
+    debian_vpn.vm.synced_folder ".", "/vagrant", disabled: true
+    debian_vpn.vm.network "forwarded_port", guest: 22, host: 31000, id: "ssh", auto_correct: true
     debian_vpn.vm.network :private_network, :ip => "192.168.221.142", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     debian_vpn.vm.network :private_network, :ip => "192.168.221.143", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     debian_vpn.vm.network :private_network, :ip => "192.168.221.144", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
@@ -98,12 +118,17 @@ Vagrant.configure("2") do |config|
       v.nested = true
       v.memory = 1024
       v.cpus = 1
-      v.default_prefix = "proxy_"
+      v.default_prefix = "proxy_"      
+      if Vagrant.has_plugin?( "vagrant-libvirt", ">= 0.7.0" )
+        v.disk_bus = "scsi"
+        v.disk_driver :cache => "unsafe", :discard => "unmap", :detect_zeroes => "unmap", :io => "threads"
+      end
+
       # v.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :disabled => true
       # For libvirt plugin versions below 0.4.0.
       # v.volume_cache = "unsafe"
       # For libvirt plugin versions equal to, or higher than 0.4.0.
-      v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
+      # v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
     end
 
     debian_vpn.vm.provider :virtualbox do |v, override|
@@ -129,6 +154,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "centos_vpn" do |centos_vpn|
     centos_vpn.vm.box = "generic/centos8"
     centos_vpn.vm.hostname = "centos-vpn"
+    centos_vpn.vm.boot_timeout = 1200
+    centos_vpn.vm.synced_folder ".", "/vagrant", disabled: true
+    centos_vpn.vm.network "forwarded_port", guest: 22, host: 30000, id: "ssh", auto_correct: true
     centos_vpn.vm.network :private_network, :ip => "192.168.221.242", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     centos_vpn.vm.network :private_network, :ip => "192.168.221.243", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     centos_vpn.vm.network :private_network, :ip => "192.168.221.244", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
@@ -141,11 +169,16 @@ Vagrant.configure("2") do |config|
       v.memory = 1024
       v.cpus = 1
       v.default_prefix = "proxy_"
+      if Vagrant.has_plugin?( "vagrant-libvirt", ">= 0.7.0" )
+        v.disk_bus = "scsi"
+        v.disk_driver :cache => "unsafe", :discard => "unmap", :detect_zeroes => "unmap", :io => "threads"
+      end
+
       # v.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :disabled => true
       # For libvirt plugin versions below 0.4.0.
       # v.volume_cache = "unsafe"
       # For libvirt plugin versions equal to, or higher than 0.4.0.
-      v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
+      # v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
     end
 
     centos_vpn.vm.provider :virtualbox do |v, override|
