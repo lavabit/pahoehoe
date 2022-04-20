@@ -7,8 +7,8 @@
 
 # The values used here should match the android/app/build.gradle file. Specifically, the 
 # android -> lavabit -> versionName and android -> lavabit -> versionCode values. 
-[ ! -n "$VERNUM" ] && export VERNUM="202"
-[ ! -n "$VERSTR" ] && export VERSTR="1.0.2"
+[ ! -n "$VERNUM" ] && export VERNUM="203"
+[ ! -n "$VERSTR" ] && export VERSTR="1.0.3-RC"
 
 # Handle self referencing, sourcing etc.
 if [[ $0 != $BASH_SOURCE ]]; then

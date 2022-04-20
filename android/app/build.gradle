@@ -194,10 +194,10 @@ android {
       buildConfigField "String", "geoipUrl", geoipUrl
 
       //Change the versionCode as needed.
-      versionCode 202
+      versionCode 203
 
       //Change the versionName as needed.
-      versionName "1.0.2"
+      versionName "1.0.3-RC"
 
       //skip the account creation / login screen if the provider offers anonymous vpn usage, use directly the anonymous cert instead
       buildConfigField 'boolean', 'priotize_anonymous_usage', 'true'
