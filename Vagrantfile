@@ -133,7 +133,7 @@ Vagrant.configure("2") do |config|
 
     debian_vpn.vm.provider :virtualbox do |v, override|
       v.gui = false
-      v.customize ["modifyvm", :id, "--memory", 512]
+      v.customize ["modifyvm", :id, "--memory", 1024]
       v.customize ["modifyvm", :id, "--cpus", 1]
     end
 
@@ -183,7 +183,7 @@ Vagrant.configure("2") do |config|
 
     centos_vpn.vm.provider :virtualbox do |v, override|
       v.gui = false
-      v.customize ["modifyvm", :id, "--memory", 512]
+      v.customize ["modifyvm", :id, "--memory", 1024]
       v.customize ["modifyvm", :id, "--cpus", 1]
     end
 
