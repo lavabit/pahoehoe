@@ -1,6 +1,6 @@
-The Lavabit encrypted proxy service is a simple to use, super fast, completely secure service. The service is a completely free public service. No user account or personal information required. It's simply our way ensuring you no longer have any excuse to let anyone log and bog you (down with ads).
+The <i>Lavabit Encrypted Proxy</i> is simple to use, super fast and completely secure. And it's completely free! No user account or personal information required. This is our way of ensuring you no longer have an excuse to surf unprotected, letting anyone and everyone log and bog you (down with ads). Just install, and within seconds your network traffic will be safely encrypted and routed through Lavabit's servers.
 
-Why should you use the Lavabit Encrypted Proxy?
+<b>Why should you use the <i>Lavabit Encrypted Proxy</i>?</b>
 
 • We do not record anything about how you use the Internet
 • We do not invade your display with ads
@@ -8,13 +8,24 @@ Why should you use the Lavabit Encrypted Proxy?
 • We do not have any limits on how much or how fast you can download
 • We do not require a user account
 • We do not charge anything for this free service
-
 • We use fully encrypted physical servers to provide you with the best service
-• We safely mask IPv4 and IPv6 traffic
+• We support IPv4 and IPv6
 • We use strong encryption to provide PERFECT FORWARD SECRECY for your surfing sessions.
 
-How does Lavabit Encrypted Proxy work?
+<b>How does the <i>Lavabit Encrypted Proxy</i> work?</b>
 
-With the Lavabit Encrypted Proxy, we use Virtual Private Networking (VPN) technology to provide an encrypted pipeline for all your Internet traffic. It's a secure tunnel between your computer and the Internet backbone. Right past any peepers that might be up to no good. From our servers, you can access the Internet without censorship, or surveillance. What's more, the websites and servers you access will no longer see your identity, or rather your IP address, but will instead see the generic proxy address we provide.
+With the <i>Lavabit Encrypted Proxy</i>, we use Virtual Private Networking (VPN) technology to provide an encrypted pipeline for all your Internet traffic. It's a secure tunnel between your computer and the Internet backbone. Right past any peepers that might be up to no good. From our servers, you can access the Internet without censorship, or surveillance. What's more, the websites and servers you access will no longer see your identity, or rather your IP address, but will instead see the generic proxy address we provide.
 
-Using a Lavabit Encrypted Proxy is a great first step toward protecting your privacy, and taking backing control over what personal information you share, and with whom.
+Using a <i>Lavabit Encrypted Proxy</i> is a great first step toward protecting your privacy, and taking backing control over what personal information you share, and with whom.
+
+<b>How can the <i>Lavabit Encrypted Proxy</i>, and all its awesomeness, be free?</b>
+
+The short answer is - because we can. We've offered a free VPN proxy service to our encrypted email users for more than 10 years. We simply felt it was time to let everyone enjoy the benefits of a fast, free service. And by dropping the user requirement, we make anonymous access possible.
+
+At Lavabit, we believe that everyone deserves privacy and security online, and we don't want excuses like cost, or technological know-how to get in the way. So we created the <i>Lavabit Encrypted Proxy</i>, so that more people will, we hope, be able to exercise a little more control over their privacy.
+
+<b>We protect your internet address, the rest is up to you.</b>
+
+As with all VPN proxy services, this app adds security to your data as it flows over the network. And it protects your internet protocol address. It does not stop apps, or websites you trust with private information from abusing and misusing that data. 
+
+The <i>Lavabit Encrypted Proxy</i> ie able to protect and prevent many forms of censorship and surveillance - but whether you're shrewd or senseless - sophisticated or a sucker for sophistries - that is still up to you.
