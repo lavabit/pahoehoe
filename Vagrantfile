@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
     debian_build.vm.box = "generic/debian10"
     debian_build.vm.hostname = "debian-build"
     debian_build.vm.boot_timeout = 1200
+    debian_build.vm.base_mac = "08002727A0A0"
     debian_build.vm.synced_folder ".", "/vagrant", disabled: true
     debian_build.vm.network "forwarded_port", guest: 22, host: 35000, id: "ssh", auto_correct: true
     debian_build.vm.network :private_network, :ip => "192.168.221.50", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
@@ -60,6 +61,7 @@ Vagrant.configure("2") do |config|
   #   ubuntu_aosp.vm.box = "generic/ubuntu1804"
   #   ubuntu_aosp.vm.hostname = "ubuntu-aosp"
   #   ubuntu_aosp.vm.boot_timeout = 1200
+  #   ubuntu_aosp.vm.base_mac = "08002727D0D0"
   #   ubuntu_aosp.vm.synced_folder ".", "/vagrant", disabled: true
   #   ubuntu_aosp.vm.network "forwarded_port", guest: 22, host: 34000, id: "ssh", auto_correct: true
   #   ubuntu_aosp.vm.network :private_network, :ip => "192.168.221.51", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
@@ -105,6 +107,7 @@ Vagrant.configure("2") do |config|
     debian_vpn.vm.box = "generic/debian10"
     debian_vpn.vm.hostname = "debian-vpn"
     debian_vpn.vm.boot_timeout = 1200
+    debian_vpn.vm.base_mac = "08002727B0B0"
     debian_vpn.vm.synced_folder ".", "/vagrant", disabled: true
     debian_vpn.vm.network "forwarded_port", guest: 22, host: 31000, id: "ssh", auto_correct: true
     debian_vpn.vm.network :private_network, :ip => "192.168.221.142", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
@@ -155,6 +158,7 @@ Vagrant.configure("2") do |config|
     centos_vpn.vm.box = "generic/centos8"
     centos_vpn.vm.hostname = "centos-vpn"
     centos_vpn.vm.boot_timeout = 1200
+    centos_vpn.vm.base_mac = "08002727C0C0"
     centos_vpn.vm.synced_folder ".", "/vagrant", disabled: true
     centos_vpn.vm.network "forwarded_port", guest: 22, host: 30000, id: "ssh", auto_correct: true
     centos_vpn.vm.network :private_network, :ip => "192.168.221.242", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
