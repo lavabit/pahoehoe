@@ -116,9 +116,32 @@ printf "Android build stage complete.\n"
 vagrant ssh-config debian_build > $BASE/build/config
 
 # If there is an output folder, extract the development APKs from the build environment.
-vagrant ssh -c "test -d \$HOME/android/app/build/outputs/" debian_build &> /dev/null && \
- printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget outputs\n" | sftp -F $BASE/build/config debian_build 1>/dev/null || \
- { RESULT=$? ; tput setaf 1 ; printf "Outputs download error. [ OUTPUTS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+vagrant ssh -c "test -d \$HOME/android/app/build/outputs/" debian_build &> /dev/null && {
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_insecure_fat_debug_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null || \
+    { RESULT=$? ; tput setaf 1 ; printf "Outputs download error. [ OUTPUTS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+}
+
+# 
+# outputs/apk/lavabitInsecureFatweb/debug/Lavabit_Proxy_web_debug_1.0.2.apk
+# outputs/apk/lavabitProductionArm64/beta/Lavabit_Proxy_arm64-v8a_beta_1.0.2.apk
+# outputs/apk/lavabitProductionArm64/release/Lavabit_Proxy_arm64-v8a_release_1.0.2.apk
+# outputs/apk/lavabitProductionArmv7/beta/Lavabit_Proxy_armeabi-v7a_beta_1.0.2.apk
+# outputs/apk/lavabitProductionArmv7/release/Lavabit_Proxy_armeabi-v7a_release_1.0.2.apk
+# outputs/apk/lavabitProductionFat/beta/Lavabit_Proxy_beta_1.0.2.apk
+# outputs/apk/lavabitProductionFat/debug/Lavabit_Proxy_debug_1.0.2.apk
+# outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_1.0.2.apk
+# outputs/apk/lavabitProductionFatweb/debug/Lavabit_Proxy_web_debug_1.0.2.apk
+# outputs/apk/lavabitProductionFatweb/release/Lavabit_Proxy_web_release_1.0.2.apk
+# outputs/apk/lavabitProductionX86/beta/Lavabit_Proxy_x86_beta_1.0.2.apk
+# outputs/apk/lavabitProductionX86/release/Lavabit_Proxy_x86_release_1.0.2.apk
+# outputs/apk/lavabitProductionX86_64/beta/Lavabit_Proxy_x86_64_beta_1.0.2.apk
+# outputs/apk/lavabitProductionX86_64/release/Lavabit_Proxy_x86_64_release_1.0.2.apk
+#  printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget outputs\n" | sftp -F $BASE/build/config debian_build 1>/dev/null || \
+#  { RESULT=$? ; tput setaf 1 ; printf "Outputs download error. [ OUTPUTS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+# 
+# 
+
+
 
 # If there is a releases folder, extract the signed release APKs files from the build environment.
 vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && \
