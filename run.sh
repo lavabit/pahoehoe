@@ -117,36 +117,54 @@ vagrant ssh-config debian_build > $BASE/build/config
 
 # If there is an output folder, extract the development APKs from the build environment.
 vagrant ssh -c "test -d \$HOME/android/app/build/outputs/" debian_build &> /dev/null && {
-  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_insecure_fat_debug_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null || \
-    { RESULT=$? ; tput setaf 1 ; printf "Outputs download error. [ OUTPUTS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitInsecureFat/debug/Lavabit_Proxy_debug_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_fat_insecure_debug_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionFat/debug/Lavabit_Proxy_debug_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_fat_debug_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionFatweb/debug/Lavabit_Proxy_debug_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_fatweb_debug_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionX86/beta/Lavabit_Proxy_x86_beta_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_x86_beta_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionX86_64/beta/Lavabit_Proxy_x86_64_beta_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_x86_64_beta_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionArmv7/beta/Lavabit_Proxy_armeabi-v7a_beta_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_armeabi-v7a_beta_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionArm64/beta/Lavabit_Proxy_arm64-v8a_beta_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_arm64-v8a_beta_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionFat/beta/Lavabit_Proxy_beta_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_fat_beta_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionX86/release/Lavabit_Proxy_x86_release_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_x86_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionX86_64/release/Lavabit_Proxy_x86_64_release_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_x86_64_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionArmv7/release/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionArm64/release/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_fat_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionFatweb/release/Lavabit_Proxy_web_release_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_fatweb_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null || \
+  { RESULT=$? ; tput setaf 1 ; printf "Outputs download error. [ OUTPUTS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 }
 
-# 
-# outputs/apk/lavabitInsecureFatweb/debug/Lavabit_Proxy_web_debug_1.0.2.apk
-# outputs/apk/lavabitProductionArm64/beta/Lavabit_Proxy_arm64-v8a_beta_1.0.2.apk
-# outputs/apk/lavabitProductionArm64/release/Lavabit_Proxy_arm64-v8a_release_1.0.2.apk
-# outputs/apk/lavabitProductionArmv7/beta/Lavabit_Proxy_armeabi-v7a_beta_1.0.2.apk
-# outputs/apk/lavabitProductionArmv7/release/Lavabit_Proxy_armeabi-v7a_release_1.0.2.apk
-# outputs/apk/lavabitProductionFat/beta/Lavabit_Proxy_beta_1.0.2.apk
-# outputs/apk/lavabitProductionFat/debug/Lavabit_Proxy_debug_1.0.2.apk
-# outputs/apk/lavabitProductionFat/release/Lavabit_Proxy_release_1.0.2.apk
-# outputs/apk/lavabitProductionFatweb/debug/Lavabit_Proxy_web_debug_1.0.2.apk
-# outputs/apk/lavabitProductionFatweb/release/Lavabit_Proxy_web_release_1.0.2.apk
-# outputs/apk/lavabitProductionX86/beta/Lavabit_Proxy_x86_beta_1.0.2.apk
-# outputs/apk/lavabitProductionX86/release/Lavabit_Proxy_x86_release_1.0.2.apk
-# outputs/apk/lavabitProductionX86_64/beta/Lavabit_Proxy_x86_64_beta_1.0.2.apk
-# outputs/apk/lavabitProductionX86_64/release/Lavabit_Proxy_x86_64_release_1.0.2.apk
-#  printf "cd /home/vagrant/android/app/build/\nlcd $BASE/build/\nget outputs\n" | sftp -F $BASE/build/config debian_build 1>/dev/null || \
-#  { RESULT=$? ; tput setaf 1 ; printf "Outputs download error. [ OUTPUTS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
-# 
-# 
-
-
-
 # If there is a releases folder, extract the signed release APKs files from the build environment.
-vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && \
-  printf "cd /home/vagrant/android/\nlcd $BASE/build/\nget releases\n" | sftp -F $BASE/build/config debian_build 1>/dev/null || \
-  { RESULT=$? ; printf "Release builds missing.\n" ; }
+vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && {
+  printf "get /home/vagrant/android/releases/SHA256SUMS $BASE/build/releases/SHA256SUMS\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_release_$VERSTR.apk $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_release_$VERSTR.apk.sig $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.sig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_release_$VERSTR.apk.idsig $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.idsig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_release_$VERSTR.apk.version $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.version\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_web_release_$VERSTR.apk $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_web_release_$VERSTR.apk.sig $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.sig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_web_release_$VERSTR.apk.idsig $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.idsig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_web_release_$VERSTR.apk.version $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.version\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_x86_release_$VERSTR.apk $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.sig $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.sig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.idsig $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.idsig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.version $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.version\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.sig $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.sig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.idsig $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.idsig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.version $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.version\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.sig $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.sig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.idsig $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.idsig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.version $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.version\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig\n" | sftp -F $BASE/build/config debian_build 1>/dev/null && \
+  printf "get /home/vagrant/android/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version\n" | sftp -F $BASE/build/config debian_build 1>/dev/null || \
+  { RESULT=$? ; tput setaf 1 ; printf "Release download error. [ RELEASES = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+} || { 
+  printf "Release builds missing. Skipping download.\n" ;
+}
 
 # Termux version 118 requires at least v24 of the Android SDK.
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/
