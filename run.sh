@@ -207,9 +207,7 @@ vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && {
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.versin ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.versin ]\n\n" ; tput sgr0 ; exit 1 ; }
-} || { 
-  printf "Release builds missing. Skipping download.\n" ;
-}
+} 
 
 # Termux version 118 requires at least v24 of the Android SDK.
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/
@@ -244,8 +242,8 @@ printf "a67fbbb73f1a0bcacc5dd51f8aaf8ee52454094a86b019a93bf0f44c44202d5a  $BASE/
 
 # Download the currently released Lavabit App
 [ -d $BASE/build/lavabit/ ] && rm --force --recursive $BASE/build/lavabit/ ; mkdir --parents $BASE/build/lavabit/
-curl --silent --location --output $BASE/build/lavabit/com.lavabit.pahoehoe_201.apk https://f-droid.org/repo/com.lavabit.pahoehoe_201.apk
-printf "c091f6b50318c4cfb8d2edc175264cd82e03b9e2469889f8bbb9467bc2d405a2  $BASE/build/lavabit/com.lavabit.pahoehoe_201.apk" | sha256sum -c --quiet || exit 1
+curl --silent --location --output $BASE/build/lavabit/com.lavabit.pahoehoe_202.apk https://f-droid.org/repo/com.lavabit.pahoehoe_202.apk
+printf "700d0cdc53eea321cfb2da25ca01707ba9a508d35419ea0877d520148a6fb906  $BASE/build/lavabit/com.lavabit.pahoehoe_202.apk" | sha256sum -c --quiet || exit 1
 
 # Download CPU Info App
 [ -d $BASE/build/cpuinfo/ ] && rm --force --recursive $BASE/build/cpuinfo/ ; mkdir --parents $BASE/build/cpuinfo/
@@ -256,4 +254,4 @@ printf "3f70b2cccf987f91e1e6887f66781040e00e76ea6a11cd9024b9b4573cd26855  $BASE/
 # sshfs vagrant@192.168.221.50:/home/vagrant/android $BASE/build/source -o uidfile=1000 -o gidfile=1000 \
 # -o StrictHostKeyChecking=no -o IdentityFile=$BASE/.vagrant/machines/debian_build/libvirt/private_key
 
-tput setaf 2; printf "Lavabit encrypted proxy build complete.\n"; tput sgr0
+printf "Android download stage complete.\n"
