@@ -61,7 +61,11 @@ printf "\nBox download complete.\n"
 
 # Create the virtual machines.
 vagrant up --provider=$PROVIDER &> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 || \
- { RESULT=$? ; tput setaf 1 ; printf "Box startup error. [ UP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+ { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Retrying. [ UP = $RESULT ]\n\n" ; tput sgr0 ; \
+ vagrant destroy -f ; sleep 120 ; vagrant up --provider=$PROVIDER &>> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 } || \
+ { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Retrying. [ UP = $RESULT ]\n\n" ; tput sgr0 ; \
+ vagrant destroy -f ; sleep 120 ; vagrant up --provider=$PROVIDER &>> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 } || \
+ { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Exiting. [ UP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
  
 printf "Box startup complete.\n"
 
