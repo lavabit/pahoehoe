@@ -145,7 +145,7 @@ vagrant ssh -c "test -d \$HOME/android/app/build/outputs/" debian_build &> /dev/
   [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_64_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_64_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/outputs/Lavabit_Proxy_armeabi-v7a_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/outputs/Lavabit_Proxy_arm64-v8a_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_fat_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_64_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/outputs/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
