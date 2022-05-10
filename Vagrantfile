@@ -41,6 +41,7 @@ Vagrant.configure("2") do |config|
       v.gui = false
       v.customize ["modifyvm", :id, "--memory", 4096]
       v.customize ["modifyvm", :id, "--cpus", 4]
+      v.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
     end
 
     debian_build.vm.provision "shell", inline: <<-SHELL
@@ -88,6 +89,7 @@ Vagrant.configure("2") do |config|
   #     v.gui = false
   #     v.customize ["modifyvm", :id, "--memory", 12384]
   #     v.customize ["modifyvm", :id, "--cpus", 4]
+  #     v.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
   # =>  end
   #
   #   ubuntu_aosp.vm.provision "shell", inline: <<-SHELL
@@ -138,6 +140,7 @@ Vagrant.configure("2") do |config|
       v.gui = false
       v.customize ["modifyvm", :id, "--memory", 1024]
       v.customize ["modifyvm", :id, "--cpus", 1]
+      v.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
     end
 
     debian_vpn.vm.provision "shell", inline: <<-SHELL
@@ -189,6 +192,7 @@ Vagrant.configure("2") do |config|
       v.gui = false
       v.customize ["modifyvm", :id, "--memory", 1024]
       v.customize ["modifyvm", :id, "--cpus", 1]
+      v.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
     end
 
     centos_vpn.vm.provision "shell", inline: <<-SHELL
