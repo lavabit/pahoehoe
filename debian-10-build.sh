@@ -38,11 +38,15 @@ if [ -n "$VERSTR" ]; then
 fi
 
 # Update the Development Fingerprints
-curl --silent --insecure https://api.centos.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/centos.local.json
-curl --silent --insecure https://api.centos.local/ca.crt > $HOME/android/app/src/test/resources/preconfigured/centos.local.pem
+curl --silent --insecure https://api.centos.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/centos.local.json || \
+ { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve CentOS VPN test server config. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+curl --silent --insecure https://api.centos.local/ca.crt > $HOME/android/app/src/test/resources/preconfigured/centos.local.pem || \
+  { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve CentOS VPN test server CA certificate. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
-curl --silent --insecure https://api.debian.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/debian.local.json
-curl --silent --insecure https://api.debian.local/ca.crt > $HOME/android/app/src/test/resources/preconfigured/debian.local.pem
+curl --silent --insecure https://api.debian.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/debian.local.json || \
+ { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve Debian VPN test server config. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+curl --silent --insecure https://api.debian.local/ca.crt > $HOME/android/app/src/test/resources/preconfigured/debian.local.pem || \
+ { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve Debian VPN test server CA certificate. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
 cat <<-EOF > $HOME/android/local.properties
 
