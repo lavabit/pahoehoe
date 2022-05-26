@@ -45,9 +45,11 @@ sudo swapon --all
 sudo tee -a /etc/sysctl.conf <<-EOF > /dev/null
 vm.swappiness=10
 vm.vfs_cache_pressure=50
+vm.overcommit_ratio=400
 EOF
 sudo sysctl --quiet vm.vfs_cache_pressure=50
 sudo sysctl --quiet vm.swappiness=10
+sudo sysctl --quiet vm.overcommit_ratio=400
 
 # Trim the drive to free space.
 sudo sed -i "s/OnCalendar.*/OnCalendar=hourly/g" /lib/systemd/system/fstrim.timer
