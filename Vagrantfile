@@ -40,7 +40,7 @@ Vagrant.configure("2") do |config|
     debian_build.vm.provider :virtualbox do |v, override|
       v.gui = false
       v.customize ["modifyvm", :id, "--memory", 4096]
-      v.customize ["modifyvm", :id, "--guestmemoryballoon", 2048]
+      # v.customize ["modifyvm", :id, "--guestmemoryballoon", 2048]
       v.customize ["modifyvm", :id, "--cpus", 4]
       v.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "on"]
       v.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
@@ -142,7 +142,7 @@ Vagrant.configure("2") do |config|
     debian_vpn.vm.provider :virtualbox do |v, override|
       v.gui = false
       v.customize ["modifyvm", :id, "--memory", 1024]
-      v.customize ["modifyvm", :id, "--guestmemoryballoon", 512]
+      # v.customize ["modifyvm", :id, "--guestmemoryballoon", 512]
       v.customize ["modifyvm", :id, "--cpus", 1]
       v.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "on"]
       v.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
@@ -196,7 +196,7 @@ Vagrant.configure("2") do |config|
     centos_vpn.vm.provider :virtualbox do |v, override|
       v.gui = false
       v.customize ["modifyvm", :id, "--memory", 1024]
-      v.customize ["modifyvm", :id, "--guestmemoryballoon", 512]
+      # v.customize ["modifyvm", :id, "--guestmemoryballoon", 512]
       v.customize ["modifyvm", :id, "--cpus", 1]
       v.customize ["storagectl", :id, "--name", "SATA Controller", "--hostiocache", "on"]
       v.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
