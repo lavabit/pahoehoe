@@ -73,6 +73,8 @@ sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq
 # Android client build.
 cd $HOME
 
+sudo chown vagrant:vagrant $HOME/.bashrc
+
 # Remove history limits.
 sed -i "/HISTSIZE/d" $HOME/.bashrc
 sed -i "/HISTCONTROL/d" $HOME/.bashrc
@@ -104,6 +106,7 @@ shopt -s histappend
 
 EOF
 
+sudo chown vagrant:vagrant $HOME/.vimrc
 cat <<-EOF > $HOME/.vimrc
 set mouse-=a
 EOF
