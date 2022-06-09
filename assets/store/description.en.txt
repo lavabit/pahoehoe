@@ -28,4 +28,4 @@ At Lavabit, we believe that everyone deserves privacy and security online, and w
 
 As with all VPN proxy services, this app adds security to your data as it flows over the network. And it protects your internet protocol address. It does not stop apps, or websites you trust with private information from abusing and misusing that data. 
 
-The <i>Lavabit Encrypted Proxy</i> ie able to protect and prevent many forms of censorship and surveillance - but whether you're shrewd or senseless - sophisticated or a sucker for sophistries - that is still up to you.
+The <i>Lavabit Encrypted Proxy</i> is able to protect and prevent many forms of censorship and surveillance - but whether you're shrewd or senseless - sophisticated or a sucker for sophistries - that is still up to you.
