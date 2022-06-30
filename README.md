@@ -20,11 +20,29 @@ To create a new release, update the `run.sh` and the `android/app/build.gradle` 
 
 Once the release files have been generated, increment the version code and version string values used by the `run.sh` and `android/app/build.gradle` files, while also appending `RC` back onto the end of the version string. Please also note that the `android-11-installer.sh` and `debian-10-emulator.sh` should be updated with the new version string values (including the RC), so they can find properly predict the build filenames to install.
 
+**Direct Access**
+For those looking to use the Lavabit proxy servers directly, and without the assistance of our apps, the `lavabitvpn.sh` script may provide a guide. It tries to create a proxy client configuration that can be used directly with any generic OpenVPN client. Unfortunately this script is rather fragile, and may require root permissions on some systems, so it can properly safeguard the configuration it generates. We've also found that even with root, it may not work properly on all distros.
+
+### Tasks
+  
+- Update the config so the automatic retry window will only grow to a maxium of 10 seconds.
+- Randomize which proxy node is used if multiple  nodes are online at a single location.
+- Remove the QUERY_ALL_PACKAGES permission from the manifest, or fix and restore access to the excluder.
+- Allow users to manually switch to using UDP, instead of TCP.
+- Properly implement dnsmasq on the proxy nodes, so that DNS queries get tunneled properly.
+- Once the DNS issue is fixed, submit a pull request upstream with our certificate and requisite config info.
+- Add a caching layer to the VPNweb daemon to reduce the lag a user might face during setup.
+- Adapt the updated description we use on the Play Store for F-droid, and enable the translations.
+- Update the OpenVPN version on the server, and along with the embedded OpenVPN client, and enable TLS 1.3.
+- Incorporate post quantum cipher support (and allow users to enable their use).
+- Update the SDK target from 30 (Android 11) to 32 (Android 12L), or even 33 (Android 13).
+- Begin uploading our Android app to the Samsung and Amazon app stores, and allow direct downloads via the Lavabit website.
+- Potentially offer the app via APKPure, Uptodow, SlideMe and Aptoide.
+  
+<sub><sub>The Aurora/Yalp stores are Play Store proxies, and the Huawei, Xiaomi, OPPO and VIVO stores are based in China, where VPN apps are illegal.</sub></sub>
+  
 **Future Release Work**
 Integrate support for the [Google Play Publisher](https://github.com/Triple-T/gradle-play-publisher/blob/master/README.md#managing-play-store-metadata) Gradle radleplugin which will allow us to automate the submission of new builds and the management of metadata in the same way we already integrate with the F-Droid store.
-
-### Direct Access
-The `lavabitvpn.sh` script demonstrates how to use retrieve the client config, and generate access keys for the proxy service without the client apps and then connect using the OpenVPN binary. Unfortunately this script currently requires root permissions so it can properly secure itself. We've also found that even with root, it may not work properly on all distros.
 
 ### Security Note
 The production releases keys/creation is handled by the `debian-10-build-key.sh` script module. Since this script is likely to contain sensitive information, like the release signing keys, it should never be committed to the repo, or pushed to a server. The git ignore directive should prevent this, but for extra security, consider adding the following script as `.git/hooks/pre-commit` to the production build system git repo:
@@ -36,10 +54,10 @@ exit 0
 ```
 
 ### Upstream Code
-While the management, and build scripts for the project were developed by Lavabit, and are unique to this repo, the client and server code wasn't created scratch. Rather it created by modifying code found in other pre-existing F/OSS projects.
+While the management, and build scripts for the project were developed by Lavabit, and are unique to this repo, the client and server code wasn't created from nothingness. Rather it is the byproduct of a polygamus relationship between several pre-existing F/OSS projects.
 
-Most notably, the Android application code was based off the [Bitmask codebase](https://0xacab.org/leap/bitmask_android), which in turn relied on a number of F/OSS projects for support, with the the most significant contribution to the Android application coming from the [ICS OpenVPN project](https://github.com/schwabe/ics-openvpn).
+Our Android application code is a fork of the [Bitmask codebase](https://0xacab.org/leap/bitmask_android), which acts as a wrapper around the [ICS OpenVPN project](https://github.com/schwabe/ics-openvpn).
 
-The HTTP server daemon used to facilitate client setup and access was also adapted from existing code found in the [VPNweb repository](https://0xacab.org/leap/vpnweb/). This daemon is written in Go, and relies on F/OSS Go modules to function.
+The HTTPS server daemon we use to facilitate client setup, and provide access credentials is an adaptation of the [VPNweb repository](https://0xacab.org/leap/vpnweb/). The server utilizes a several Go modules, all of which are also F/OSS, to function.
 
-While the code developed by Lavabit has been released, under the GPL, and most of the incorporated code has also been released under the GPL, there may be modules and/or code found inside sub-folders that is subject to a different license. 
+All of the code developed by Lavabit is hereby released under the GPL. Most of the code we incorporate, but not all of it, is also available under the GPL. Just beware that some of the code you may find buried in sub-folder may be subject to a different license. Even though the license may not be the GPL, all of the licenses are OSI approved.
