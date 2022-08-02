@@ -270,7 +270,7 @@ void *mem_create_secure(size_t size)
 {
 #ifdef HAVE_MLOCK
 
-	char *addr, *lock;
+	char *addr = NULL, *lock = NULL;
 #ifdef MLOCK_REQUIRES_PAGE_BOUNDARY
 	long pagesize;
 

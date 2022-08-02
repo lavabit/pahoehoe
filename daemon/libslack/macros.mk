@@ -121,7 +121,7 @@ SLACK_TEST_CCFLAGS += -Wno-restrict
 # I'm wrong.
 
 # SLACK_CCFLAGS += -Wno-deprecated-declarations
-SLACK_CCFLAGS += -Wno-gnu-folding-constant
+# SLACK_CCFLAGS += -Wno-gnu-folding-constant
 
 # Uncomment this to exclude compilation of the debug locker functions.
 # These functions shamefully assume that pthread_self() can be cast into
