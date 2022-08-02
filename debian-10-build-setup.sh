@@ -22,12 +22,12 @@ sudo tee --append /etc/hosts <<-EOF > /dev/null
 192.168.221.144 144.vpn.debian.local
 192.168.221.145 145.vpn.debian.local
 
-192.168.221.246 api.centos.local
-192.168.221.242 vpn.centos.local
-192.168.221.242 242.vpn.centos.local
-192.168.221.243 243.vpn.centos.local
-192.168.221.244 244.vpn.centos.local
-192.168.221.245 245.vpn.centos.local
+192.168.221.246 api.alma.local
+192.168.221.242 vpn.alma.local
+192.168.221.242 242.vpn.alma.local
+192.168.221.243 243.vpn.alma.local
+192.168.221.244 244.vpn.alma.local
+192.168.221.245 245.vpn.alma.local
 EOF
 
 # Create a swap file.

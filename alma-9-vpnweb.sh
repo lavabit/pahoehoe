@@ -5,15 +5,15 @@ systemctl --quiet daemon-reload && systemctl restart haveged && sudo systemctl -
 
 # Point us at the development environment.
 tee --append /etc/hosts <<-EOF > /dev/null
-192.168.221.246 api.centos.local
-192.168.221.242 vpn.centos.local
-192.168.221.242 242.vpn.centos.local
-192.168.221.243 243.vpn.centos.local
-192.168.221.244 244.vpn.centos.local
-192.168.221.245 245.vpn.centos.local
+192.168.221.246 api.alma.local
+192.168.221.242 vpn.alma.local
+192.168.221.242 242.vpn.alma.local
+192.168.221.243 243.vpn.alma.local
+192.168.221.244 244.vpn.alma.local
+192.168.221.245 245.vpn.alma.local
 EOF
 
-dnf -q -y module enable go-toolset 1>/dev/null
+# dnf -q -y module enable go-toolset 1>/dev/null
 dnf -q -y install jq git gcc curl make expect golang coreutils gnutls-utils python3-jinja2 python3-netaddr python3-yaml python3-six 1>/dev/null
 
 [ -d $HOME/daemon ] && rm --force --recursive $HOME/daemon
@@ -33,7 +33,7 @@ VPNWEB_AUTH=anon
 VPNWEB_PORT=443
 VPNWEB_ADDRESS=192.168.221.246
 VPNWEB_REDIRECT=https://lavabit.com/
-VPNWEB_AUTH_SECRET="`mkpasswd -l 32 -d 6 -C 6 -s 0 -d 4`"
+VPNWEB_AUTH_SECRET="`mkpasswd-expect -l 32 -d 6 -C 6 -s 0 -d 4`"
 VPNWEB_API_PATH=/etc/vpnweb/public/
 VPNWEB_PROVIDER_CA=/etc/vpnweb/ca-cert.pem
 VPNWEB_TLSCRT=/etc/vpnweb/tls-cert.pem
@@ -47,13 +47,13 @@ organization = "Lavabit LLC"
 unit = "Lavabit Developer Proxy"
 state = "Texas"
 country = US
-email = "support@centos.local"
-cn = "centos.local"
-dc = "centos.local"
+email = "support@alma.local"
+cn = "alma.local"
+dc = "alma.local"
 serial = 001
 activation_date = "2021-01-01 10:00:00"
 expiration_date = "2031-12-31 23:59:59"
-dns_name = "centos.local"
+dns_name = "alma.local"
 ca
 signing_key
 encryption_key
@@ -65,13 +65,13 @@ organization = "Lavabit LLC"
 unit = "Lavabit Developer Proxy"
 state = "Texas"
 country = US
-email = "support@centos.local"
-cn = "api.centos.local"
-dc = "centos.local"
+email = "support@alma.local"
+cn = "api.alma.local"
+dc = "alma.local"
 serial = 002
 activation_date = "2021-01-01 12:00:00"
 expiration_date = "2031-12-31 12:00:00"
-dns_name = "api.centos.local"
+dns_name = "api.alma.local"
 signing_key
 encryption_key
 tls_www_server
@@ -117,36 +117,36 @@ locations:
         - timezone: -6
 
 gateways:
-    - 242.vpn.centos.local:
-        - host: 242.vpn.centos.local
+    - 242.vpn.alma.local:
+        - host: 242.vpn.alma.local
         - ip_address: 192.168.221.242
         - location: Dallas
         - transports:
             - [ "openvpn", "tcp", "443"]
-    - 243.vpn.centos.local:
-        - host: 243.vpn.centos.local
+    - 243.vpn.alma.local:
+        - host: 243.vpn.alma.local
         - ip_address: 192.168.221.243
         - location: Dallas
         - transports:
             - [ "openvpn", "tcp", "443"]
-    - 244.vpn.centos.local:
-        - host: 244.vpn.centos.local
+    - 244.vpn.alma.local:
+        - host: 244.vpn.alma.local
         - ip_address: 192.168.221.244
         - location: Dallas
         - transports:
             - [ "openvpn", "tcp", "443"]
-    - 245.vpn.centos.local:
-        - host: 245.vpn.centos.local
+    - 245.vpn.alma.local:
+        - host: 245.vpn.alma.local
         - ip_address: 192.168.221.245
         - location: Dallas
         - transports:
             - [ "openvpn", "tcp", "443"]
 
 provider:
-    - name: "CentOS Test Proxy"
-    - description: "CentOS Test Proxy"
-    - domain: centos.local
-    - api_uri: api.centos.local
+    - name: "Alma Test Proxy"
+    - description: "Alma Test Proxy"
+    - domain: alma.local
+    - api_uri: api.alma.local
     - fingerprint: "SHA256: $FINGERPRINT"
 EOF
 
@@ -158,10 +158,10 @@ cat <<-EOF > /etc/vpnweb/public/geoip.json
   "lat": 32.776,
   "lon": -97.822,
   "gateways": [
-    "242.vpn.centos.local",
-    "243.vpn.centos.local",
-    "244.vpn.centos.local",
-    "245.vpn.centos.local"
+    "242.vpn.alma.local",
+    "243.vpn.alma.local",
+    "244.vpn.alma.local",
+    "245.vpn.alma.local"
   ]
 }
 EOF
@@ -261,31 +261,32 @@ echo "VPN web service installed."
 echo "Starting unit tests."
 sleep 10
 
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/ca.crt || { echo "https://api.centos.local/ca.crt failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/provider.json || { echo "https://api.centos.local/provider.json failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/ca.crt || { echo "https://api.alma.local/ca.crt failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/provider.json || { echo "https://api.alma.local/provider.json failed ..." ; exit 1 ; }
 
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/1/cert || { echo "https://api.centos.local/1/cert failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/1/ca.crt || { echo "https://api.centos.local/1/ca.crt failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/1/configs.json || { echo "https://api.centos.local/1/configs.json failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/1/service.json || { echo "https://api.centos.local/1/service.json failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/1/config/eip-service.json || { echo "https://api.centos.local/1/config/eip-service.json failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/1/cert || { echo "https://api.alma.local/1/cert failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/1/ca.crt || { echo "https://api.alma.local/1/ca.crt failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/1/configs.json || { echo "https://api.alma.local/1/configs.json failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/1/service.json || { echo "https://api.alma.local/1/service.json failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/1/config/eip-service.json || { echo "https://api.alma.local/1/config/eip-service.json failed ..." ; exit 1 ; }
 
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/3/cert || { echo "https://api.centos.local/3/cert failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/3/ca.crt || { echo "https://api.centos.local/3/ca.crt failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/3/configs.json || { echo "https://api.centos.local/3/configs.json failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/3/service.json || { echo "https://api.centos.local/3/service.json failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/3/config/eip-service.json || { echo "https://api.centos.local/3/config/eip-service.json failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/3/cert || { echo "https://api.alma.local/3/cert failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/3/ca.crt || { echo "https://api.alma.local/3/ca.crt failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/3/configs.json || { echo "https://api.alma.local/3/configs.json failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/3/service.json || { echo "https://api.alma.local/3/service.json failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/3/config/eip-service.json || { echo "https://api.alma.local/3/config/eip-service.json failed ..." ; exit 1 ; }
 
-curl --fail --silent --show-error --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/ || { echo "https://api.centos.local/ redirection failed ..." ; exit 1 ; }
-curl --fail --silent --show-error --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.centos.local/$RANDOM || { echo "https://api.centos.local/RANDOM redirection failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/ || { echo "https://api.alma.local/ redirection failed ..." ; exit 1 ; }
+curl --fail --silent --show-error --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.alma.local/$RANDOM || { echo "https://api.alma.local/RANDOM redirection failed ..." ; exit 1 ; }
 
 for i in {1..100}; do
   URL="`cat /dev/urandom | tr -dc '[:alnum:]\#\\\/\.\-\_' | fold -w 32 | head -n 1`"
-  curl --fail --silent --show-error --globoff --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem "https://api.centos.local/${URL}" || { echo "https://api.centos.local/${URL} redirection failed" ; exit 1 ; }
+  curl --fail --silent --show-error --globoff --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem "https://api.alma.local/${URL}" || { echo "https://api.alma.local/${URL} redirection failed" ; exit 1 ; }
 done
 
 echo "Unit tests completed."
 
 # Cleanup.
 rm --force --recursive $HOME/go/ $HOME/.cache/ $HOME/vpnweb/ $HOME/daemon/
-dnf -q -y module disable go-toolset && dnf -q -y remove jq git gcc make golang expect gnutls-utils python3-jinja2 python3-netaddr python3-yaml patch 1>/dev/null
+# dnf -q -y module disable go-toolset && 
+dnf -q -y remove jq git gcc make golang expect gnutls-utils python3-jinja2 python3-netaddr python3-yaml patch 1>/dev/null

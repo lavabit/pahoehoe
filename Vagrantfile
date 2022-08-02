@@ -165,20 +165,20 @@ Vagrant.configure("2") do |config|
 
   end
 
-  config.vm.define "centos_vpn" do |centos_vpn|
-    centos_vpn.vm.box = "generic/centos8"
-    centos_vpn.vm.hostname = "centos-vpn"
-    centos_vpn.vm.boot_timeout = 1200
-    centos_vpn.vm.base_mac = "08002727C0C0"
-    centos_vpn.vm.synced_folder ".", "/vagrant", disabled: true
-    centos_vpn.vm.network "forwarded_port", guest: 22, host: 30000, id: "ssh", auto_correct: true
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.242", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.243", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.244", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.245", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
-    centos_vpn.vm.network :private_network, :ip => "192.168.221.246", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+  config.vm.define "alma_vpn" do |alma_vpn|
+    alma_vpn.vm.box = "generic/alma9"
+    alma_vpn.vm.hostname = "alma-vpn"
+    alma_vpn.vm.boot_timeout = 1200
+    alma_vpn.vm.base_mac = "08002727C0C0"
+    alma_vpn.vm.synced_folder ".", "/vagrant", disabled: true
+    alma_vpn.vm.network "forwarded_port", guest: 22, host: 30000, id: "ssh", auto_correct: true
+    alma_vpn.vm.network :private_network, :ip => "192.168.221.242", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    alma_vpn.vm.network :private_network, :ip => "192.168.221.243", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    alma_vpn.vm.network :private_network, :ip => "192.168.221.244", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    alma_vpn.vm.network :private_network, :ip => "192.168.221.245", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
+    alma_vpn.vm.network :private_network, :ip => "192.168.221.246", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
 
-    centos_vpn.vm.provider :libvirt do |v, override|
+    alma_vpn.vm.provider :libvirt do |v, override|
       v.driver = "kvm"
       v.nested = true
       v.memory = 1024
@@ -196,7 +196,7 @@ Vagrant.configure("2") do |config|
       # v.disk_driver :cache => 'unsafe', :discard => 'unmap', :detect_zeroes => 'unmap'
     end
 
-    centos_vpn.vm.provider :virtualbox do |v, override|
+    alma_vpn.vm.provider :virtualbox do |v, override|
       v.cpus = 1
       v.memory = 1024
       v.gui = false
@@ -206,7 +206,7 @@ Vagrant.configure("2") do |config|
       v.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
     end
 
-    centos_vpn.vm.provision "shell", inline: <<-SHELL
+    alma_vpn.vm.provision "shell", inline: <<-SHELL
       # set -x
       dnf -q -y update 2> /dev/null
       echo "* * * * * root command bash -c '/usr/bin/updatedb'" > /etc/cron.d/updatedb

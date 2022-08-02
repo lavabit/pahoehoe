@@ -68,7 +68,7 @@ public class ProviderManagerTest {
                     preconfiguredUrls[1] = "demo.bitmask.net.url";
                     preconfiguredUrls[2] = "riseup.net.url";
                     preconfiguredUrls[3] = "calyx.net.url";
-                    preconfiguredUrls[4] = "centos.local.url";
+                    preconfiguredUrls[4] = "alma.local.url";
                     preconfiguredUrls[5] = "debian.local.url";
                     return preconfiguredUrls;
                 } else

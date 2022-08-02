@@ -7,17 +7,17 @@ organization = "Lavabit LLC"
 unit = "Lavabit Developer Proxy"
 state = "Texas"
 country = US
-email = "support@centos.local"
-cn = "vpn.centos.local"
-dc = "centos.local"
+email = "support@alma.local"
+cn = "vpn.alma.local"
+dc = "alma.local"
 serial = 003
 activation_date = "2021-01-01 12:00:00"
 expiration_date = "2031-12-31 12:00:00"
-dns_name = "vpn.centos.local"
-dns_name = "242.vpn.centos.local"
-dns_name = "243.vpn.centos.local"
-dns_name = "244.vpn.centos.local"
-dns_name = "245.vpn.centos.local"
+dns_name = "vpn.alma.local"
+dns_name = "242.vpn.alma.local"
+dns_name = "243.vpn.alma.local"
+dns_name = "244.vpn.alma.local"
+dns_name = "245.vpn.alma.local"
 signing_key
 encryption_key
 tls_www_server
@@ -53,7 +53,7 @@ EOF
 # openssl dhparam -5 -outform PEM -out /etc/openvpn/dh.pem 4096
 
 # Create log directory.
-mkdir /var/log/openvpn/
+[ ! -d /var/log/openvpn/ ] && mkdir /var/log/openvpn/
 
 cat <<-EOF > /etc/openvpn/server/tcp.242.conf
 port 443
@@ -493,6 +493,11 @@ bind-interfaces
 EOF
 
 systemctl --quiet enable dnsmasq.service && systemctl --quiet start dnsmasq.service
+
+# Fix the permissions on the interface config files to avoid errors below.
+chown -R root:root /etc/sysconfig/network-scripts/
+chmod 644 /etc/sysconfig/network-scripts/ifcfg-*
+chcon "system_u:object_r:net_conf_t:s0" /etc/sysconfig/network-scripts/ifcfg-*
 
 # Firewall rules.
 DEVICE=$(ip route | awk '/^default via/ {print $5}')

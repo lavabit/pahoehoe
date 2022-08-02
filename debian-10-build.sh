@@ -38,10 +38,10 @@ if [ -n "$VERSTR" ]; then
 fi
 
 # Update the Development Fingerprints
-curl --silent --insecure https://api.centos.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/centos.local.json || \
- { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve CentOS VPN test server config. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
-curl --silent --insecure https://api.centos.local/ca.crt > $HOME/android/app/src/test/resources/preconfigured/centos.local.pem || \
-  { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve CentOS VPN test server CA certificate. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+curl --silent --insecure https://api.alma.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/alma.local.json || \
+ { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve Alma VPN test server config. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+curl --silent --insecure https://api.alma.local/ca.crt > $HOME/android/app/src/test/resources/preconfigured/alma.local.pem || \
+  { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve Alma VPN test server CA certificate. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
 curl --silent --insecure https://api.debian.local/provider.json > $HOME/android/app/src/test/resources/preconfigured/debian.local.json || \
  { RESULT=$? ; tput setaf 1 ; printf "Unable to retrieve Debian VPN test server config. [ cURL = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
@@ -101,8 +101,8 @@ printf "org.gradle.jvmargs=-Xmx${MOSTMEM}m -XX:MaxPermSize=${QUARTERMEM}m -XX:Ma
 printf "org.gradle.jvmargs=-Xmx${MOSTMEM}m -XX:MaxPermSize=${QUARTERMEM}m -XX:MaxMetaspaceSize=${QUARTERMEM}m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> $HOME/android/ics-openvpn/gradle.properties
 
 git update-index --assume-unchanged $HOME/android/ics-openvpn/main/build/ovpnassets/.empty
-git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/centos.local.json
-git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/centos.local.pem
+git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/alma.local.json
+git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/alma.local.pem
 git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/debian.local.json
 git update-index --assume-unchanged $HOME/android/app/src/test/resources/preconfigured/debian.local.pem
 

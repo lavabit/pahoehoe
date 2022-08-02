@@ -11,7 +11,7 @@ These same scripts can also be used to setup local VPN instances for testing, or
      height="80">](https://play.google.com/store/apps/details?id=com.lavabit.pahoehoe)
 
 ### Building (Easy Method)
-To build the code in this repo, clone the repo and execute the `run.sh` script. That script will setup CentOS and Debian virtual machines as local VPN servers, which you can then test against, and it will setup a third Debian virtual machine with the dependencies needed to build the Android APK files. If you would like to build the APK without using the Vagrant VMs consult the `debian-10-build-setup.sh` to see what dependencies are required, and the `debian-10-build.sh` for how to build the APK using the command line.
+To build the code in this repo, clone the repo and execute the `run.sh` script. That script will setup Alma and Debian virtual machines as local VPN servers, which you can then test against, and it will setup a third Debian virtual machine with the dependencies needed to build the Android APK files. If you would like to build the APK without using the Vagrant VMs consult the `debian-10-build-setup.sh` to see what dependencies are required, and the `debian-10-build.sh` for how to build the APK using the command line.
 
 Note that building the APK using Android Studio will fail unless you manually build the VPN libraries using the command line, before importing the project. Use the `android/scripts/build_deps.sh` to build the binary libraries via the command line.
 

@@ -43,12 +43,12 @@ vagrant destroy -f &>/dev/null
 # download the latest box file. If the box is missing, or the download fails, we 
 # use the add command to download it, and we try that three times, which will hopefully
 # reduce the number of CI failures caused by temporal cloud issues.
-vagrant box update --provider $PROVIDER --box "generic/centos8" &> "$BASE/build/logs/vagrant_box_add.txt" || \
-  { vagrant box add --clean --force --provider $PROVIDER "generic/centos8" &> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
-  { sleep 120 ; vagrant box add --clean --force --provider $PROVIDER "generic/centos8" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
-  { sleep 180 ; vagrant box add --clean --force --provider $PROVIDER "generic/centos8" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
-  { tput setaf 1 ; printf "\nBox download failed. [ BOX = generic/centos8 ]\n\n" ; tput sgr0 ; \
-  vagrant box remove --force --all --provider $PROVIDER "generic/centos8" &> /dev/null ; exit 1 ; }
+vagrant box update --provider $PROVIDER --box "generic/alma9" &> "$BASE/build/logs/vagrant_box_add.txt" || \
+  { vagrant box add --clean --force --provider $PROVIDER "generic/alma9" &> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
+  { sleep 120 ; vagrant box add --clean --force --provider $PROVIDER "generic/alma9" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
+  { sleep 180 ; vagrant box add --clean --force --provider $PROVIDER "generic/alma9" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
+  { tput setaf 1 ; printf "\nBox download failed. [ BOX = generic/alma9 ]\n\n" ; tput sgr0 ; \
+  vagrant box remove --force --all --provider $PROVIDER "generic/alma9" &> /dev/null ; exit 1 ; }
 
 vagrant box update --provider $PROVIDER --box "generic/debian10" &> "$BASE/build/logs/vagrant_box_add.txt" || \
   { vagrant box add --clean --force --provider $PROVIDER "generic/debian10" &>> "$BASE/build/logs/vagrant_box_add.txt" ; } || \
@@ -73,8 +73,8 @@ printf "Box startup complete.\n"
  set -e
  
 # Upload the scripts.
-vagrant upload centos-8-vpnweb.sh vpnweb.sh centos_vpn &> /dev/null
-vagrant upload centos-8-openvpn.sh openvpn.sh centos_vpn &> /dev/null
+vagrant upload alma-9-vpnweb.sh vpnweb.sh alma_vpn &> /dev/null
+vagrant upload alma-9-openvpn.sh openvpn.sh alma_vpn &> /dev/null
 vagrant upload debian-10-vpnweb.sh vpnweb.sh debian_vpn &> /dev/null
 vagrant upload debian-10-openvpn.sh openvpn.sh debian_vpn &> /dev/null
 
@@ -84,19 +84,19 @@ vagrant upload debian-10-build.sh build.sh debian_build &> /dev/null
 
 [ -f debian-10-build-key.sh ] && vagrant upload debian-10-build-key.sh key.sh debian_build &> /dev/null
 
-vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' centos_vpn &> /dev/null
+vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' alma_vpn &> /dev/null
 vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' debian_vpn &> /dev/null
 vagrant ssh -c 'chmod +x setup.sh build.sh rebuild.sh' debian_build &> /dev/null
 
 [ -f debian-10-build-key.sh ] && vagrant ssh -c 'chmod +x key.sh' debian_build &> /dev/null
 
 # Provision the VPN service.
-vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" centos_vpn &> "$BASE/build/logs/centos_vpn.txt" || \
- { RESULT=$? ; tput setaf 1 ; printf "CentOS VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
-vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < openvpn.sh" centos_vpn &>> "$BASE/build/logs/centos_vpn.txt" || \
- { RESULT=$? ; tput setaf 1 ; printf "CentOS VPN error. [ OPENVPN = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" alma_vpn &> "$BASE/build/logs/alma_vpn.txt" || \
+ { RESULT=$? ; tput setaf 1 ; printf "Alma VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < openvpn.sh" alma_vpn &>> "$BASE/build/logs/alma_vpn.txt" || \
+ { RESULT=$? ; tput setaf 1 ; printf "Alma VPN error. [ OPENVPN = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
-printf "CentOS VPN stage complete.\n"
+printf "Alma VPN stage complete.\n"
 
 vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" debian_vpn &> "$BASE/build/logs/debian_vpn.txt" || \
  { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }

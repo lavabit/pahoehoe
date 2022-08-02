@@ -1,19 +1,19 @@
 {
-  "api_uri": "https://api.centos.local",
+  "api_uri": "https://api.alma.local",
   "api_version": "3",
   "ca_cert_fingerprint": "SHA256: 5532a3ddddb1af104db4293041f4bdb3839803a1510e733d3d9f5dae88600e2d",
-  "ca_cert_uri": "https://api.centos.local/ca.crt",
+  "ca_cert_uri": "https://api.alma.local/ca.crt",
   "default_language": "en",
   "description": {
-    "en": "CentOS Test Proxy"
+    "en": "Alma Test Proxy"
   },
-  "domain": "centos.local",
+  "domain": "alma.local",
   "enrollment_policy": "open",
   "languages": [
     "en"
   ],
   "name": {
-    "en": "CentOS Test Proxy"
+    "en": "Alma Test Proxy"
   },
   "service": {
     "allow_anonymous": true,

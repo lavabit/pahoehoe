@@ -65,7 +65,7 @@ public class TestEipFragment extends BaseTestDashboardFragment {
     }
 
     private void checkProxyLocal() {
-        checkProvider("centos.local");
+        checkProvider("alma.local");
     }
 
     private void checkdebianLocal() {
