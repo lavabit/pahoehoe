@@ -20,7 +20,7 @@ class EIPConfig:
 
 def parseConfig(provider_config):
     with open(provider_config) as conf:
-        config = yaml.load(conf.read())
+        config = yaml.load(conf.read(), Loader=yaml.FullLoader)
     eip = EIPConfig()
     eip.openvpn.update(yamlListToDict(config['openvpn']))
     configureAuth(eip, config)
