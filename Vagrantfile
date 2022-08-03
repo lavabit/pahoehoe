@@ -213,6 +213,8 @@ Vagrant.configure("2") do |config|
       sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11DisplayOffset.*/X11DisplayOffset 10/g' /etc/ssh/sshd_config
+      # We need to set the crypto policy to LEGACY for the CI server.
+      sudo update-crypto-policies --set LEGACY
       sudo systemctl restart sshd.service 2> /dev/null
     SHELL
 
