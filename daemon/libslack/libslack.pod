@@ -1,7 +1,7 @@
 #
 # libslack - http://libslack.org/
 #
-# Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,10 +13,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-#a You should have received a copy of the GNU General Public License
+# You should have received a copy of the GNU General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
-# 20201111 raf <raf@raf.org>
+# 20210220 raf <raf@raf.org>
 
 =head1 NAME
 
@@ -140,7 +140,7 @@ network/storage friendly). There's also a function to send mail.
 
 =item Agent Oriented Programming
 
-I<Libslack> provides a generic agent oriented programming model in the form
+I<Libslack> provides a generic agent-oriented programming model in the form
 of the I<Agent> data type. Like objects, agents can react to external
 stimuli. Unlike objects, agents can can also take independent actions. This
 is performed by multiplexing I/O events on arbitrary file descriptors using
@@ -205,11 +205,11 @@ calls. The coprocess API is similar in spirit to I<popen(3)> and
 I<pclose(3)>. The I<fgetline(3)> function interoperates perfectly with
 standard I/O. Errors are returned via C<errno> just like system calls and
 some standard library functions. You may not like C<errno> if you write
-threaded programs but I figured that until C<errno> goes away, it's best to
-accept it and find a way to benefit from it. Unavoidably, the string module
-does wrap an object around perfectly good char pointers but the underlying
-char pointer is always accessible and many of the string functions have
-versions that work on ordinary C strings.
+multi-threaded programs but I figured that until C<errno> goes away, it's
+best to accept it and find a way to benefit from it. Unavoidably, the string
+module does wrap an object around perfectly good char pointers but the
+underlying char pointer is always accessible and many of the string
+functions have versions that work on ordinary C strings.
 
 The purpose of this design is Laziness. It means I don't have to wrap every
 net related system call or standard string function in an extra function and
@@ -251,7 +251,7 @@ extra examples.
 
 Libslack contains the following modules:
 
-    agent    - agent oriented programming
+    agent    - agent-oriented programming
     coproc   - coprocesses using pipes or pseudo terminals
     daemon   - becoming a daemon
     err      - message/error/debug/verbosity/alert messaging
@@ -279,28 +279,29 @@ Each module, as well as each function, has its own section 3 manpage.
 =head1 HEADER FILES
 
 Each module has its own header file (see SYNOPSIS). If you want to include
-these header files individually, you must first include the <slack/std.h>
-header file. Alternatively, you can just include the <slack/lib.h> header
-file and get everything. B<Note:> Make sure that <slack/lib.h> or
-<slack/std.h> is included before any system header files. Otherwise, the
-system headers won't be set up properly.
+these header files individually, you must first include the
+C<E<lt>slack/std.hE<gt>> header file. Alternatively, you can just include
+the C<E<lt>slack/lib.hE<gt>> header file and get everything. B<Note:> Make
+sure that C<E<lt>slack/lib.hE<gt>> or C<E<lt>slack/std.hE<gt>> is included
+before any system header files. Otherwise, the system headers won't be set
+up properly.
 
 If I<libslack> was installed on your system with a prefix added to each
-identifier, you may also want to include <slack/prefix.h> which allows you
-to continue to use the original I<libslack> identifiers and have them
-automatically translated into the prefixed identifiers.
+identifier, you may also want to include C<E<lt>slack/prefix.hE<gt>> which
+allows you to continue to use the original I<libslack> identifiers and have
+them automatically translated into the prefixed identifiers.
 
 Alternatively, if I<libslack> was installed on your system with the original
 names and you wish to compile client code that does use a prefix, you can
-include I<"remove_prefix.h"> which allows you to continue to use the
+include C<"remove_prefix.h"> which allows you to continue to use the
 prefixed identifiers and have them automatically translated into the
 original identifiers. Note that you will probably have to generate this
 header file yourself (see the prefix program in the tools directory).
 
 If your client code uses one prefix and the I<libslack> installed on your
 current system uses a different prefix, you will need to include both of
-these header files. First include I<"remove_prefix.h">. Then include
-<slack/prefix.h>.
+these header files. First include C<"remove_prefix.h">. Then include
+C<E<lt>slack/prefix.hE<gt>>.
 
 =head1 EXAMPLES
 
@@ -340,6 +341,6 @@ I<vsscanf(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut

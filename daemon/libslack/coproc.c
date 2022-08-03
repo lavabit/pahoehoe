@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -97,37 +97,37 @@ C<envv> is the environment variable vector to be passed to I<execve(2)>. If
 C<envv> is C<null>, the current environment is used. If C<cmd> is the name
 of a program, C<argv> must not be C<null>. If C<cmd> contains shell
 metacharacters, it will executed by C<sh -c> and C<argv> must be C<null>.
-This provides some protection from unintentionally invoking C<sh -c>. If
-C<cmd> does not contain any shell metacharacters, but does contain a slash
+This provides protection from unintentionally invoking C<sh -c>. If C<cmd>
+does not contain any shell metacharacters, but does contain a slash
 character (C</>), it is passed directly to I<execve(2)>. If it doesn't
 contain a slash character, we search for the executable in the directories
-specified by the C<PATH> variable. If the C<PATH> variable is not set, a
-default path is used: C</bin:/usr/bin> for root; C<:/bin:/usr/bin> for other
-users. If permission is denied for a file (I<execve(2)> returns C<EACCES>),
-then searching continues. If the header of a file isn't recognised
-(I<execve(2)> returns C<ENOEXEC>), then C</bin/sh> will be executed with
-C<cmd> as its first argument. This is done so that shell scripts without a
-C<#!> line can be used. If this attempt fails, no further searching is done.
-Communication with the coprocess occurs over pipes. Data written to C<*to>
-can be read from the standard input of the coprocess. Data written to the
-standard output or standard error of the coprocess may be read from C<*from>
-and C<*err> respectively. If the function pointer C<action> is not C<null>,
-it is invoked in the child process between the calls to I<fork(2)> and
-I<execve(2)>. Specifically, it is invoked before the pipes are duplicated
-onto C<stdin>, C<stdout> and C<stderr>. I<data> is passed as the argument to
-I<action>. This is useful when you need to prevent the coprocess from
-inheriting certain process attributes. It can be used to ignore signals, set
-default signal handlers, modify the signal mask and close files. On success,
-returns the process id of the coprocess. On error, returns C<-1> with
-C<errno> set appropriately.
+specified by the C<PATH> environment variable. If the C<PATH> environment
+variable is not set, a default path is used: C</bin:/usr/bin> for I<root>;
+C<:/bin:/usr/bin> for other users. If permission is denied for a file
+(I<execve(2)> returns C<EACCES>), then searching continues. If the header of
+a file isn't recognised (I<execve(2)> returns C<ENOEXEC>), then C</bin/sh>
+will be executed with C<cmd> as its first argument. This is done so that
+shell scripts without a C<#!> line can be used. If this attempt fails, no
+further searching is done. Communication with the coprocess occurs over
+pipes. Data written to C<*to> can be read from the standard input of the
+coprocess. Data written to the standard output or standard error of the
+coprocess may be read from C<*from> and C<*err>, respectively. If the
+function pointer C<action> is not C<null>, it is invoked in the child
+process between the calls to I<fork(2)> and I<execve(2)>. Specifically, it
+is invoked before the pipes are duplicated onto C<stdin>, C<stdout> and
+C<stderr>. I<data> is passed as the argument to I<action>. This is useful
+when you need to prevent the coprocess from inheriting certain process
+attributes. It can be used to ignore signals, set default signal handlers,
+modify the signal mask and close files. On success, returns the process id
+of the coprocess. On error, returns C<-1> with C<errno> set appropriately.
 
 Note: That this can only be used with coprocesses that do not buffer I/O or
 that explicitly set line buffering (or no buffering) with I<setbuf(3)> or
-I<setvbuf(3)>. If a potential coprocess uses standard I/O and you don't have
-access to the source code, you will need to use I<coproc_pty_open(3)>
+I<setvbuf(3)>. If a potential coprocess uses standard I/O, and you don't
+have access to the source code, you will need to use I<coproc_pty_open(3)>
 instead.
 
-B<Note: If cmd does contain shell metacharacters, make sure that the
+B<Note: If I<cmd> does contain shell metacharacters, make sure that the
 application provides the command to execute. If the command comes from
 outside the application, do not trust it. Verify that it is safe to
 execute.>
@@ -384,7 +384,7 @@ int coproc_close(pid_t pid, int *to, int *from, int *err)
 
 Equivalent to I<coproc_open(3)> except that communication with the coprocess
 occurs over a pseudo terminal. This is useful when the coprocess uses
-standard I/O and you don't have the source code. Standard I/O is fully
+standard I/O, and you don't have the source code. Standard I/O is fully
 buffered unless connected to a terminal. C<*pty_user_fd> is set to the user
 (or controlling process) side of a pseudo terminal. Data written to
 C<*pty_user_fd> can be read from the standard input of the coprocess. Data
@@ -505,8 +505,8 @@ I<coproc_pty_open(3)> or I<coproc_pty_close(3)>.
 
 =head1 MT-Level
 
-MT-Safe (I<coproc_pty_open(3)> is MT-Safe iff the I<pseudo(3)> module is
-MT-Safe).
+I<MT-Safe> (I<coproc_pty_open(3)> is I<MT-Safe> iff the I<pseudo(3)> module
+is I<MT-Safe>).
 
 =head1 EXAMPLES
 
@@ -817,7 +817,7 @@ I<pseudo(3>>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

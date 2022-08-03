@@ -2,7 +2,7 @@
 #
 # libslack - http://libslack.org/
 #
-# Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 # Revert to system implementation of rwlocks
 #
-# 20201111 raf <raf@raf.org>
+# 20210220 raf <raf@raf.org>
 
 perl -pi \
 	-e 's/test_pthread_rwlock/pthread_rwlock/g;' \
@@ -35,3 +35,4 @@ perl -pi \
 	-e 's/^\/\* #undef (HAVE_PTHREAD_RWLOCK) \*\/$/#define $1 1/;' \
 	`find . -name config.h`
 
+# vi:set ts=4 sw=4:

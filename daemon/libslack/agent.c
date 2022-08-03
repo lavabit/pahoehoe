@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -75,22 +75,23 @@ I<libslack(agent)> - agent module
 =head1 DESCRIPTION
 
 This module provides support for a generic agent programming model. Agents
-are like event loops except that while event loops only react to input
+are like event loops, except that while event loops only react to input
 events, agents can also take independent actions at specific times.
 
 Unlike event loops, which are typically GUI-specific and receive input
 events by calling some concrete event retrieval function, input events for
 agents take the form of data transfers across file descriptors. This means
-that input events can come from any source and have any semantics. For
+that input events can come from any source, and have any semantics. For
 example, to implement an event loop for a specific GUI using an agent, you'd
 have a separate thread or process that calls the GUI's event retrieval
-function and then sends each event to the agent across a pipe or socket.
+function, and then sends each event to the agent across a pipe or socket.
 
 Agents multiplex input sources using I<poll(2)> (or I<select(2)> if
 unavoidable) and multiplex timers for scheduled actions over I<poll(2)>'s
 timeout facility using hierarchical timing wheels. If timers are not used,
 agents are just an alternate interface to I<poll(2)>. If input sources are
-not used, agents are just a multipurpose timer that doesn't use any signals.
+not used, agents are just a multi-purpose timer that doesn't use any
+signals.
 
 Multiple agents can be connected to each other via pipes and sockets in
 arbitrary networks (in multiple threads or multiple processes on the same
@@ -318,7 +319,9 @@ static void timewheel_release(timewheel_t *timewheel)
 
 Creates an I<Agent> object. On error, returns C<null> with C<errno> set
 appropriately. It is the caller's responsibility to deallocate the new agent
-with I<agent_release(3)> or I<agent_destroy(3)>.
+with I<agent_release(3)> or I<agent_destroy(3)>. It is strongly recommended
+to use I<agent_destroy(3)>, because it also sets the pointer variable to
+C<null>.
 
 =cut
 
@@ -373,13 +376,15 @@ occurred; I<agent_velocity(3)> which returns the rate of I/O events;
 I<agent_acceleration(3)> which returns the rate of change of the I/O event
 rate; and I<agent_dadt(3)> which returns the rate of change of the rate of
 change of the I/O event rate. These functions can be applied to individual
-descriptors or to the agent as a whole. These agents can be combined to
-produce a fast/slow lane structure that improves scalability of I/O with
-respect to the number of connected descriptors. See the SCALABILITY section
-below for more details. On error, returns C<null> with C<errno> set
+file descriptors, or to the agent as a whole. These agents can be combined
+to produce a fast/slow lane structure that improves scalability of I/O with
+respect to the number of connected file descriptors. See the SCALABILITY
+section below for more details. On error, returns C<null> with C<errno> set
 appropriately. It is the caller's responsibility to deallocate the new agent
-with I<agent_release(3)> or I<agent_destroy(3)>. Note, if this system does
-not have I<poll(2)>, this function is not very useful.
+with I<agent_release(3)> or I<agent_destroy(3)>. It is strongly recommended
+to use I<agent_destroy(3)>, because it also sets the pointer variable to
+C<null>. Note, if this system does not have I<poll(2)>, this function is not
+very useful.
 
 =cut
 
@@ -433,7 +438,7 @@ Agent *agent_create_measured_with_locker(Locker *locker)
 =item C<Agent *agent_create_using_select(void)>
 
 Equivalent to I<agent_create(3)> except that the agent created will use
-I<select(2)> instead of I<poll(2)>. This should only be used under Linux
+I<select(2)> instead of I<poll(2)>. This should only be used under I<Linux>
 when accurate 10ms timers are required (see the BUGS section for details).
 It should not be used for I/O (see the SCALABILITY section for details).
 
@@ -518,8 +523,8 @@ void agent_release(Agent *agent)
 =item C<void *agent_destroy(Agent **agent)>
 
 Destroys (deallocates and sets to C<null>) C<*agent>. Returns C<null>.
-B<Note:> agents shared by multiple threads must not be destroyed until after
-all threads have finished with it.
+B<Note:> agents that are shared by multiple threads must not be destroyed
+until after all threads have finished with it.
 
 =cut
 
@@ -541,11 +546,11 @@ void *agent_destroy(Agent **agent)
 =item C<int agent_rdlock(const Agent *agent)>
 
 Claims a read lock on C<agent> (if C<agent> was created with a I<Locker>).
-This is needed when multiple read only I<agent(3)> module functions need to
+This is needed when multiple read-only I<agent(3)> module functions need to
 be called atomically. It is the caller's responsibility to call
 I<agent_unlock(3)> after the atomic operation. The only functions that may
 be called on C<agent> between calls to I<agent_rdlock(3)> and
-I<agent_unlock(3)> are any read only I<agent(3)> module functions whose name
+I<agent_unlock(3)> are any read-only I<agent(3)> module functions whose name
 ends with C<_unlocked>. On success, returns C<0>. On error, returns an error
 code.
 
@@ -604,7 +609,7 @@ int (agent_unlock)(const Agent *agent)
 
 =item C<int agent_connect(Agent *agent, int fd, int events, agent_reaction_t *reaction, void *arg)>
 
-Connect the descriptor, C<fd>, to C<agent>. C<events> specifies the
+Connect the file descriptor, C<fd>, to C<agent>. C<events> specifies the
 input/output events of interest. It is a bitmask of the following values:
 C<R_OK>, C<W_OK> and C<X_OK> indicating, respectively, readability,
 writability and exceptional condition (i.e. arrival of out of band data).
@@ -641,7 +646,7 @@ int agent_connect(Agent *agent, int fd, int events, agent_reaction_t *reaction, 
 
 =item C<int agent_connect_unlocked(Agent *agent, int fd, int events, agent_reaction_t *reaction, void *arg)>
 
-Equivalent to I<agent_connect(3)> except that C<agent> is not write locked.
+Equivalent to I<agent_connect(3)> except that C<agent> is not write-locked.
 
 =cut
 
@@ -802,9 +807,9 @@ int agent_connect_unlocked(Agent *agent, int fd, int events, agent_reaction_t *r
 
 =item C<int agent_disconnect(Agent *agent, int fd)>
 
-Disconnect the descriptor, C<fd>, from C<agent>. C<agent> will no longer
-respond to input/output events that occur on C<fd>. On success, returns
-C<0>. On error, returns C<-1> with C<errno> set appropriately.
+Disconnect the file descriptor, C<fd>, from C<agent>. C<agent> will no
+longer respond to input/output events that occur on C<fd>. On success,
+returns C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -832,8 +837,8 @@ int agent_disconnect(Agent *agent, int fd)
 
 =item C<int agent_disconnect_unlocked(Agent *agent, int fd)>
 
-Equivalent to I<agent_disconnect(3)> except that C<agent> is not write
-locked.
+Equivalent to I<agent_disconnect(3)> except that C<agent> is not
+write-locked.
 
 =cut
 
@@ -914,13 +919,15 @@ int agent_disconnect_unlocked(Agent *agent, int fd)
 
 =item C<int agent_transfer(Agent *agent, int fd, Agent *dst)>
 
-Transfers the connected descriptor, C<fd>, from C<agent> to C<dst>. The
+Transfers the connected file descriptor, C<fd>, from C<agent> to C<dst>. The
 activity data for C<fd> (i.e. time of last event, velocity, acceleration and
 dadt) are transferred as well. Both C<agent> and C<dst> must be agents
 created using I<agent_create_measured(3)>. On success, returns C<0>. On
 error, returns C<-1> with C<errno> set appropriately. Note this only works
-for agents in separate threads. To transfer a descriptor to another agent in
-another process on the same host, use I<agent_send(3)> and I<agent_recv(3)>.
+for agents in separate threads. To transfer a file descriptor to another
+agent in another process on the same host, use I<agent_send(3)> and
+I<agent_recv(3)>. It is not possible to transfer a file descriptor to
+another agent on another host.
 
 =cut
 
@@ -948,8 +955,8 @@ int agent_transfer(Agent *agent, int fd, Agent *dst)
 
 =item C<int agent_transfer_unlocked(Agent *agent, int fd, Agent *dst)>
 
-Equivalent to I<agent_transfer(3)> except that C<agent> is not write locked.
-Note that C<dst> is still write locked.
+Equivalent to I<agent_transfer(3)> except that C<agent> is not write-locked.
+Note that C<dst> is still write-locked.
 
 =cut
 
@@ -1002,25 +1009,25 @@ int agent_transfer_unlocked(Agent *agent, int fd, Agent *dst)
 
 =item C<int agent_send(Agent *agent, int fd, int sockfd)>
 
-Transfers the connected descriptor, C<fd>, from C<agent> to a receiving
+Transfers the connected file descriptor, C<fd>, from C<agent> to a receiving
 agent on the other end of the UNIX domain stream socket, C<sockfd>. Both the
 sending and the receiving agent must have been created using
 I<agent_create_measured(3)>. The receiving agent must call I<agent_recv(3)>
-to receive the descriptor. The activity data for C<fd> (i.e. time of last
-event, velocity, acceleration and dadt) are transferred as well. The events
-to react to and the reaction function and its argument are also sent to the
-receiving agent but note that the reaction function and its argument will be
-meaningless if the receiving agent exists in an unrelated process. They are
-passed just in case the processes are related and the reaction function's
-argument points to shared memory. If not, the receiving agent must specify a
-new reaction function and argument in the call to I<agent_recv(3)>. If the
-receiving agent exists in a separate thread, I<agent_transfer(3)> should be
-used instead. It is much faster. On success, returns C<0>. On error, returns
-C<-1> with C<errno> set appropriately. Note that this function does not
-close C<fd>. The caller must do this. Note that there is no provision for
-returning errors encountered by the receiving process to the sending
-process. If this is a problem, use threads instead and call
-I<agent_transfer(3)>.
+to receive the file descriptor. The activity data for C<fd> (i.e. time of
+last event, velocity, acceleration and dadt) are transferred as well. The
+events to react to and the reaction function and its argument are also sent
+to the receiving agent but note that the reaction function and its argument
+will be meaningless if the receiving agent exists in an unrelated process.
+They are passed just in case the processes are related and the reaction
+function's argument points to shared memory. If not, the receiving agent
+must specify a new reaction function and argument in the call to
+I<agent_recv(3)>. If the receiving agent exists in a separate thread,
+I<agent_transfer(3)> should be used instead. It is much faster. On success,
+returns C<0>. On error, returns C<-1> with C<errno> set appropriately. Note
+that this function does not close C<fd>. The caller must do this. Note that
+there is no provision for returning errors encountered by the receiving
+process to the sending process. If this is a problem, use threads instead
+and call I<agent_transfer(3)>.
 
 =cut
 
@@ -1048,7 +1055,7 @@ int agent_send(Agent *agent, int fd, int sockfd)
 
 =item C<int agent_send_unlocked(Agent *agent, int fd, int sockfd)>
 
-Equivalent to I<agent_send(3)> except that C<agent> is not write locked.
+Equivalent to I<agent_send(3)> except that C<agent> is not write-locked.
 
 =cut
 
@@ -1090,11 +1097,18 @@ int agent_send_unlocked(Agent *agent, int fd, int sockfd)
 
 =item C<int agent_recv(Agent *agent, int sockfd, agent_reaction_t *reaction, void *arg)>
 
-Receives a descriptor from the UNIX domain stream socket, C<sockfd>, and
-connects it to C<agent>. C<reaction> and C<arg> are used when connecting the
-descriptor to C<agent> all other data is received along with the descriptor.
-On success, returns the descriptor received. On error, returns C<-1> with
-C<errno> set appropriately.
+Receives a file descriptor from the UNIX domain stream socket, C<sockfd>,
+and connects it to C<agent>. If C<reaction> and C<arg> are null, then the
+I<reaction> function and its I<arg> argument are obtained from the sending
+process along with the file descriptor. This is only possible when the
+sending and receiving process share the same address space (i.e. after
+I<fork(2)>). When the sending and receiving process don't share the same
+address space (i.e. after I<exec(2)> or similar), then the I<reaction> and
+I<arg> parameters must be supplied by the receiving process. In either case,
+if the I<reaction> and I<arg> parameters are not null, they override the
+reaction function and argument that are received from the sending process.
+On success, returns the file descriptor received. On error, returns C<-1>
+with C<errno> set appropriately.
 
 =cut
 
@@ -1122,7 +1136,7 @@ int agent_recv(Agent *agent, int sockfd, agent_reaction_t *reaction, void *arg)
 
 =item C<int agent_recv_unlocked(Agent *agent, int sockfd, agent_reaction_t *reaction, void *arg)>
 
-Equivalent to I<agent_recv(3)> except that C<agent> is not write locked.
+Equivalent to I<agent_recv(3)> except that C<agent> is not write-locked.
 
 =cut
 
@@ -1165,10 +1179,10 @@ int agent_recv_unlocked(Agent *agent, int sockfd, agent_reaction_t *reaction, vo
 
 =item C<int agent_detail(Agent *agent, int fd)>
 
-Returns the level of detail in the activity data available for the
-descriptor C<fd> handled by C<agent>. If C<fd> is C<-1>, returns the number
-of level of detail available for C<agent> itself. On error, returns C<-1>
-with C<errno> set appropriately.
+Returns the level of detail in the activity data that is available for the
+file descriptor C<fd> handled by C<agent>. If C<fd> is C<-1>, returns the
+level of detail that is available for C<agent> itself. On error, returns
+C<-1> with C<errno> set appropriately.
 
 If C<0> is returned, there have been no I/O events for C<fd> (or agent if
 C<fd> is C<-1>), so no activity data is available. If C<1> is returned,
@@ -1183,7 +1197,7 @@ I<agent_acceleration(3)> and I<agent_dadt(3)> may be called with the same
 C<fd> argument.
 
 These functions may be used to implement algorithms that determine whether
-or not a given descriptor should remain with a given agent, or be
+or not a given file descriptor should remain with a given agent, or be
 transferred to another agent using I<agent_transfer(3)> or I<agent_send(3)>
 and I<agent_recv(3)>. See the SCALABILITY section.
 
@@ -1213,7 +1227,7 @@ int agent_detail(Agent *agent, int fd)
 
 =item C<int agent_detail_unlocked(Agent *agent, int fd)>
 
-Equivalent to I<agent_detail(3)> except that C<agent> is not read locked.
+Equivalent to I<agent_detail(3)> except that C<agent> is not read-locked.
 
 =cut
 
@@ -1238,7 +1252,7 @@ int agent_detail_unlocked(Agent *agent, int fd)
 	if (fd == -1)
 		return agent->tempo->detail;
 
-	/* Get the descriptor's id and return its detail */
+	/* Get the file descriptor's id and return its detail */
 
 	if ((id = agent->ids[fd]) == -1)
 		return set_errno(EINVAL);
@@ -1250,12 +1264,12 @@ int agent_detail_unlocked(Agent *agent, int fd)
 
 =item C<const struct timeval * const agent_last(Agent *agent, int fd)>
 
-Returns the time of the most recent I/O event for the descriptor C<fd>
+Returns the time of the most recent I/O event for the file descriptor C<fd>
 handled by C<agent>. If C<fd> is C<-1>, returns the time of the most recent
-event handled by C<agent> for any descriptor. On error, returns C<-1> with
-C<errno> set appropriately. Note: This function may only be called after
-I<agent_detail(3)> has returned a value greater than C<0> for the same C<fd>
-argument.
+event handled by C<agent> for any file descriptor. On error, returns C<-1>
+with C<errno> set appropriately. Note: This function may only be called
+after I<agent_detail(3)> has returned a value greater than C<0> for the same
+C<fd> argument.
 
 =cut
 
@@ -1284,7 +1298,7 @@ const struct timeval * const agent_last(Agent *agent, int fd)
 
 =item C<const struct timeval * const agent_last_unlocked(Agent *agent, int fd)>
 
-Equivalent to I<agent_last(3)> except that C<agent> is not read locked.
+Equivalent to I<agent_last(3)> except that C<agent> is not read-locked.
 
 =cut
 
@@ -1314,7 +1328,7 @@ const struct timeval * const agent_last_unlocked(Agent *agent, int fd)
 		return &agent->tempo->since;
 	}
 
-	/* Get the descriptor's id and return the time of the last I/O event */
+	/* Get the file descriptor's id and return the time of the last I/O event */
 
 	if ((id = agent->ids[fd]) == -1)
 		return set_errnull(EINVAL);
@@ -1330,12 +1344,12 @@ const struct timeval * const agent_last_unlocked(Agent *agent, int fd)
 =item C<int agent_velocity(Agent *agent, int fd)>
 
 Returns the number of milliseconds that elapsed between the last two I/O
-events for the descriptor C<fd> handled by C<agent>. If C<fd> is C<-1>,
+events for the file descriptor C<fd> handled by C<agent>. If C<fd> is C<-1>,
 returns the number of milliseconds that elapsed between the last two events
-handled by C<agent> for any descriptor. Large return values indicate less
-I/O activity. On error, returns C<-1> with C<errno> set appropriately. Note:
-This function may only be called after I<agent_detail(3)> has returned a
-value greater than C<1> for the same C<fd> argument.
+handled by C<agent> for any file descriptor. Large return values indicate
+less I/O activity. On error, returns C<-1> with C<errno> set appropriately.
+Note: This function may only be called after I<agent_detail(3)> has returned
+a value greater than C<1> for the same C<fd> argument.
 
 =cut
 
@@ -1363,7 +1377,7 @@ int agent_velocity(Agent *agent, int fd)
 
 =item C<int agent_velocity_unlocked(Agent *agent, int fd)>
 
-Equivalent to I<agent_velocity(3)> except that C<agent> is not read locked.
+Equivalent to I<agent_velocity(3)> except that C<agent> is not read-locked.
 
 =cut
 
@@ -1393,7 +1407,7 @@ int agent_velocity_unlocked(Agent *agent, int fd)
 		return agent->tempo->dt;
 	}
 
-	/* Get the descriptor's id and return its velocity */
+	/* Get the file descriptor's id and return its velocity */
 
 	if ((id = agent->ids[fd]) == -1)
 		return set_errno(EINVAL);
@@ -1408,15 +1422,15 @@ int agent_velocity_unlocked(Agent *agent, int fd)
 
 =item C<int agent_acceleration(Agent *agent, int fd)>
 
-Returns the rate of change of the velocity of I/O events for the descriptor
-C<fd> handled by C<agent>. If C<fd> is C<-1>, returns the rate of change of
-I/O events for C<agent> for any descriptor. Negative return values indicate
-acceleration. Positive return values indicate deceleration. A zero return
-value indicates no acceleration. The larger the magnitude of the return
-value, the greater the acceleration or deceleration. On error, returns C<-1>
-with C<errno> set appropriately. Note: This function may only be called
-after I<agent_detail(3)> has returned a value greater than C<2> for the same
-C<fd> argument.
+Returns the rate of change of the velocity of I/O events for the file
+descriptor C<fd> handled by C<agent>. If C<fd> is C<-1>, returns the rate of
+change of I/O events for C<agent> for any file descriptor. Negative return
+values indicate acceleration. Positive return values indicate deceleration.
+A zero return value indicates no acceleration. The larger the magnitude of
+the return value, the greater the acceleration or deceleration. On error,
+returns C<-1> with C<errno> set appropriately. Note: This function may only
+be called after I<agent_detail(3)> has returned a value greater than C<2>
+for the same C<fd> argument.
 
 =cut
 
@@ -1444,8 +1458,8 @@ int agent_acceleration(Agent *agent, int fd)
 
 =item C<int agent_acceleration_unlocked(Agent *agent, int fd)>
 
-Equivalent to I<agent_acceleration(3)> except that C<agent> is not read
-locked.
+Equivalent to I<agent_acceleration(3)> except that C<agent> is not
+read-locked.
 
 =cut
 
@@ -1475,7 +1489,7 @@ int agent_acceleration_unlocked(Agent *agent, int fd)
 		return agent->tempo->ddt;
 	}
 
-	/* Get the descriptor's id and return its acceleration */
+	/* Get the file descriptor's id and return its acceleration */
 
 	if ((id = agent->ids[fd]) == -1)
 		return set_errno(EINVAL);
@@ -1490,17 +1504,17 @@ int agent_acceleration_unlocked(Agent *agent, int fd)
 
 =item C<int agent_dadt(Agent *agent, int fd)>
 
-Returns the rate of change of the rate of change of I/O events for the
+Returns the rate of change of the rate of change of I/O events for the file
 descriptor C<fd> handled by C<agent>. If C<fd> is C<-1>, returns the rate of
-change of the rate of change of I/O events for C<agent> for any descriptor.
-Negative return values indicate that acceleration or deceleration is
-increasing. Positive return values indicate that acceleration or
-deceleration is decreasing. A zero return value indicates that acceleration
-or deceleration is constant. The larger the magnitude of the return value,
-the greater the increase or decrease in acceleration or deceleration. On
-error, returns C<-1> with C<errno> set appropriately. Note: This function
-may only be called after I<agent_detail(3)> has returned a value greater
-than C<3> for the same C<fd> argument.
+change of the rate of change of I/O events for C<agent> for any file
+descriptor. Negative return values indicate that acceleration or
+deceleration is increasing. Positive return values indicate that
+acceleration or deceleration is decreasing. A zero return value indicates
+that acceleration or deceleration is constant. The larger the magnitude of
+the return value, the greater the increase or decrease in acceleration or
+deceleration. On error, returns C<-1> with C<errno> set appropriately. Note:
+This function may only be called after I<agent_detail(3)> has returned a
+value greater than C<3> for the same C<fd> argument.
 
 =cut
 
@@ -1528,7 +1542,7 @@ int agent_dadt(Agent *agent, int fd)
 
 =item C<int agent_dadt_unlocked(Agent *agent, int fd)>
 
-Equivalent to I<agent_dadt(3)> except that C<agent> is not read locked.
+Equivalent to I<agent_dadt(3)> except that C<agent> is not read-locked.
 
 =cut
 
@@ -1558,7 +1572,7 @@ int agent_dadt_unlocked(Agent *agent, int fd)
 		return agent->tempo->dddt;
 	}
 
-	/* Get the descriptor's id and return its dadt */
+	/* Get the file descriptor's id and return its dadt */
 
 	if ((id = agent->ids[fd]) == -1)
 		return set_errno(EINVAL);
@@ -1607,7 +1621,7 @@ void *agent_schedule(Agent *agent, long sec, long usec, agent_action_t *action, 
 
 =item C<void *agent_schedule_unlocked(Agent *agent, long sec, long usec, agent_action_t *action, void *arg)>
 
-Equivalent to I<agent_schedule(3)> except that C<agent> is not write locked.
+Equivalent to I<agent_schedule(3)> except that C<agent> is not write-locked.
 
 =cut
 
@@ -1761,7 +1775,7 @@ int agent_cancel(Agent *agent, void *action_id)
 
 =item C<int agent_cancel_unlocked(Agent *agent, void *action_id)>
 
-Equivalent to I<agent_cancel(3)> except that C<agent> is not write locked.
+Equivalent to I<agent_cancel(3)> except that C<agent> is not write-locked.
 
 =cut
 
@@ -1791,18 +1805,18 @@ int agent_cancel_unlocked(Agent *agent, void *action_id)
 
 =item C<int agent_start(Agent *agent)>
 
-Starts C<agent>. The agent will react to events on connected descriptors and
-execute scheduled actions until there are no connected file descriptors and
-no scheduled actions or until I<agent_stop(3)> is called. It is the caller's
-responsibility to ensure that action and reaction functions will not take
-too long to execute. If they are going to take more than a few milliseconds,
-consider having them execute in their own detached thread. Otherwise,
-actions scheduled for the near future (e.g. 10ms) will not execute until
-they have finished. Of course, when there are no scheduled actions, this
-doesn't matter. On success, returns C<0>. On error, returns C<-1> with
-C<errno> set appropriately. If any action or reaction function returns
-C<-1>, returns C<-1>. Note that you cannot call I<agent_start(3)> on
-C<agent> in one of it's action or reaction functions.
+Starts C<agent>. The agent will react to events on connected file
+descriptors and execute scheduled actions until there are no connected file
+descriptors and no scheduled actions or until I<agent_stop(3)> is called. It
+is the caller's responsibility to ensure that action and reaction functions
+will not take too long to execute. If they are going to take more than a few
+milliseconds, consider having them execute in their own detached thread.
+Otherwise, actions scheduled for the near future (e.g. 10ms) will not
+execute until they have finished. Of course, when there are no scheduled
+actions, this doesn't matter. On success, returns C<0>. On error, returns
+C<-1> with C<errno> set appropriately. If any action or reaction function
+returns C<-1>, returns C<-1>. Note that you cannot call I<agent_start(3)> on
+C<agent> inside one of its action or reaction functions.
 
 =cut
 
@@ -2291,7 +2305,7 @@ int agent_start(Agent *agent)
 
 =item C<int agent_stop(Agent *agent)>
 
-Stops C<agent>. All connected descriptors and scheduled actions remain
+Stops C<agent>. All connected file descriptors and scheduled actions remain
 intact and C<agent> can be started again with I<agent_start(3)>. Note that
 any actions scheduled to occur while C<agent> is stopped will be executed
 when I<agent_start(3)> is next called. On success, returns C<0>. On error,
@@ -2351,12 +2365,12 @@ When I<agent_stop(3)> is called on an agent that isn't started.
 
 =head1 MT-Level
 
-MT-Disciplined
+I<MT-Disciplined>
 
 =head1 SCALABILITY
 
 There are two aspects to the scalability of agents: scalability with respect
-to the number of scheduled actions and scalability with respect to the
+to the number of scheduled actions, and scalability with respect to the
 number of connected file descriptors.
 
 The timers for scheduled actions are multiplexed over the timeout facility
@@ -2366,7 +2380,7 @@ start and stop timers and constant average time to maintain timers so that
 thousands of timers may be outstanding without performance penalty.
 
 Adding and removing connected file descriptors take constant time but
-maintaining them is C<O(n)> where C<n> is the number of connected file
+maintaining them is I<O(n)> where I<n> is the number of connected file
 descriptors. That wouldn't be a problem if all of the file descriptors were
 active since work would have to be done reacting to all the events anyway,
 but if only a few file descriptors are active, both the kernel and the
@@ -2377,11 +2391,11 @@ descriptors since many connections can be waiting for lost packets to be
 retransmitted.
 
 To implement a portable internet service that scales well with respect to
-the number of inactive file descriptors, use two agents, each running in
-it's own thread. The first only deals with active file descriptors. The
-second only deals with inactive file descriptors. These agents swap file
-descriptors between themselves as their activity changes. Agents measure the
-activity of each file descriptor to facilitate this. The result is one
+the number of inactive file descriptors, use two agents, each running in its
+own thread. The first only deals with active file descriptors. The second
+only deals with inactive file descriptors. These agents swap file
+descriptors between themselves as their activity changes. Agents can measure
+the activity of each file descriptor to facilitate this. The result is one
 thread being woken up frequently but only dealing with a small number of
 active file descriptors each time, and another thread being woken up
 infrequently and dealing with a large number of file descriptors each time.
@@ -2396,12 +2410,12 @@ processes but it's not as fast.
 The simpler, traditional approach is to just have multiple pre-forked
 servers, each I<accept(2)>ing connections. The set of connections will then
 be split between the servers. Experiments indicate that the connections are
-split evenly between the servers but if the active connections are split
+split evenly between the servers, but if the active connections are split
 between multiple servers, then the context switching overhead of multiple
 threads waking up could outweigh the savings gained by splitting up the
 connections into smaller sets. In the worst case, all of the threads might
-be woken up at the same time resulting in the entire set of connections
-being processed. This is precisely the problem we are trying to avoid but
+be woken up at the same time, resulting in the entire set of connections
+being processed. This is precisely the problem we are trying to avoid, but
 we've added context switching overhead as well. Another thing to note is
 that since this method is usually implemented with I<select(3)>, rather than
 I<poll(2)>, the effort wasted is far greater. Consider 1000 connections
@@ -2413,8 +2427,8 @@ interest, and has to check every bit up to the one corresponding to the
 highest numbered file descriptor, the total number of bits checked would be
 1000 + 900 + 800 + 700 + 600 + 500 + 400 + 300 + 200 + 100 = 5500. In the
 worst case it would be 1000 + 999 + 998 + 997 + 996 + 995 + 994 + 993 + 992
-+ 991 = 9955. That's an order of magnitude more work than the obvious single
-threaded approach.
++ 991 = 9955. That's an order of magnitude more work than the obvious
+single-threaded approach.
 
 =cut
 
@@ -2503,27 +2517,29 @@ XXX Show example of twin fast/slow lane agents swapping fds for scalability
 
 =head1 BUGS
 
-Linux (at least 2.2.x and 2.4.x) has a bug in I<poll(2)> that can wreak
+I<Linux> (at least 2.2.x and 2.4.x) has a "bug" in I<poll(2)> that can wreak
 havoc with timers. If you specify a timeout of between 10n-9 and 10n ms
-(where n >= 1) under Linux, I<poll(2)> will timeout after 10(n+1) ms instead
-of 10n ms like I<select(2)>. This means that if you ask I<poll(2)> for a
-10ms timeout, you get a 20ms timeout. If you ask for 20ms, you get 30ms and
-so on. As a workaround, the agent module subtracts 10ms from timeouts
-greater than 10ms under Linux. This means that (under Linux) you can't have
-a 10ms timer but you can have 20ms, 30ms and so on. It also means that if
-two actions are scheduled to occur 10ms apart, the second action will
-execute 20ms after the first. If you need accurate 10ms timers under Linux,
-use I<agent_create_using_select(3)> instead of I<agent_create(3)>. This will
-create an agent that uses I<select(2)> instead of I<poll(2)>. Note, however,
-that I<select(2)> is unscalable with respect to the number of connections
-and hence can't be used in a fast/slow lane server (See the SCALABILITY
-section for details). If accurate 10ms timers and scalable I/O are both
-required under Linux, use I<agent_create(3)> for all agents that will handle
-I/O and use I<agent_create_using_select(3)> for a separate agent that will
-handle actions. Note that on systems whose I<poll(2)> does not have this bug
-(e.g. Solaris), this isn't necessary. Also note that on systems that don't
-have I<poll(2)> (e.g. Mac OS X), agents will always use I<select(2)> and
-hence can't be used in a fast/slow lane server.
+(where n >= 1) under I<Linux>, I<poll(2)> will timeout after 10(n+1) ms
+instead of 10n ms like I<select(2)>. This means that if you ask I<poll(2)>
+for a 10ms timeout, you get a 20ms timeout. If you ask for 20ms, you get
+30ms and so on. As a workaround, the agent module subtracts 10ms from
+timeouts greater than 10ms under I<Linux>. This means that (under I<Linux>)
+you can't have a 10ms timer but you can have 20ms, 30ms and so on. It also
+means that if two actions are scheduled to occur 10ms apart, the second
+action will execute 20ms after the first. Note that this isn't really a bug
+in I<poll(2)> which is allowed to behave this way according to I<POSIX>.
+It's just really unfortunate. If you need accurate 10ms timers under
+I<Linux>, use I<agent_create_using_select(3)> instead of I<agent_create(3)>.
+This will create an agent that uses I<select(2)> instead of I<poll(2)>.
+Note, however, that I<select(2)> is unscalable with respect to the number of
+connections and hence can't be used in a fast/slow lane server (See the
+SCALABILITY section for details). If accurate 10ms timers and scalable I/O
+are both required under I<Linux>, use I<agent_create(3)> for all agents that
+will handle I/O and use I<agent_create_using_select(3)> for a separate agent
+that will handle actions. Note that on systems whose I<poll(2)> does not
+have this bug (e.g. I<Solaris>), this isn't necessary. Also note that on
+systems that don't have I<poll(2)> (e.g. I<Mac OS X>), agents will always
+use I<select(2)> and hence can't be used in a fast/slow lane server.
 
 It is an error to call I<agent_cancel(3)> for an action that has already
 happened (because the memory associated with the action is deallocated when
@@ -2535,15 +2551,15 @@ so from another action that was scheduled at least 10ms before the action
 being cancelled. Alternatively, you could disable, rather than cancel, an
 action by modifying a global variable that it checks before doing anything.
 
-If an action or reaction take a long time to run and an action scheduled for
-the near future misses it's schedule, the agent will catch up, executing any
-missed actions (better late than never). Unfortunately, there is no way to
-distinguish between an action or reaction taking a long time to run and the
-system's clock being set forward. So, if the system's clock is set forward,
-the agent will execute all actions scheduled for the missing time. The
-solution is to run an NTP daemon on the system to maintain accurate system
-time. Then, there would never be a large enough change to the system time to
-cause problems.
+If an action or reaction take a long time to run, and an action scheduled
+for the near future misses its schedule, the agent will catch up, executing
+any missed actions (better late than never). Unfortunately, there is no way
+to distinguish between an action or reaction taking a long time to run and
+the system's clock being set forward. So, if the system's clock is set
+forward, the agent will execute all actions scheduled for the missing time.
+The solution is to run an NTP daemon on the system to maintain accurate
+system time. Then, there would never be a large enough change to the system
+time to cause problems.
 
 =head1 SEE ALSO
 
@@ -2553,7 +2569,7 @@ I<select(2)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

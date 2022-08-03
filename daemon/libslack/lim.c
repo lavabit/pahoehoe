@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,14 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
 
 =head1 NAME
 
-I<libslack(lim)> - POSIX.1 limits module
+I<libslack(lim)> - I<POSIX.1> limits module
 
 =head1 SYNOPSIS
 
@@ -69,10 +69,10 @@ I<libslack(lim)> - POSIX.1 limits module
 
 =head1 DESCRIPTION
 
-This module provides functions for simply and reliably obtaining a POSIX.1
-limit for the current system or a usable default when a particular facility
-is unlimited on the current system. These functions always return a usable
-value.
+This module provides functions for simply and reliably obtaining a
+I<POSIX.1> limit for the current system or a usable default when a
+particular facility is unlimited on the current system. These functions
+always return a usable value.
 
 =over 4
 
@@ -182,9 +182,9 @@ Returns system limits using I<pathconf(3)>. If the limit is indeterminate, a
 predetermined default value is returned. If the limit is determinate, a
 predetermined amount may be added to its value. This is only needed for
 C<_PC_PATH_MAX> which is the maximum length of a relative path. To be more
-useful, 2 is added to this limit to account for the C<'/'> and C<'\0'> that
-will be needed to form an absolute path. Whatever happens, a usable value is
-returned.
+useful, C<2> is added to this limit to account for the C<'/'> and C<'\0'>
+that will be needed to form an absolute path. Whatever happens, a usable
+value is returned.
 
 */
 
@@ -206,9 +206,9 @@ Returns system limits using I<fpathconf(3)>. If the limit is indeterminate,
 a predetermined default value is returned. If the limit is determinate, a
 predetermined amount may be added to its value. This is only needed for
 C<_PC_PATH_MAX> which is the maximum length of a relative path. To be more
-useful, 2 is added to this limit to account for the C<'/'> and C<'\0'> that
-will be needed to form an absolute path. Whatever happens, a usable value is
-returned.
+useful, C<2> is added to this limit to account for the C<'/'> and C<'\0'>
+that will be needed to form an absolute path. Whatever happens, a usable
+value is returned.
 
 */
 
@@ -322,7 +322,7 @@ long limit_stream(void)
 
 =item C<long limit_tzname(void)>
 
-Returns the maximum number of bytes in a timezone name. If indeterminate, a
+Returns the maximum number of bytes in a time zone name. If indeterminate, a
 usable value (3) is returned.
 
 =cut
@@ -369,8 +369,8 @@ long limit_save_ids(void)
 
 =item C<long limit_version(void)>
 
-Returns the year and month the POSIX.1 standard was approved in the format
-YYYYMML.
+Returns the year and month the I<POSIX.1> standard was approved in the format
+I<YYYYMML>.
 
 =cut
 
@@ -807,14 +807,14 @@ long limit_chown(void)
 
 =head1 RETURNS
 
-The functions that return a condition return 1 when the condition is true or
-C<0> when it is false. All of the others either return the system limit
-indicated or a predetermined, usable value when the indicated limit is
+The functions that return a condition return C<1> when the condition is true
+or C<0> when it is false. All of the others either return the system limit
+indicated, or a predetermined, usable value when the indicated limit is
 indeterminate. These functions never return C<-1>.
 
 =head1 MT-Level
 
-MT-Safe
+I<MT-Safe>
 
 =head1 EXAMPLES
 
@@ -861,7 +861,7 @@ I<locker(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -109,7 +109,8 @@ struct Pool
 
 =item C< #define null NULL>
 
-Easier to type. Easier to read.
+Easier to type. Easier to read. Feel free to keep using C<NULL> if you
+prefer.
 
 =item C< #define nul '\0'>
 
@@ -119,15 +120,19 @@ A name for the C<nul> character.
 
 Allocates enough memory (with I<malloc(3)>) to store an object of type
 C<type>. It is the caller's responsibility to deallocate the allocated
-memory with I<mem_release(3)>, I<mem_destroy(3)> or I<free(3)>. On success,
-returns the address of the allocated memory. On error, returns C<null>.
+memory with I<free(3)>, I<mem_release(3)>, or I<mem_destroy(3)>. It is
+strongly recommended to use I<mem_destroy(3)>, because it also sets the
+pointer variable to C<null>. On success, returns the address of the
+allocated memory. On error, returns C<null>.
 
 =item C< #define mem_create(size, type)>
 
 Allocates enough memory (with I<malloc(3)>) to store C<size> objects of type
 C<type>. It is the caller's responsibility to deallocate the allocated
-memory with I<mem_release(3)>, I<mem_destroy(3)> or I<free(3)>. On success,
-returns the address of the allocated memory. On error, returns C<null>.
+memory with I<free(3)>, I<mem_release(3)>, or I<mem_destroy(3)>. It is
+strongly recommended to use I<mem_destroy(3)>, because it also sets the
+pointer variable to C<null>. On success, returns the address of the
+allocated memory. On error, returns C<null>.
 
 =item C< #define mem_resize(mem, num)>
 
@@ -136,7 +141,7 @@ new memory is allocated and assigned to C<*mem>. If size is zero, C<*mem> is
 deallocated and C<null> is assigned to C<*mem>. Otherwise, C<*mem> is
 reallocated and assigned back to C<*mem>. On success, returns C<*mem> (which
 will be C<null> if C<size> is zero). On error, returns C<null> with C<errno>
-set appropriately and C<*mem> is not altered.
+set appropriately, and C<*mem> is not altered.
 
 =item C<void *mem_resize_fn(void **mem, size_t size)>
 
@@ -223,34 +228,40 @@ void *(mem_destroy)(void **mem)
 
 =item C<void *mem_create_secure(size_t size)>
 
-Allocates C<size> bytes of memory (with I<malloc(3)>) and then locks it into
-RAM with I<mlock(2)> so that it can't be paged to disk where some nefarious
-local user with root access might read its contents. It is the caller's
+Allocates C<size> bytes of memory (with I<malloc(3)>), and then locks it
+into RAM with I<mlock(2)> so that it can't be paged to disk, where some
+nefarious local user with root access might read its contents. Note that
+additional operating system dependent measures might be required to prevent
+the I<root> user from accessing the RAM of arbitrary processes (e.g. On
+I<Linux>: C<sysctl kernel.yama.ptrace_scope=3>). It is the caller's
 responsibility to deallocate the secure memory with I<mem_release_secure(3)>
 or I<mem_destroy_secure(3)> which will clear the memory and unlock it before
-deallocating it. On success, returns the address of the secure allocated
-memory. On error, returns C<null> with C<errno> set appropriately.
+deallocating it. It is strongly recommended to use I<mem_destroy_secure(3)>,
+because it also sets the pointer variable to C<null>. On success, returns
+the address of the secure allocated memory. On error, returns C<null> with
+C<errno> set appropriately.
 
-Note that entire pages are locked by I<mlock(2)> so don't create many, small
-pieces of secure memory or many entire pages will be locked. Use a secure
-memory pool instead. Also note that on old systems, secure memory requires
-root privileges.
+Note that entire memory pages are locked by I<mlock(2)>, so don't create
+many, small pieces of secure memory or many entire pages will be locked. Use
+a secure memory pool instead. Also note that on old systems, secure memory
+requires root privileges.
 
-On some systems (e.g. Solaris), memory locks must start on page boundaries.
-So we need to I<malloc(3)> enough memory to extend from whatever address
-I<malloc(3)> may return to the next page boundary (worst case: C<pagesize -
-sizeof(int)>) and then the actual number of bytes requested. We need an
-additional 8 bytes to store the address returned by I<malloc(3)> (so we can
-I<free(3)> it later) and the size passed to I<mlock(2)> so we can pass it to
-I<munlock(2)> later. Unfortunately, we need to store the address and size
-after the page boundary and not before it because I<malloc(3)> may return a
-page boundary or an address less than 8 bytes to the left of a page
-boundary.
+On some systems (e.g. I<Solaris>), memory locks must start on page
+boundaries. So we need to I<malloc(3)> enough memory to extend from whatever
+address I<malloc(3)> may return to the next page boundary (worst case:
+C<pagesize - sizeof(int)>) and then the actual number of bytes requested. We
+need an additional C<sizeof(void *) + sizeof(size_t)> bytes (e.g. C<8> or
+C<16>) to store the address returned by I<malloc(3)> (so we can I<free(3)>
+it later), and the size passed to I<mlock(2)> so we can pass it to
+I<munlock(2)> later. Unfortunately, we need to store the address and the
+size after the page boundary and not before it, because I<malloc(3)> might
+return a page boundary or an address less than C<sizeof(void *) +
+sizeof(size_t)> bytes to the left of a page boundary.
 
 It will look like:
 
    for free()
-   +-------+       +- size+8 for munlock()
+   +-------+       +- size+n for munlock()
    v       |       v
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |       |* * * *|# # # #|       |       |       |       |
@@ -259,8 +270,8 @@ It will look like:
    |       +- next page    |
    +- malloc()             +- address returned
 
-If your system doesn't require page boundaries (e.g. Linux), the address
-returned by I<malloc(3)> is locked and returned and only the size is stored.
+If your system doesn't require page boundaries (e.g. I<Linux>), the address
+returned by I<malloc(3)> is locked, and only the size is stored.
 
 =cut
 
@@ -270,8 +281,7 @@ void *mem_create_secure(size_t size)
 {
 #ifdef HAVE_MLOCK
 
-	char *addr = NULL, *lock = NULL;
-#ifdef MLOCK_REQUIRES_PAGE_BOUNDARY
+	char *addr, *lock;
 	long pagesize;
 
 	if ((pagesize = sysconf(_SC_PAGESIZE)) == -1)
@@ -279,22 +289,14 @@ void *mem_create_secure(size_t size)
 
 	size += sizeof(void *) + sizeof(size_t);
 	addr = malloc(pagesize - sizeof(int) + size);
-#else
-	size += sizeof(size_t);
-	addr = malloc(size);
-#endif
 
 	if (!addr)
 		return NULL;
 
-#ifdef MLOCK_REQUIRES_PAGE_BOUNDARY
 	if ((long)addr & (pagesize - 1)) /* addr not on page boundary */
 		lock = (void *)(((long)addr & ~(pagesize - 1)) + pagesize);
 	else
 		lock = addr;
-#else
-	lock = addr;
-#endif
 
 	if (mlock(lock, size) == -1)
 	{
@@ -302,10 +304,8 @@ void *mem_create_secure(size_t size)
 		return NULL;
 	}
 
-#ifdef MLOCK_REQUIRES_PAGE_BOUNDARY
 	*(void **)lock = addr;
 	lock += sizeof(void *);
-#endif
 	*(size_t *)lock = size;
 	lock += sizeof(size_t);
 
@@ -324,7 +324,7 @@ Sets the memory pointed to by C<mem> to C<0xff> bytes, then to C<0xaa>
 bytes, then to C<0x55> bytes, then to C<nul> bytes, then unlocks and
 releases (deallocates) C<mem>. Only to be used on memory returned by
 I<mem_create_secure(3)>. Only to be used in destructor functions. In other
-cases, use I<mem_destroy(3)> which also sets C<mem> to C<null>.
+cases, use I<mem_destroy_secure(3)> which also sets C<mem> to C<null>.
 
 =cut
 
@@ -362,7 +362,8 @@ void mem_release_secure(void *mem)
 
 =item C<void *mem_destroy_secure(void **mem)>
 
-Sets the memory pointed to by C<*mem> to C<nul> bytes, then unlocks and
+Sets the memory pointed to by C<*mem> to C<0xff> bytes, then to C<0xaa>
+bytes, then to C<0x55> bytes, then to C<nul> bytes, then unlocks and
 destroys (deallocates and sets to C<null>) C<*mem>. Only to be used on
 memory returned by I<mem_create_secure(3)>. Returns C<null>.
 
@@ -386,10 +387,11 @@ void *(mem_destroy_secure)(void **mem)
 =item C<char *mem_strdup(const char *str)>
 
 Returns a dynamically allocated copy of C<str>. It is the caller's
-responsibility to deallocate the new string with I<mem_release(3)>,
-I<mem_destroy(3)> or I<free(3)>. This function exists because I<strdup(3)>
-is not part of the ISO C standard. On error, returns C<null> with C<errno>
-set appropriately.
+responsibility to deallocate the new string with I<free(3)>,
+I<mem_release(3)>, or I<mem_destroy(3)>. It is strongly recommended to use
+I<mem_destroy(3)>, because it also sets the pointer variable to C<null>.
+This function exists because I<strdup(3)> is not part of the I<ISO C>
+standard. On error, returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -428,17 +430,19 @@ Alias for allocating a 4-dimensional array. See I<mem_create_space(3)>.
 Allocates a multi-dimensional array of elements of size C<size> and sets the
 memory to C<nul> bytes. The remaining arguments specify the sizes of each
 dimension. The last argument must be zero. There is an arbitrary limit of 32
-dimensions. The memory returned is set to zero. The memory returned needs to
-be cast or assigned into the appropriate pointer type. You can then set and
-access elements exactly like a real multi-dimensional C array. Finally, it
-must be deallocated with I<mem_destroy_space(3)> or I<mem_release_space(3)>
-or I<mem_destroy(3)> or I<mem_release(3)> or I<free(3)>.
+dimensions. The memory returned is set to C<nul> bytes. The memory returned
+needs to be cast or assigned into the appropriate pointer type. You can then
+set and access elements exactly like a real multi-dimensional C array.
+Finally, it must be deallocated with I<mem_destroy_space(3)> or
+I<mem_release_space(3)> or I<mem_destroy(3)> or I<mem_release(3)> or
+I<free(3)>. It is strongly recommended to use I<mem_destroy_space(3)> or
+I<mem_destroy(3)>, because they also set the pointer variable to C<null>.
 
 Note: You must not use I<memset(3)> on all of the returned memory because
 the start of this memory contains pointers into the remainder. The exact
 amount of this overhead depends on the number and size of dimensions. The
 memory is allocated with I<calloc(3)> to reduce the need to I<memset(3)> the
-elements but if you need to know where the elements begin, use
+elements, but if you need to know where the elements begin, use
 I<mem_space_start(3)>.
 
 The memory returned looks like (e.g.):
@@ -511,9 +515,10 @@ void *mem_create_space(size_t size, ...)
 
 =item C<size_t mem_space_start(size_t size, ...)>
 
-Calculates the amount of overhead required for a multi-dimensional array
-created by a call to I<mem_create_space(3)> with the same arguments. If you
-need reset all elements in such an array to zero:
+Calculates the amount of overhead required for a dynamically allocated
+multi-dimensional array created by a call to I<mem_create_space(3)> with the
+same arguments. If you need to reset all elements in such an array to C<nul>
+bytes:
 
     int ****space = mem_create_space(sizeof(int), 2, 3, 4, 5, 0);
     size_t start = mem_space_start(sizeof(int), 2, 3, 4, 5, 0);
@@ -550,25 +555,25 @@ size_t mem_space_start(size_t size, ...)
 
 =item C< #define mem_release2d(space)>
 
-Alias for releasing (deallocating) a 2-dimensional array.
-See I<mem_release_space(3)>.
+Alias for releasing (deallocating) a dynamically allocated 2-dimensional
+array. See I<mem_release_space(3)>.
 
 =item C< #define mem_release3d(space)>
 
-Alias for releasing (deallocating) a 3-dimensional array.
-See I<mem_release_space(3)>.
+Alias for releasing (deallocating) a dynamically allocated 3-dimensional
+array. See I<mem_release_space(3)>.
 
 =item C< #define mem_release4d(space)>
 
-Alias for releasing (deallocating) a 4-dimensional array.
-See I<mem_release_space(3)>.
+Alias for releasing (deallocating) a dynamically allocated 4-dimensional
+array. See I<mem_release_space(3)>.
 
 =item C< #define mem_release_space(space)>
 
 Releases (deallocates) a multi-dimensional array, C<space>, allocated with
 I<mem_create_space>. Same as I<free(3)>. Only to be used in destructor
-functions. In other cases, use I<mem_destroy_space(3)> which also sets
-C<space> to C<null>.
+functions. In other cases, use I<mem_destroy_space(3)> or I<mem_destroy>
+which also set C<space> to C<null>.
 
 =item C< #define mem_destroy2d(space)>
 
@@ -600,12 +605,14 @@ pointed to by C<space>.
 
 Creates a memory pool of size C<size> from which smaller chunks of memory
 may be subsequently allocated (with I<pool_alloc(3)>) without resorting to
-the use of I<malloc(3)>. Useful when you have many small objects to allocate
-but I<malloc(3)> is slowing your program down too much. It is the caller's
-responsibility to deallocate the new pool with I<pool_release(3)> or
-I<pool_destroy(3)>. On success, returns the pool. On error, returns C<null>.
+the use of I<malloc(3)>. Useful when you have many small objects to
+allocate, but I<malloc(3)> is slowing your program down too much. It is the
+caller's responsibility to deallocate the new pool with I<pool_release(3)>
+or I<pool_destroy(3)>. It is strongly recommended to use I<pool_destroy(3)>,
+because it also sets the pointer variable to C<null>. On success, returns
+the pool. On error, returns C<null>.
 
-The size of a pool can't be changed after it is created and the individual
+The size of a pool can't be changed after it is created, and the individual
 chunks of memory allocated from within a pool can't be separately
 deallocated. The entire pool can be emptied with I<pool_clear(3)>.
 
@@ -729,9 +736,12 @@ void *pool_destroy(Pool **pool)
 Creates a memory pool of size C<size> just like I<pool_create(3)> except
 that the memory pool is locked into RAM with I<mlock(2)> so that it can't be
 paged to disk where some nefarious local user with root access might read
-its contents. It is the caller's responsibility to deallocate the new pool
-with I<pool_release_secure(3)> or I<pool_destroy_secure(3)> which will clear
-the memory pool and unlock it before deallocating it. In all other ways, the
+its contents. Note that additional operating system dependent measures might
+be required to prevent the I<root> user from accessing the RAM of arbitrary
+processes (e.g. On I<Linux>: C<sysctl kernel.yama.ptrace_scope=3>). It is
+the caller's responsibility to deallocate the new pool with
+I<pool_release_secure(3)> or I<pool_destroy_secure(3)> which will clear the
+memory pool and unlock it before deallocating it. In all other ways, the
 pool returned is exactly like a pool returned by I<pool_create(3)>. On
 success, returns the pool. On error, returns C<null> with C<errno> set
 appropriately. Note that on old systems, secure memory requires root
@@ -786,7 +796,8 @@ Pool *pool_create_secure_with_locker(Locker *locker, size_t size)
 
 =item C<void pool_release_secure(Pool *pool)>
 
-Sets the contents of the memory pool to C<nul> bytes, then unlocks and
+Sets the contents of the memory pool to C<0xff> bytes, then to C<0xaa>
+bytes, then to C<0x55> bytes, then to C<nul> bytes, then unlocks and
 releases (deallocates) C<pool>. Only to be used on pools returned by
 I<pool_create_secure(3)>. Only to be used in destructor functions. In other
 cases, use I<pool_destroy_secure(3)> which also sets C<pool> to C<null>.
@@ -823,7 +834,8 @@ void pool_release_secure(Pool *pool)
 
 =item C<void *pool_destroy_secure(Pool **pool)>
 
-Sets the contents of the memory pool to C<nul> bytes, then unlocks and
+Sets the contents of the memory pool to C<0xff> bytes, then to C<0xaa>
+bytes, then to C<0x55> bytes, then to C<nul> bytes, then unlocks and
 destroys (deallocates and sets to C<null>) C<*pool>. Returns C<null>.
 B<Note:> secure pools shared by multiple threads must not be destroyed until
 after all threads have finished with it.
@@ -847,8 +859,9 @@ void *pool_destroy_secure(Pool **pool)
 
 =item C<void pool_clear_secure(Pool *pool)>
 
-Fills the secure C<pool> with C<nul> bytes and deallocates all of the chunks
-of secure memory previously allocated from C<pool> so that it can be reused.
+Fills the secure C<pool> with C<0xff> bytes, then C<0xaa> bytes, then
+C<0x55> bytes, then C<nul> bytes, and deallocates all of the chunks of
+secure memory previously allocated from C<pool> so that it can be reused.
 Does not use I<free(3)>.
 
 =cut
@@ -1005,15 +1018,15 @@ satisfy a request.
 =item C<ENOSYS>
 
 Returned by I<mem_create_secure(3)> and I<pool_create_secure(3)> when
-I<mlock(2)> is not supported (e.g. Mac OS X).
+I<mlock(2)> is not supported (e.g. I<Mac OS X>).
 
 =back
 
 =head1 MT-Level
 
-MT-Safe (mem)
+I<MT-Safe> (mem)
 
-MT-Disciplined (pool) man I<locker(3)> for details.
+I<MT-Disciplined> (pool) man I<locker(3)> for details.
 
 =head1 EXAMPLES
 
@@ -1093,7 +1106,7 @@ I<locker(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 
@@ -1611,7 +1624,16 @@ int main(int ac, char **av)
 				if (!memcmp(whitebox, "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff", 32))
 					++errors, printf("Test65: pool_destroy_secure(32) failed: memory not cleared\n");
 				else
+				{
 					++errors, printf("Test65: pool_destroy_secure(32) failed: memory not cleared (possibly - or maybe the already-deallocated memory has just been reused by now)\n");
+					{
+						int i;
+						printf("content = \"");
+						for (i = 0; i < 32; i++)
+							printf("\\x%02x", ((unsigned char *)whitebox)[i]);
+						printf("\" (should be all or mostly \\x00)\n");
+					}
+				}
 			}
 			if (pool)
 				++errors, printf("Test66: pool_destroy_secure(32) failed: pool == %p, not NULL\n", (void *)pool);

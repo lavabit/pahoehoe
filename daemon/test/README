@@ -2,7 +2,7 @@ README
 ======
 This directory contains various tests for the daemon program. Note that
 these tests do not verify their own behaviour. Most of the tests send
-messages to syslog so you have to monitor syslog destinations (e.g.
+messages to syslog, so you have to monitor syslog destinations (e.g.
 /var/log/messages). Some of the tests run in the foreground with pseudo
 terminals. A user has to be there to see that things (like window resizing)
 work. So this file describes what to expect for each test. Note that the
@@ -668,6 +668,51 @@ The output should look something like:
 
   List verbose:
   No named daemons are running
+
+test69
+------
+This tests the simple shell-like expansion of environment variable notation
+and user home directory notation in command line option arguments and the
+configuration file. It needs to be run as root (so chroot / works).
+
+The output should contain the following (among other things) after
+show() / options:
+
+  config .../daemon.conf,
+  name test69,
+  command "echo /root /root /~ /root 1",
+  pidfiles /tmp,
+  pidfile /tmp/blah.pid,
+  uid 0,
+  gid 0,
+  chroot /,
+  chdir /,
+  umask 022,
+  inherit yes,
+  idiot 1,
+  foreground yes,
+  pty yes,
+  noecho yes,
+  stdout /tmp/daemontest.log,
+  stderr /tmp/daemontest.log,
+  errlog /tmp/daemontest.log,
+  dbglog /tmp/daemontest.log,
+  signame term,
+  signo 15,
+
+And after show() / command line: / environment:
+
+  PATH=/usr/local/bin:/usr/bin:/root/bin:/root/bin2
+
+And at the end:
+
+  debug:  sending signal term=15 to daemon test69 client
+  fatal: failed to find client pid for test69: No such file or directory
+
+If the above appears in the output, it means that environment variable
+notation and user home directory notation have been successfully expanded
+for all of the command line options with text arguments (and environment
+variable definitions in the configure file).
 
 clean
 -----

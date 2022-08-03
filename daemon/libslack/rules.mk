@@ -1,7 +1,7 @@
 #
 # libslack - http://libslack.org/
 #
-# Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
-# 20201111 raf <raf@raf.org>
+# 20210220 raf <raf@raf.org>
 
 ifneq ($(SLACK_TARGET),./$(SLACK_NAME))
 
@@ -49,14 +49,14 @@ install-slack: install-slack-bin install-slack-h install-slack-man
 install-slack-bin: install-slack-lib install-slack-config
 
 install-slack-lib:
-	mkdir -p $(LIB_INSDIR)
-	install -m 644 $(SLACK_TARGET) $(LIB_INSDIR)/$(SLACK_INSTALL)
-	rm -f $(LIB_INSDIR)/$(SLACK_INSTALL_LINK)
-	ln -s $(SLACK_INSTALL) $(LIB_INSDIR)/$(SLACK_INSTALL_LINK)
+	mkdir -p $(DESTDIR)$(LIB_INSDIR)
+	install -m 644 $(SLACK_TARGET) $(DESTDIR)$(LIB_INSDIR)/$(SLACK_INSTALL)
+	rm -f $(DESTDIR)$(LIB_INSDIR)/$(SLACK_INSTALL_LINK)
+	ln -s $(SLACK_INSTALL) $(DESTDIR)$(LIB_INSDIR)/$(SLACK_INSTALL_LINK)
 
 install-slack-config: $(SLACK_CONFIG)
-	mkdir -p $(APP_INSDIR)
-	install -m 755 $(SLACK_CONFIG) $(APP_INSDIR)
+	mkdir -p $(DESTDIR)$(APP_INSDIR)
+	install -m 755 $(SLACK_CONFIG) $(DESTDIR)$(APP_INSDIR)
 
 SLACK_CONFIG_CODE := perl -e ' \
 		my %arg = \
@@ -82,25 +82,25 @@ $(SLACK_CONFIG): $(SLACK_CONFIG).t
 	@$(SLACK_CONFIG_CODE) < $< > $@
 
 install-slack-h:
-	mkdir -p $(HDR_INSDIR)/$(SLACK_NAME)
-	install -m 644 $(SLACK_HFILES) $(HDR_INSDIR)/$(SLACK_NAME)
+	mkdir -p $(DESTDIR)$(HDR_INSDIR)/$(SLACK_NAME)
+	install -m 644 $(SLACK_HFILES) $(DESTDIR)$(HDR_INSDIR)/$(SLACK_NAME)
 
 install-slack-man: man-slack
-	@mkdir -p $(APP_MANDIR); \
-	install -m 644 $(SLACK_APP_MANFILES) $(APP_MANDIR); \
-	mkdir -p $(LIB_MANDIR); \
-	install -m 644 $(SLACK_LIB_MANFILES) $(LIB_MANDIR); \
+	@mkdir -p $(DESTDIR)$(APP_MANDIR); \
+	install -m 644 $(SLACK_APP_MANFILES) $(DESTDIR)$(APP_MANDIR); \
+	mkdir -p $(DESTDIR)$(LIB_MANDIR); \
+	install -m 644 $(SLACK_LIB_MANFILES) $(DESTDIR)$(LIB_MANDIR); \
 	for module in $(SLACK_MODULES); \
 	do \
 		for func in `perl -n -e 'print $$1, "\n" if /^=item C<(?:const )?\w+[\s*]*(\w+)\(.*\)>$$/ or /^=item C< \#define (\w+)\(.*\)>$$/' "$(SLACK_SRCDIR)/$$module.c"`; \
 		do \
-			[ -f $(LIB_MANDIR)/$$func.$(LIB_MANSECT)$(MAN_SUFFIX) ] || ln -s $$module.$(LIB_MANSECT)$(MAN_SUFFIX) $(LIB_MANDIR)/$$func.$(LIB_MANSECT)$(MAN_SUFFIX); \
+			[ -f $(DESTDIR)$(LIB_MANDIR)/$$func.$(LIB_MANSECT)$(MAN_SUFFIX) ] || ln -s $$module.$(LIB_MANSECT)$(MAN_SUFFIX) $(DESTDIR)$(LIB_MANDIR)/$$func.$(LIB_MANSECT)$(MAN_SUFFIX); \
 		done; \
 	done
 
 install-slack-html: html-slack
-	@mkdir -p $(SLACK_HTMLDIR); \
-	install -m 644 $(SLACK_APP_HTMLFILES) $(SLACK_LIB_HTMLFILES) $(SLACK_HTMLDIR)
+	@mkdir -p $(DESTDIR)$(SLACK_HTMLDIR); \
+	install -m 644 $(SLACK_APP_HTMLFILES) $(SLACK_LIB_HTMLFILES) $(DESTDIR)$(SLACK_HTMLDIR)
 
 .PHONY: uninstall-slack uninstall-slack-bin uninstall-slack-lib uninstall-slack-config uninstall-slack-h uninstall-slack-man uninstall-slack-html
 
@@ -109,22 +109,22 @@ uninstall-slack: uninstall-slack-bin uninstall-slack-h uninstall-slack-man
 uninstall-slack-bin: uninstall-slack-lib uninstall-slack-config
 
 uninstall-slack-lib:
-	rm -f $(LIB_INSDIR)/$(SLACK_INSTALL_LINK) $(LIB_INSDIR)/$(SLACK_INSTALL)
+	rm -f $(DESTDIR)$(LIB_INSDIR)/$(SLACK_INSTALL_LINK) $(DESTDIR)$(LIB_INSDIR)/$(SLACK_INSTALL)
 
 uninstall-slack-config:
-	rm -f $(patsubst %, $(APP_INSDIR)/%, $(notdir $(SLACK_CONFIG)))
+	rm -f $(patsubst %, $(DESTDIR)$(APP_INSDIR)/%, $(notdir $(SLACK_CONFIG)))
 
 uninstall-slack-h:
-	rm -f $(patsubst %, $(HDR_INSDIR)/$(SLACK_NAME)/%, $(notdir $(SLACK_HFILES)))
-	rmdir $(HDR_INSDIR)/$(SLACK_NAME) || exit 0
+	rm -f $(patsubst %, $(DESTDIR)$(HDR_INSDIR)/$(SLACK_NAME)/%, $(notdir $(SLACK_HFILES)))
+	rmdir $(DESTDIR)$(HDR_INSDIR)/$(SLACK_NAME) || exit 0
 
 uninstall-slack-man:
-	@rm -f $(patsubst %, $(APP_MANDIR)/%, $(notdir $(SLACK_APP_MANFILES)))
-	@rm -f $(patsubst %, $(LIB_MANDIR)/%, $(notdir $(SLACK_LIB_MANFILES)))
-	@rm -f $(foreach MODULE, $(SLACK_MODULES), $(patsubst %, $(LIB_MANDIR)/%.$(LIB_MANSECT)$(MAN_SUFFIX), $(shell perl -n -e 'print $$1, "\n" if /^=item C<(?:const )?\w+[\s*]*(\w+)\(.*\)>$$/ or /^=item C< \#define (\w+)\(.*\)>$$/' "$(SLACK_SRCDIR)/$(MODULE).c")))
+	@rm -f $(patsubst %, $(DESTDIR)$(APP_MANDIR)/%, $(notdir $(SLACK_APP_MANFILES)))
+	@rm -f $(patsubst %, $(DESTDIR)$(LIB_MANDIR)/%, $(notdir $(SLACK_LIB_MANFILES)))
+	@rm -f $(foreach MODULE, $(SLACK_MODULES), $(patsubst %, $(DESTDIR)$(LIB_MANDIR)/%.$(LIB_MANSECT)$(MAN_SUFFIX), $(shell perl -n -e 'print $$1, "\n" if /^=item C<(?:const )?\w+[\s*]*(\w+)\(.*\)>$$/ or /^=item C< \#define (\w+)\(.*\)>$$/' "$(SLACK_SRCDIR)/$(MODULE).c")))
 
 uninstall-slack-html:
-	@rm -f $(patsubst %, $(SLACK_HTMLDIR)/%, $(notdir $(SLACK_APP_HTMLFILES) $(SLACK_LIB_HTMLFILES)))
+	@rm -f $(patsubst %, $(DESTDIR)$(SLACK_HTMLDIR)/%, $(notdir $(SLACK_APP_HTMLFILES) $(SLACK_LIB_HTMLFILES)))
 
 .PHONY: dist-slack dist-html-slack rpm-slack deb-slack sol-slack obsd-slack fbsd-slack nbsd-slack osx-slack
 
@@ -498,15 +498,15 @@ help::
 	echo " man-$(SLACK_NAME)             -- makes the $(SLACK_NAME) manpages"; \
 	echo " html-$(SLACK_NAME)            -- makes the $(SLACK_NAME) manpages in html"; \
 	echo " install-slack         -- installs $(SLACK_NAME), headers and manpages"; \
-	echo " install-slack-bin     -- installs $(SLACK_NAME) in $(LIB_INSDIR)"; \
-	echo " install-slack-h       -- installs $(SLACK_NAME) headers in $(HDR_INSDIR)/$(SLACK_NAME)"; \
-	echo " install-slack-man     -- installs $(SLACK_NAME) manpages in $(LIB_MANDIR)"; \
-	echo " install-slack-html    -- installs $(SLACK_NAME) html manpages in $(SLACK_HTMLDIR)"; \
+	echo " install-slack-bin     -- installs $(SLACK_NAME) in $(DESTDIR)$(LIB_INSDIR)"; \
+	echo " install-slack-h       -- installs $(SLACK_NAME) headers in $(DESTDIR)$(HDR_INSDIR)/$(SLACK_NAME)"; \
+	echo " install-slack-man     -- installs $(SLACK_NAME) manpages in $(DESTDIR)$(LIB_MANDIR)"; \
+	echo " install-slack-html    -- installs $(SLACK_NAME) html manpages in $(DESTDIR)$(SLACK_HTMLDIR)"; \
 	echo " uninstall-slack       -- uninstalls $(SLACK_NAME), its headers and manpages"; \
-	echo " uninstall-slack-bin   -- uninstalls $(SLACK_NAME) from $(LIB_INSDIR)"; \
-	echo " uninstall-slack-h     -- uninstalls $(SLACK_NAME) headers from $(HDR_INSDIR)/$(SLACK_NAME)"; \
-	echo " uninstall-slack-man   -- uninstalls $(SLACK_NAME) manpages from $(LIB_MANDIR)"; \
-	echo " uninstall-slack-html  -- uninstalls $(SLACK_NAME) html manpages from $(SLACK_HTMLDIR)"; \
+	echo " uninstall-slack-bin   -- uninstalls $(SLACK_NAME) from $(DESTDIR)$(LIB_INSDIR)"; \
+	echo " uninstall-slack-h     -- uninstalls $(SLACK_NAME) headers from $(DESTDIR)$(HDR_INSDIR)/$(SLACK_NAME)"; \
+	echo " uninstall-slack-man   -- uninstalls $(SLACK_NAME) manpages from $(DESTDIR)$(LIB_MANDIR)"; \
+	echo " uninstall-slack-html  -- uninstalls $(SLACK_NAME) html manpages from $(DESTDIR)$(SLACK_HTMLDIR)"; \
 	echo " test-slack            -- makes and runs library unit tests"; \
 	echo " dist-slack            -- makes a source tarball for libslack"; \
 	echo " dist-html-slack       -- makes a tarball of libslack's html manpages"; \
@@ -572,21 +572,17 @@ $(SLACK_SRCDIR)/%.o: $(SLACK_SRCDIR)/%.c
 	$(CC) $(SLACK_CFLAGS) -o $@ -c $<
 
 $(SLACK_TESTDIR)/%: $(SLACK_SRCDIR)/%.c $(SLACK_TARGET)
-	@[ -d $(SLACK_TESTDIR) ] || mkdir $(SLACK_TESTDIR)
+	@[ -d $(SLACK_TESTDIR) ] || mkdir $(SLACK_TESTDIR) 2>/dev/null || [ -d $(SLACK_TESTDIR) ]
 	$(CC) -DTEST $(SLACK_TEST_CFLAGS) -o $@ $< $(SLACK_TEST_LDFLAGS)
 
-ifneq ($(findstring quotes,$(shell $(POD2MAN) --help 2>&1)),)
-NOQUOTES := --quotes=none
-endif
-
 $(SLACK_SRCDIR)/%.$(LIB_MANSECT): $(SLACK_SRCDIR)/%.c
-	$(POD2MAN) --center='$(LIB_MANSECTNAME)' --section=$(LIB_MANSECT) $(NOQUOTES) $< > $@
+	$(POD2MAN) --section=$(LIB_MANSECT) --center='$(LIB_MANSECTNAME)' --name=$(shell basename $< .c | tr a-z A-Z) --release=$(SLACK_ID) --date=$(SLACK_DATE) --quotes=none $< > $@
 
 $(SLACK_SRCDIR)/%.$(LIB_MANSECT): $(SLACK_SRCDIR)/%.pod
-	$(POD2MAN) --center='$(LIB_MANSECTNAME)' --section=$(LIB_MANSECT) $(NOQUOTES) $< > $@
+	$(POD2MAN) --section=$(LIB_MANSECT) --center='$(LIB_MANSECTNAME)' --name=$(shell basename $< .pod | tr a-z A-Z) --release=$(SLACK_ID) --date=$(SLACK_DATE) --quotes=none $< > $@
 
 $(SLACK_SRCDIR)/%.$(APP_MANSECT): $(SLACK_SRCDIR)/%.pod
-	$(POD2MAN) --center='$(APP_MANSECTNAME)' --section=$(APP_MANSECT) $(NOQUOTES) $< > $@
+	$(POD2MAN) --section=$(APP_MANSECT) --center='$(APP_MANSECTNAME)' --name=$(shell basename $< .pod | tr a-z A-Z) --release=$(SLACK_ID) --date=$(SLACK_DATE) --quotes=none $< > $@
 
 $(SLACK_SRCDIR)/%.gz: $(SLACK_SRCDIR)/%
 	$(GZIP) $<

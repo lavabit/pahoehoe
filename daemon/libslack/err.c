@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -72,8 +72,8 @@ flexible behaviour. The message types catered for are: normal, verbose,
 debug, error, fatal error, dump and alert messages. All messages are created
 and sent with I<printf(3)>-like syntax. The destinations for these messages
 are configurable by the client. Calling I<prog_init(3)> causes normal and
-verbose messages to be sent to standard output; debug, error, fatal error,
-dump and alert messages to be sent to standard error.
+verbose messages to be sent to standard output; and debug, error, fatal
+error, dump and alert messages to be sent to standard error.
 
 Calls to I<prog_set_out(3)>, I<prog_out_fd(3)>, I<prog_out_stdout(3)>,
 I<prog_out_file(3)>, I<prog_out_syslog(3)> and I<prog_out_none(3)> cause
@@ -132,14 +132,14 @@ details.
 =item C<void msg(const char *format, ...)>
 
 Outputs a message to the program's normal message destination. C<format> is
-a I<printf(3)>-like format string and processes any remaining arguments in
+a I<printf(3)>-like format string which processes any remaining arguments in
 the same way as I<printf(3)>.
 
 B<Warning: Do not under any circumstances ever pass a non-literal string as
 the format argument unless you know exactly how many conversions will take
 place. Being careless with this is a very good way to build potential
-security holes into your programs. The same is true for all functions that
-take a printf()-like format string as an argument.>
+security vulnerabilities into your programs. The same is true for all
+functions that take a printf()-like format string as an argument.>
 
     msg(buf);       // EVIL
     msg("%s", buf); // GOOD
@@ -179,10 +179,10 @@ void vmsg(const char *format, va_list args)
 Outputs a verbose message to the program's normal message destination if
 C<level> is less than or equal to the program's current verbosity level. If
 the program's name has been supplied using I<prog_set_name(3)>, the message
-will be preceded by the name, a colon and a space. The message is also
+will be preceded by the name, a colon, and a space. The message is also
 preceded by as many spaces as the message level. This indents messages
 according to their verbosity. C<format> is a I<printf(3)>-like format string
-and processes any remaining arguments in the same way as I<printf(3)>. The
+which processes any remaining arguments in the same way as I<printf(3)>. The
 message is followed by a newline.
 
 =cut
@@ -234,16 +234,19 @@ C<level> satisfies the program's current debug level. The debug level is
 broken into two components. The low byte specifies the level. The next three
 bytes specify a section within which the level applies. Debug messages with
 a section value whose bits overlap those of the program's current debug
-section and with a level that is less than or equal to the program's current
-debug level are emitted. As a convenience, if the program's current debug
-section is zero, debug messages with a sufficiently small level are emitted
-regardless of the message section. See I<prog_set_debug_level(3)> for
-examples. If the program's name has been supplied using I<prog_set_name(3)>,
-the message will be preceded by the name, a colon and a space. The message
-is also preceded by as many spaces as the debug level. This indents debug
-messages according to their debug level. C<format> is a I<printf(3)>-like
-format string and processes any remaining arguments in the same way as
-I<printf(3)>. The message is followed by a newline.
+section, and with a level that is less than or equal to the program's
+current debug level, are emitted. As a convenience, if the program's current
+debug section is zero, debug messages with a sufficiently small level are
+emitted, regardless of the message section. See I<prog_set_debug_level(3)>
+for examples. If the program's name has been supplied using
+I<prog_set_name(3)>, the message will be preceded by the name, a colon, and
+a space. This is followed by the string C<"debug:">. If C<level> specifies a
+non-zero section, it is included in the debug message, after a space and
+surrounded by square brackets. This is followed by as many spaces as the
+debug level. This indents debug messages according to their debug level.
+C<format> is a I<printf(3)>-like format string which processes any remaining
+arguments in the same way as I<printf(3)>. The message is followed by a
+newline.
 
 =cut
 
@@ -307,9 +310,10 @@ void vdebugf(size_t level, const char *format, va_list args)
 
 Outputs an error message to the program's error message destination. If the
 program's name has been supplied using I<prog_set_name(3)>, the message will
-be preceded by the name, a colon and a space. C<format> is a
-I<printf(3)>-like format string and processes any remaining arguments in the
-same way as I<printf(3)>. The message is followed by a newline. Returns -1.
+be preceded by the name, a colon, and a space. C<format> is a
+I<printf(3)>-like format string which processes any remaining arguments in
+the same way as I<printf(3)>. The message is followed by a newline. Returns
+-1.
 
 =cut
 
@@ -353,14 +357,14 @@ int verror(const char *format, va_list args)
 
 =item C<void fatal(const char *format, ...)>
 
-Outputs an error message to the program's error message destination and then
-calls I<exit(3)> with a return code of C<EXIT_FAILURE>. If the program's
-name was supplied using I<prog_set_name(3)>, the message will be preceded
-by the name, a colon and a space. This is followed by the string C<"fatal: ">.
-C<format> is a I<printf(3)>-like format string and processes any remaining
-arguments in the same way as I<printf(3)>. The message is followed by a
-newline. B<Note:> Never use this in a library. Only an application can
-decide which errors are fatal.
+Outputs an error message to the program's error message destination, and
+then calls I<exit(3)> with a return code of C<EXIT_FAILURE>. If the
+program's name was supplied using I<prog_set_name(3)>, the message will be
+preceded by the name, a colon, and a space. This is followed by the string
+C<"fatal: ">. C<format> is a I<printf(3)>-like format string which processes
+any remaining arguments in the same way as I<printf(3)>. The message is
+followed by a newline. B<Note:> Never use this in a library. Only an
+application can decide which errors are fatal.
 
 =cut
 
@@ -399,10 +403,10 @@ void vfatal(const char *format, va_list args)
 
 Outputs an error message to the program's error message destination and then
 calls I<abort(3)>. If the program's name was supplied using
-I<prog_set_name(3)>, the message will be preceded by the name, a colon and
+I<prog_set_name(3)>, the message will be preceded by the name, a colon, and
 a space. This is followed by the string C<"dump: ">. C<format> is a
-I<printf(3)>-like format string and processes any remaining arguments in the
-same way as I<printf(3)>. The message is followed by a newline. B<Note:>
+I<printf(3)>-like format string which processes any remaining arguments in
+the same way as I<printf(3)>. The message is followed by a newline. B<Note:>
 Never use this in a library. Only an application can decide which errors are
 fatal.
 
@@ -443,8 +447,8 @@ void vdump(const char *format, va_list args)
 
 Outputs an alert message of the given C<priority> to the program's alert
 message destination. If the program's name has been supplied using
-I<prog_set_name(3)>, the message will be preceded by the name, a colon and
-a space. C<format> is a I<printf(3)>-like format string and processes any
+I<prog_set_name(3)>, the message will be preceded by the name, a colon, and
+a space. C<format> is a I<printf(3)>-like format string which processes any
 remaining arguments in the same way as I<printf(3)>. The message is followed
 by a newline. Note that this only works when the program's alert message
 destination is a simple syslog destination. If the alert message destination
@@ -506,8 +510,8 @@ void valert(int priority, const char *format, va_list args)
 =item C<void debugsysf(size_t level, const char *format, ...)>
 
 Equivalent to I<debugf(3)> except that the message is followed by a colon, a
-space, the string representation of C<errno> and a newline (rather than just
-a newline).
+space, the string representation of C<errno>, and a newline (rather than
+just a newline).
 
 =cut
 
@@ -551,8 +555,8 @@ void vdebugsysf(size_t level, const char *format, va_list args)
 =item C<int errorsys(const char *format, ...)>
 
 Equivalent to I<error(3)> except that the message is followed by a colon, a
-space, the string representation of C<errno> and a newline (rather than just
-a newline).
+space, the string representation of C<errno>, and a newline (rather than
+just a newline).
 
 =cut
 
@@ -591,8 +595,8 @@ int verrorsys(const char *format, va_list args)
 =item C<void fatalsys(const char *format, ...)>
 
 Equivalent to I<fatal(3)> except that the message is followed by a colon, a
-space, the string representation of C<errno> and a newline (rather than just
-a newline).
+space, the string representation of C<errno>, and a newline (rather than
+just a newline).
 
 =cut
 
@@ -630,8 +634,8 @@ void vfatalsys(const char *format, va_list args)
 =item C<void dumpsys(const char *format, ...)>
 
 Equivalent to I<dump(3)> except that the message is followed by a colon, a
-space, the string representation of C<errno> and a newline (rather than just
-a newline).
+space, the string representation of C<errno>, and a newline (rather than
+just a newline).
 
 =cut
 
@@ -669,8 +673,8 @@ void vdumpsys(const char *format, va_list args)
 =item C<void alertsys(int priority, const char *format, ...)>
 
 Equivalent to I<alert(3)> except that the message is followed by a colon, a
-space, the string representation of C<errno> and a newline (rather than just
-a newline).
+space, the string representation of C<errno>, and a newline (rather than
+just a newline).
 
 =cut
 
@@ -740,7 +744,7 @@ void *(set_errnull)(int errnum)
 =item C<void (*set_errnullf(int errnum))()>
 
 Sets C<errno> to C<errnum> and returns C<null> as a function pointer.
-This is useful because ISO C doesn't like casting normal pointers
+This is useful because I<ISO C> doesn't like casting normal pointers
 into function pointers.
 
 =cut
@@ -790,7 +794,7 @@ explanation of the condition tested and then calls I<dump(3)> to terminate
 the program. This means the message will be sent to the right place(s)
 rather than just to C<stderr>. B<Note:> Like I<assert(3)>, this function is
 largely useless. It should never be left in production code (because it's
-rude) so you need to write code to handle error conditions properly anyway.
+rude), so you need to write code to handle error conditions properly anyway.
 You might as well not bother using I<assert(3)> or I<check(3)> in the first
 place.
 
@@ -798,7 +802,7 @@ place.
 
 =head1 MT-Level
 
-MT-Safe
+I<MT-Safe>
 
 =head1 EXAMPLES
 
@@ -837,7 +841,7 @@ I<printf(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

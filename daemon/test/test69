@@ -1,0 +1,10 @@
+#!/bin/sh
+
+chroot=/; export chroot
+user=root; export user
+config="`pwd`/daemon.conf"; export config
+name=test69; export name
+S=1; export S
+
+../daemon --debug=9 --idiot --chroot='$chroot' --user='$user' --config='$config' --name='$name'
+rm -f /tmp/daemontest.log

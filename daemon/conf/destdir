@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# daemon - http://libslack.org/daemon/
+#
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+
+# Modify Makefile to change DESTDIR.
+#
+# 20210304 raf <raf@raf.org>
+
+# Strip off the leading "--destdir=" from the command line option
+
+if [ x"$1" = x ]
+then
+	echo "usage: $0 --destdir=..."
+	exit 1
+fi
+
+destdir="${1#--destdir=}"
+
+[ x"$destdir" != x ] && destdir=" $destdir"
+
+perl -pi \
+	-e 's{^(DESTDIR :=).*$}{$1'"$destdir"'}' \
+	Makefile
+
+# vi:set ts=4 sw=4:

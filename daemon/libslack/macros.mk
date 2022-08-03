@@ -1,7 +1,7 @@
 #
 # libslack - http://libslack.org/
 #
-# Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
-# 20201111 raf <raf@raf.org>
+# 20210220 raf <raf@raf.org>
 
 # Uncomment these to override the defines in daemon.h and prog.h
 #
@@ -25,6 +25,14 @@
 # SLACK_DEFINES += -DETC_DIR=\"/etc\"
 # SLACK_DEFINES += -DROOT_PID_DIR=\"/var/run\"
 # SLACK_DEFINES += -DUSER_PID_DIR=\"/tmp\"
+#
+# SLACK_CLIENT_DEFINES += -DPATH_SEP=\'/\'
+# SLACK_CLIENT_DEFINES += -DROOT_DIR=\"/\"
+# SLACK_CLIENT_DEFINES += -DETC_DIR=\"/etc\"
+# SLACK_CLIENT_DEFINES += -DROOT_PID_DIR=\"/var/run\"
+# SLACK_CLIENT_DEFINES += -DUSER_PID_DIR=\"/tmp\"
+
+SLACK_CLIENT_CFLAGS += $(SLACK_CLIENT_DEFINES)
 
 # Uncomment this if your system doesn't have GNU getopt_long()
 #
@@ -131,7 +139,8 @@ SLACK_TEST_CCFLAGS += -Wno-restrict
 # SLACK_DEFINES += -DNO_DEBUG_LOCKERS=1
 
 SLACK_NAME := slack
-SLACK_VERSION := 0.7
+SLACK_VERSION := 0.7.1
+SLACK_DATE := 20210220
 SLACK_URL := http://libslack.org/
 SLACK_ID := lib$(SLACK_NAME)-$(SLACK_VERSION)
 SLACK_DIST := $(SLACK_ID).tar.gz
@@ -204,8 +213,9 @@ FBSD_TARGETS += fbsd-slack
 NBSD_TARGETS += nbsd-slack
 OSX_TARGETS += osx-slack
 
-CLEAN_FILES += $(SLACK_OFILES) $(SLACK_CONFIG) $(SLACK_LIB_MANFILES) $(SLACK_APP_MANFILES) $(SLACK_LIB_HTMLFILES) $(SLACK_APP_HTMLFILES) $(SLACK_SRCDIR)/pod2html-* $(SLACK_SWIGFILE)
+CLEAN_FILES += $(SLACK_OFILES) $(SLACK_CONFIG) $(SLACK_LIB_MANFILES) $(SLACK_APP_MANFILES) $(SLACK_LIB_HTMLFILES) $(SLACK_APP_HTMLFILES) $(SLACK_SRCDIR)/pod2htm* $(SLACK_SWIGFILE)
 CLOBBER_FILES += $(SLACK_TARGET) $(SLACK_SRCDIR)/tags $(SLACK_TESTDIR) $(SLACK_INCLINK)
+DEBIAN_CLOBBER_FILES += $(SLACK_TARGET) $(SLACK_SRCDIR)/tags $(SLACK_TESTDIR) $(SLACK_INCLINK)
 
 SLACK_RPM_FILES += $(LIB_INSDIR)/$(SLACK_INSTALL_LINK)
 SLACK_RPM_FILES += $(LIB_INSDIR)/$(SLACK_INSTALL)
@@ -251,6 +261,20 @@ SLACK_CLIENT_LIBS += util
 SLACK_TEST_LDFLAGS += $(patsubst %, -L%, $(SLACK_LIBDIRS)) $(patsubst %, -l%, $(SLACK_TEST_LIBS))
 SLACK_CLIENT_LDFLAGS += $(patsubst %, -l%, $(SLACK_CLIENT_LIBS))
 
+# Inherit $(CPPFLAGS), $(CFLAGS) and $(LDFLAGS) from the caller
+#
+SLACK_CPPFLAGS += $(CPPFLAGS)
+SLACK_TEST_CPPFLAGS += $(CPPFLAGS)
+
+SLACK_CLIENT_CFLAGS += $(CFLAGS)
+SLACK_CFLAGS += $(CFLAGS)
+SLACK_TEST_CFLAGS += $(CFLAGS)
+
+SLACK_CLIENT_LDFLAGS += $(LDFLAGS)
+SLACK_TEST_LDFLAGS += $(LDFLAGS)
+
+# There are no sub-targets to propagate up
+#
 SLACK_SUBTARGETS :=
 SLACK_SUBDIRS :=
 

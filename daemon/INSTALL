@@ -9,7 +9,7 @@ This version is only known to work on the following systems:
     OpenBSD 4.7 (i386, amd64), 6.6 (amd64)
     FreeBSD 8.0 (i386, amd64), 12.1 (amd64)
     NetBSD 5.0.2 (i386, amd64), 8.1 (amd64)
-    MacOSX 10.{4,5,6,11,14} (ppc, i386, x86_64)
+    MacOSX/macOS 10.{4,5,6,11,14,15}, 11 (ppc, i386, x86_64, arm64)
     kFreeBSD 20090729 (i386)
     GNU/Hurd (i386)
 
@@ -44,16 +44,46 @@ they have some very nasty bugs.
 
 First, uninstall any previous version:
 
-    cd /usr/local/src/daemon-0.6.4
+    cd /usr/local/src/daemon-0.7.1
     make uninstall
 
 To build and test:
 
-    tar xzf daemon-0.7.tar.gz
-    cd daemon-0.7
+    tar xzf daemon-0.8.tar.gz
+    cd daemon-0.8
     ./configure # iff linux, openbsd, freebsd, netbsd, macosx, solaris, gnuhurd or kfreebsd
     make        # must be gnu make
     make test   # only tests libslack. to test daemon, see test/README
+
+Note that the configure script is not a GNU autoconf script.
+It just has hard-coded settings for certain platforms.
+It does not accept all of the usual command line options.
+However, it does accept certain options:
+
+    --help
+    Print a help message showing these options, then exit
+
+    --prefix=/opt/local
+    Changes the installation prefix to a non-standard one (needed for macports).
+    This also changes the directory that the config file is installed in.
+    When --prefix=/usr or --prefix=default, the config file is installed in /etc.
+    Otherwise (e.g. --prefix=/usr/local or --prefix=/opt/local), the config
+    file is installed under the prefix.
+
+    --destdir
+    Changes the makefile $(DESTDIR) for building packages.
+    It doesn't affect any paths in the final binary.
+
+    --enable-logind
+    On Linux systems where libsystemd or libelogind headers and libraries
+    are installed, this option will use them for daemon's --bind option.
+    It isn't enabled by default.
+
+    --disable-logind
+    This option undoes the effects of --enable-logind.
+
+    --enable-test
+    Includes backup implementations of several functions (unnecessary)
 
 To install daemon and its manpage (in /usr/local by default):
 
@@ -102,43 +132,43 @@ created.
 
 To install from the Fedora RPM binary package (into /usr by default):
 
-    rpm -i daemon-0.7-1.x86_64.rpm # or
-    rpm -i daemon-0.7-1.i686.rpm
+    rpm -i daemon-0.8-1.x86_64.rpm # or
+    rpm -i daemon-0.8-1.i686.rpm
 
 To install from the OpenBSD binary package (into /usr/local by default):
 
-    mv daemon-0.7-openbsd-amd64.tgz daemon-0.7.tgz # or
-    mv daemon-0.7-openbsd-i386.tgz  daemon-0.7.tgz
+    mv daemon-0.8-openbsd-amd64.tgz daemon-0.8.tgz # or
+    mv daemon-0.8-openbsd-i386.tgz  daemon-0.8.tgz
     # then
-    pkg_add daemon-0.7.tar.gz
+    pkg_add daemon-0.8.tar.gz
 
 To install from the FreeBSD binary package (into /usr/local by default):
 
-    pkg_add daemon-0.7-freebsd-amd64.tbz # or
-    pkg_add daemon-0.7-freebsd-i386.tbz
+    pkg_add daemon-0.8-freebsd-amd64.tbz # or
+    pkg_add daemon-0.8-freebsd-i386.tbz
 
 To install from the NetBSD binary package (into /usr/local by default):
 
-    pkg_add daemon-0.7-netbsd-amd64.tgz # or
-    pkg_add daemon-0.7-netbsd-i386.tgz
+    pkg_add daemon-0.8-netbsd-amd64.tgz # or
+    pkg_add daemon-0.8-netbsd-i386.tgz
 
 To install from the Mac OS X binary package (into /usr/local by default):
 
     cd /usr/local
-    tar xzf /usr/local/src/daemon-0.7-macosx-universal.tar.gz # or
-    tar xzf /usr/local/src/daemon-0.7-macosx-x86_64.tar.gz # or
-    tar xzf /usr/local/src/daemon-0.7-macosx-i386.tar.gz # or
-    tar xzf /usr/local/src/daemon-0.7-macosx-powerpc.tar.gz
+    tar xzf /usr/local/src/daemon-0.8-macosx-universal.tar.gz # or
+    tar xzf /usr/local/src/daemon-0.8-macosx-x86_64.tar.gz # or
+    tar xzf /usr/local/src/daemon-0.8-macosx-i386.tar.gz # or
+    tar xzf /usr/local/src/daemon-0.8-macosx-powerpc.tar.gz
 
 To install from the Solaris10 binary package (into /usr/local by default):
 
-    gunzip daemon-0.7-solaris-amd64.pkg.gz
-    pkgadd -d daemon-0.7-solaris-amd64.pkg
+    gunzip daemon-0.8-solaris-amd64.pkg.gz
+    pkgadd -d daemon-0.8-solaris-amd64.pkg
 
 or
 
-    gunzip daemon-0.7-solaris-i386.pkg.gz
-    pkgadd -d daemon-0.7-solaris-i386.pkg
+    gunzip daemon-0.8-solaris-i386.pkg.gz
+    pkgadd -d daemon-0.8-solaris-i386.pkg
 
 On debian/ubuntu systems you should be able to:
 
@@ -189,7 +219,7 @@ filesystem entry is needed for the client and it must be unlinked after use.
 It's also possible for a malicious local user to deny a client access to the
 server. The solution is to always use UNIX domain stream sockets.
 
-Solaris has an inadequate snprintf() function so libslack provides it's own
+Solaris has an inadequate snprintf() function so libslack provides its own
 implementation. When configured for Solaris, this snprintf() function will
 format exactly like the system's sprintf() function, even though it has
 incorrect behaviour with respect to the ISO C standard. I thought this was
@@ -213,6 +243,6 @@ Probably has the same UNIX domain datagram problem as Solaris.
     URL: http://libslack.org/daemon
     URL: http://raf.org/daemon
     GIT: https://github.com/raforg/daemon
-    Date: 20201111
+    Date: 20210304
     Author: raf <raf@raf.org>
 

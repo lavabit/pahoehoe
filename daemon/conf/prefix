@@ -1,0 +1,84 @@
+#!/bin/sh
+#
+# daemon - http://libslack.org/daemon/
+#
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+
+# Modify Makefile and macros.mk to change
+# PREFIX/CONF_INSDIR/CONFIG_PATH/ROOT_PID_DIR together.
+# But can be reversed with --prefix=default.
+#
+# 20210304 raf <raf@raf.org>
+
+# Strip off the leading "--prefix=" from the command line option
+prefix="${1#--prefix=}"
+
+# With --prefix=default, set PREFIX to /usr/local.
+# Otherwise, set it to the given argument.
+if [ "$prefix" = "default" ]
+then
+	perl -pi \
+		-e 's{^(PREFIX := ).*$}{$1/usr/local}' \
+		`find . -name Makefile`
+else
+	perl -pi \
+		-e 's{^(PREFIX := ).*$}{$1'"$prefix"'}' \
+		`find . -name Makefile`
+fi
+
+# With --prefix=default or --prefix=/usr, CONF_INSDIR and ROOT_PID_DIR
+# stay as /etc and /var/run. Otherwise, we want them to be $(PREFIX)/etc
+# and $(PREFIX)/var/run.
+#
+# The operating system specific conf/* scripts mostly handle this fine.
+#
+# But for macports on macOS, we need this to move the system configuration
+# files to /opt/local/etc, and to move root's pidfiles to
+# /opt/local/var/run.
+#
+# In summary, if the --prefix option argument is /usr, then the system
+# configuration files are under /etc and root's pidfiles are in /var/run.
+#
+# If the --prefix argument is /usr/local or /opt/local or other, then the
+# system configuration files are under /usr/local/etc or /opt/local/etc or
+# other, and root's pidfiles are in /usr/local/var/run or /opt/local/var/run
+# or other.
+
+if [ "$prefix" = "/usr" -o "$prefix" = "default" ]
+then
+	perl -pi \
+		-e 's/^CONF_INSDIR := \$\(PREFIX\)\/etc$/CONF_INSDIR := \/etc/;' \
+		`find . -name Makefile`
+
+	perl -pi \
+		-e 's/^(DAEMON_DEFINES \+= -DCONFIG_PATH=\\"\$\(PREFIX\)\/etc\/daemon\.conf\\")$/# $1/;' \
+		-e 's/^(\S+ \+= -DROOT_PID_DIR)=.*$/# $1=\\"\/var\/run\\"/;' \
+		-e 's/^(\S+ \+= -DETC_DIR)=.*$/# $1=\\"\/etc\\"/;' \
+		`find . -name macros.mk`
+else
+	perl -pi \
+		-e 's/^CONF_INSDIR := \/etc$/CONF_INSDIR := \$(PREFIX)\/etc/;' \
+		`find . -name Makefile`
+
+	perl -pi \
+		-e 's/^# (DAEMON_DEFINES \+= -DCONFIG_PATH=\\"\$\(PREFIX\)\/etc\/daemon\.conf\\")$/$1/;' \
+		-e 's/^(?:# )?(\S+ \+= -DROOT_PID_DIR)=.*$/$1=\\"\$(PREFIX)\/var\/run\\"/;' \
+		-e 's/^(?:# )?(\S+ \+= -DETC_DIR)=.*$/$1=\\"\$(PREFIX)\/etc\\"/;' \
+		`find . -name macros.mk`
+fi
+
+# vi:set ts=4 sw=4:

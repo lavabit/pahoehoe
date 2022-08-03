@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -64,21 +64,21 @@ This module provides an abstraction of thread synchronisation that
 facilitates the implementation of I<MT-Disciplined> libraries. I'll explain
 what this means.
 
-Libraries need to be I<MT-Safe> when used in a multi threaded program.
-However, most programs are single threaded and synchronisation doesn't come
-for free so libraries should be I<Unsafe> when used in a single threaded
-program. Even in multi threaded programs, some functions or objects may only
-be accessed by a single thread and so they should not incur the expense of
+Libraries need to be I<MT-Safe> when used in a multi-threaded program.
+However, most programs are single-threaded, and synchronisation doesn't come
+for free, so libraries should be I<Unsafe> when used in a single-threaded
+program. Even in multi-threaded programs, some functions or objects may only
+be accessed by a single thread, and so they should not incur the expense of
 synchronisation.
 
 When an object is shared between multiple threads which need to be
 synchronised, the method of synchronisation must be carefully selected by
 the client code. There are tradeoffs between concurrency and overhead. The
 greater the concurrency, the greater the overhead. More locks give greater
-concurrency but have greater overhead. Readers/Writer locks can give greater
-concurrency than Mutex locks but have greater overhead. One lock for each
-object may be required, or one lock for all (or a set of) objects may be
-more appropriate.
+concurrency, but have greater overhead. Readers/Writer locks can give
+greater concurrency than Mutex locks, but have greater overhead. One lock
+for each object may be required, or one lock for all (or a set of) objects
+may be more appropriate.
 
 Generally, the best synchronisation strategy for a given application can
 only be determined by testing/benchmarking the written application. It is
@@ -92,10 +92,10 @@ flexibility.
 
 The I<Locker> type specifies a lock and a set of functions for manipulating
 the lock. Arbitrary objects can include a pointer to a I<Locker> object to
-use for thread synchronisation. Such objects may each have their own lock by
-having separate I<Locker> objects or they may share the same lock by sharing
-the same I<Locker> object. Only the application developer can determine what
-is appropriate for each application on a case by case basis.
+use for thread synchronisation. Such objects may each have their own lock,
+by having separate I<Locker> objects, or they may share the same lock by
+sharing the same I<Locker> object. Only the application developer can
+determine what is appropriate for each application, on a case by case basis.
 
 I<MT-Disciplined> means that the application developer has a mechanism for
 specifying the synchronisation requirements to be applied to library code.
@@ -166,7 +166,7 @@ I<locker_tryrdlock(3)> and I<locker_trywrlock(3)> will call
 I<pthread_mutex_trylock(3)>. I<locker_rdlock(3)> and I<locker_wrlock(3)>
 will call I<pthread_mutex_lock(3)>. I<locker_unlock(3)> will call
 I<pthread_mutex_unlock(3)>. It is the caller's responsibility to initialise
-C<mutex> if necessary before use and to destroy C<mutex> if necessary after
+C<mutex> if necessary before use, and to destroy C<mutex> if necessary after
 use. On success, returns the new I<Locker> object. On error, returns C<null>
 with C<errno> set appropriately.
 
@@ -197,7 +197,7 @@ I<locker_rdlock(3)> will call I<pthread_rwlock_rdlock(3)>.
 I<locker_trywrlock(3)> will call I<pthread_rwlock_trywrlock(3)>.
 I<locker_wrlock(3)> will call I<pthread_rwlock_wrlock(3)>.
 I<locker_unlock(3)> will call I<pthread_rwlock_unlock(3)>. It is the
-caller's responsibility to initialise C<rwlock> if necessary before use and
+caller's responsibility to initialise C<rwlock> if necessary before use, and
 to destroy C<rwlock> if necessary after use. On success, returns the new
 I<Locker> object. On error, returns C<null> with C<errno> set appropriately.
 
@@ -346,7 +346,7 @@ variable, C<lock>. I<locker_tryrdlock(3)> will call C<tryrdlock>.
 I<locker_rdlock(3)> will call C<rdlock>. I<locker_trywrlock(3)> will call
 C<trywrlock>. I<locker_wrlock(3)> will call C<wrlock>. I<locker_unlock(3)>
 will call C<unlock>. It is the caller's responsibility to initialise C<lock>
-if necessary before use and to destroy C<lock> if necessary after use. None
+if necessary before use, and to destroy C<lock> if necessary after use. None
 of the arguments may be C<null>. On success, returns the new I<Locker>
 object. On error, returns C<null> with C<errno> set appropriately.
 
@@ -516,7 +516,7 @@ int (locker_unlock)(Locker *locker)
 
 Initialises the readers/writer lock, C<rwlock>, with the attributes in
 C<attr>. If C<attr> is C<null>, C<rwlock> is initialised as a process
-private lock. Note that this is the only option under Linux. On success,
+private lock. Note that this is the only option under I<Linux>. On success,
 returns C<0>. On error, returns an error code.
 
 =cut
@@ -595,7 +595,8 @@ int pthread_rwlock_destroy(pthread_rwlock_t *rwlock)
 =item I<int pthread_rwlock_rdlock(pthread_rwlock_t *rwlock)>
 
 Claims a read lock on C<rwlock>. Multiple threads may hold a read lock at
-the same time. On success, returns C<0>. On error, returns an error code.
+the same time, but only if no thread holds a write lock. On success, returns
+C<0>. On error, returns an error code.
 
 =cut
 
@@ -857,7 +858,7 @@ int pthread_rwlockattr_getpshared(const pthread_rwlockattr_t *attr, int *pshared
 =item I<int pthread_rwlockattr_setpshared(pthread_rwlockattr_t *attr, int pshared)>
 
 Sets the C<pshared> attribute of C<attr> to C<pshared>. On success, returns
-C<0>. On error, returns an error code. Note that under Linux, C<pshared>
+C<0>. On error, returns an error code. Note that under I<Linux>, C<pshared>
 must be C<PTHREAD_PROCESS_PRIVATE> or I<pthread_rwlock_init(3)> will
 subsequently fail.
 
@@ -886,7 +887,7 @@ int pthread_rwlockattr_setpshared(pthread_rwlockattr_t *attr, int pshared)
 
 =head1 ERRORS
 
-On error, C<errno> is set either by an underlying function, or as follows:
+On error, C<errno> is set, either by an underlying function, or as follows:
 
 =over 4
 
@@ -898,7 +899,7 @@ Arguments are C<null> or invalid.
 
 =head1 MT-Level
 
-MT-Safe
+I<MT-Safe>
 
 =head1 EXAMPLES
 
@@ -1027,7 +1028,7 @@ C<http://raf.org/papers/mt-disciplined.html>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

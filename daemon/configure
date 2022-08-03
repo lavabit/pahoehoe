@@ -2,7 +2,7 @@
 #
 # daemon - http://libslack.org/daemon/
 #
-# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,57 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
 
-# 20201111 raf <raf@raf.org>
+# 20210304 raf <raf@raf.org>
 
 die() { echo "$0: $@" >&2; exit 1; }
+
+for opt in "$@"
+do
+	case "$opt" in
+		--help|-h)
+			echo "$0 [options]"
+			echo "options:"
+			echo "  --help           - Print this message then exit"
+			echo "  --prefix=/path   - Override platform-specific installation prefix"
+			echo "  --destdir=/path  - Override DESTDIR in Makefile for building packages"
+			echo "  --enable-logind  - Enable logind/elogind support (i.e. --bind option)"
+			echo "  --disable-logind - Disable logind/elogind support (i.e. --bind option)"
+			echo "  --enable-test    - Include backup implementations of some functions (don't)"
+			echo
+			echo "This configure script knows what to do for several platforms:"
+			echo
+			echo "  Linux, macOS, FreeBSD, NetBSD, OpenBSD, kFreeBSD, Solaris, GNU/Hurd"
+			echo ""
+			echo "To override a platform-specific install prefix, use --prefix (e.g. /opt/local)."
+			echo "Note: For --prefix=default and --prefix=/usr, /etc and /var/run are still used."
+			echo "For other values, these paths are affected by the prefix."
+			echo ""
+			echo "To override the makefile \$(DESTDIR), use --destdir."
+			echo "This is for building packages and doesn't affect paths in the final binary."
+			echo ""
+			echo "On Linux systems with libsystemd or libelogind headers and libraries installed,"
+			echo "use --enable-logind to use them for daemon's --bind option."
+			echo ""
+			echo "To undo the effects of --enable-logind, use --disable-logind."
+			echo ""
+			echo "If set here, \$CC will override the compiler in the Makefile."
+			echo ""
+			echo "\$CPPFLAGS, \$CFLAGS and \$LDFLAGS additions need to be supplied to make later."
+			echo ""
+			exit 0
+			;;
+	esac
+done
 
 case "`uname -a`" in
 	Linux*)
 		echo "Configuring for linux"
 		conf/linux
+		if [ -f /etc/slackware-version ]
+		then
+			echo "Configuring for Slackware"
+			conf/slackware
+		fi
 		;;
 
 	GNU/kFreeBSD*)
@@ -80,6 +123,48 @@ case "`uname -a`" in
 		die "Unknown platform: please configure manually"
 		;;
 esac
+
+# Set CC from $CC (for macports)
+
+if [ "x$CC" != x ]
+then
+	echo "Configuring CC as $CC"
+	conf/ccenv
+fi
+
+# Process command line options
+
+for opt in "$@"
+do
+	case "$opt" in
+		--prefix=*)
+			echo "Configuring $opt"
+			conf/prefix "$opt"
+			;;
+		--destdir=*)
+			echo "Configuring $opt"
+			conf/destdir "$opt"
+			;;
+		--enable-test)
+			echo "Configuring to include backup function implementations."
+			conf/test
+			;;
+		--enable-logind)
+			echo "Enabling systemd-logind/elogind support"
+			conf/logind --enable
+			;;
+		--disable-logind)
+			echo "Disabling systemd-logind/elogind support"
+			conf/logind --disable
+			;;
+		*)
+			echo "$0: Unknown argument: $@" >&2
+			exit 1
+			;;
+	esac
+done
+
+# Prepare for parallel make
 
 if [ x"`which gmake`" != x"" ]
 then

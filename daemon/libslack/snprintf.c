@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -117,7 +117,7 @@ I<snprintf(3)> - safe sprintf
 
 =head1 DESCRIPTION
 
-Safe version of I<sprintf(3)> of that doesn't suffer from buffer overruns.
+Safe version of I<sprintf(3)> that doesn't suffer from buffer overruns.
 
 =over 4
 
@@ -196,32 +196,30 @@ int sprintf();
 
 =item C<int snprintf(char *str, size_t size, const char *format, ...)>
 
-Writes output to the string C<str>, under control of the format string
+Writes output to the buffer, C<str>, under control of the format string
 C<format>, that specifies how subsequent arguments are converted for output.
 It is similar to I<sprintf(3)>, except that C<size> specifies the maximum
-number of characters to produce. The trailing C<nul> character is counted
-towards this limit, so you must allocate at least C<size> characters for
-C<str>.
+number of bytes to produce. The trailing C<nul> byte is counted towards this
+limit, so you must allocate at least C<size> bytes for C<str>.
 
-If C<size> is zero, nothing is written and C<str> may be C<null>. Otherwise,
-output characters beyond the C<n-1>st are discarded rather than being
-written to C<str>, and a C<nul> character is written at the end of the
-characters actually written to C<str>. If copying takes place between
-objects that overlap, the behaviour is undefined.
+If C<size> is zero, nothing is written, and C<str> may be C<null>.
+Otherwise, output bytes beyond the C<n-1>st are discarded rather than being
+written to C<str>, and a C<nul> byte is written at the end of the bytes
+actually written to C<str>. If copying takes place between objects that
+overlap, the behaviour is undefined.
 
-On success, returns the number of characters that would have been written
-had C<size> been sufficiently large, not counting the terminating C<nul>
-character. Thus, the C<nul>-terminated output has been completely written if
-and only if the return value is nonnegative and less than C<size>. On error,
-returns C<-1> (i.e. encoding error).
+On success, returns the number of bytes that would have been written had
+C<size> been sufficiently large, not counting the terminating C<nul> byte.
+Thus, the C<nul>-terminated output has been completely written if and only
+if the return value is non-negative and less than C<size>. On error, returns
+C<-1> (i.e. encoding error).
 
-Note that if your system already has I<snprintf(3)> but this implementation
+Note that if your system already has I<snprintf(3)>, but this implementation
 was installed anyway, it's because the system implementation has a broken
 return value. Some older implementations (e.g. I<glibc-2.0>) return C<-1>
-when the string is truncated rather than returning the number of characters
-that would have been written had C<size> been sufficiently large (not
-counting the terminating C<nul> character) as required by I<ISO/IEC
-9899:1999(E)>.
+when the string is truncated rather than returning the number of bytes that
+would have been written had C<size> been sufficiently large (not counting
+the terminating C<nul> byte) as required by I<ISO/IEC 9899:1999(E)>.
 
 =cut
 
@@ -1000,7 +998,7 @@ int vsnprintf(char *str, size_t size, const char *format, va_list args)
 
 =head1 MT-Level
 
-MT-Safe - provided that the locale is only set by the main thread before
+I<MT-Safe> - provided that the locale is only set by the main thread before
 starting any other threads.
 
 =head1 EXAMPLES
@@ -1083,29 +1081,31 @@ Allocate memory only when needed to prevent truncation:
 
 =head1 BUGS
 
-The format control string, C<format>, should be interpreted as a multibyte
+The format control string, C<format>, should be interpreted as a multi-byte
 character sequence but it is not. Apart from that, these functions comply
-with the ISO C 89 formatting requirements specified for the I<fprintf(3)>
+with the I<ISO C 89> formatting requirements specified for the I<fprintf(3)>
 function (section 7.9.6.1).
 
-Even though I<snprintf(3)> is an ISO C 99 function (section 7.19.6.5), this
-implementation does not support the new ISO C 99 formatting conversions or
-length modifiers (i.e. C<%hh[diouxXn]>, C<%ll[diouxXn]>, C<%j[diouxXn]>,
-C<%z[diouxXn]>, C<%t[diouxXn]>, C<%ls>, C<%lc> and C<%[aAF]>). The main
-reason is that the local system's I<sprintf(3)> function is used to perform
-floating point formatting. If the local system can support C<%[aA]>, then
-you must have C99 already and so you must also have I<snprintf(3)> already.
+Even though I<snprintf(3)> is an I<ISO C 99> function (section 7.19.6.5),
+this implementation does not support the new I<ISO C 99> formatting
+conversions or length modifiers (i.e. C<%hh[diouxXn]>, C<%ll[diouxXn]>,
+C<%j[diouxXn]>, C<%z[diouxXn]>, C<%t[diouxXn]>, C<%ls>, C<%lc> and
+C<%[aAF]>). The main reason is that the local system's I<sprintf(3)>
+function is used to perform floating point formatting. If the local system
+can support C<%[aA]>, then you must have C99 already, and so you must also
+have I<snprintf(3)> already.
 
-If I<snprintf(3)> or I<vsnprintf(3)> require more than 512 bytes of space in
-which to format a floating point number, but fail to allocate the required
-space, the floating point number will not be formatted at all and processing
-will continue. There is no indication to the client that an error occurred.
-The chances of this happening are remote. It would take a field width or
-precision greater than the available memory to trigger this bug. Since there
-are only 15 significant digits in a I<double> and only 18 significant digits
-in an 80 bit I<long double> (33 significant digits in a 128 bit long
-double), a precision larger than 15/18/33 serves no purpose and a field
-width larger than the useful output serves no purpose.
+If I<snprintf(3)> or I<vsnprintf(3)> require more than C<512> bytes of space
+in which to format a floating point number, but fail to allocate the
+required space, the floating point number will not be formatted at all, and
+processing will continue. There is no indication to the client that an error
+occurred. The chances of this happening are remote. It would take a field
+width or precision greater than the available memory to trigger this bug.
+Since there are only C<15> significant digits in a I<double> and only C<18>
+significant digits in an C<80> bit I<long double> (C<33> significant digits
+in a C<128> bit long double), a precision larger than C<15>/C<18>/C<33>
+serves no purpose, and a field width larger than the useful output serves no
+purpose.
 
 =head1 SEE ALSO
 
@@ -1115,7 +1115,7 @@ I<vsprintf(3)>
 
 =head1 AUTHOR
 
-2002-2010 raf <raf@raf.org>,
+2002-2021 raf <raf@raf.org>,
 1998 Andrew Tridgell <tridge@samba.org>,
 1998 Michael Elkins <me@cs.hmc.edu>,
 1998 Thomas Roessler <roessler@guug.de>,

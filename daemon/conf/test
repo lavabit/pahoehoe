@@ -2,7 +2,7 @@
 #
 # daemon - http://libslack.org/daemon/
 #
-# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
 
-# Modify the macros.mk make include files to exercise optional code
+# Modify macros.mk and config.h to exercise optional code
 #
-# 20201111 raf <raf@raf.org>
+# 20210304 raf <raf@raf.org>
 
 perl -pi \
 	-e 's/^# (GETOPT := getopt)$/$1/;' \
@@ -41,3 +41,4 @@ perl -pi \
 	-e 's/^#define (HAVE_VASPRINTF) 1$/\/* #undef $1 *\//;' \
 	`find . -name config.h`
 
+# vi:set ts=4 sw=4:

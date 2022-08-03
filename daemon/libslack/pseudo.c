@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -46,7 +46,8 @@
  *
  * 20201111 raf <raf@raf.org>
  * pty_make_controlling_tty(): Removed vhangup() which caused problems when
- * it succeeded (i.e. when run as root). It broke code that used pty_fork().
+ * it succeeded (i.e. when run as root). It broke test code that used pty_fork().
+ * Replaced racist pty jargon in code and documentation with descriptive terms.
  */
 
 /*
@@ -71,7 +72,7 @@ I<libslack(pseudo)> - pseudo terminal module
 
 This module provides functions for opening pseudo terminals, changing their
 ownership, making them the controlling terminal, changing their window size
-and forking a new process whose standard input, output and error and
+and forking a new process whose standard input, output, and error are
 attached to a pseudo terminal which is made the controlling terminal.
 
 =over 4
@@ -179,8 +180,8 @@ terminal is stored in C<*pty_user_fd>. The new file descriptor for the
 process side of the pseudo terminal is stored in C<*pty_process_fd>. The
 device name of the process side of the pseudo terminal is stored in the
 buffer pointed to by C<pty_device_name> which must be able to hold at least
-64 characters. C<pty_device_name_size> is the size of the buffer pointed to
-by C<pty_device_name>. No more than C<pty_device_name_size> bytes will be
+C<64> characters. C<pty_device_name_size> is the size of the buffer pointed
+to by C<pty_device_name>. No more than C<pty_device_name_size> bytes will be
 written into the buffer pointed to by C<pty_device_name>, including the
 terminating C<nul> byte. If C<pty_device_termios> is not null, it is passed
 to I<tcsetattr(3)> with the command C<TCSANOW> to set the terminal
@@ -584,10 +585,11 @@ int pty_open(int *pty_user_fd, int *pty_process_fd, char *pty_device_name, size_
 
 =item C<int pty_release(const char *pty_device_name)>
 
-Releases the pty device whose name is in C<pty_device_name>. Its ownership
-is returned to root, and its permissions set to C<rw-rw-rw->. Note that only
-root can execute this function successfully on most systems. On success,
-returns C<0>. On error, returns C<-1> with C<errno> set appropriately.
+Releases the pseudo terminal device whose name is in C<pty_device_name>. Its
+ownership is returned to I<root>, and its permissions are set to
+C<rw-rw-rw->. Note that only I<root> can execute this function successfully
+on most systems. On success, returns C<0>. On error, returns C<-1> with
+C<errno> set appropriately.
 
 =cut
 
@@ -611,17 +613,17 @@ int pty_release(const char *pty_device_name)
 
 =item C<int pty_set_owner(const char *pty_device_name, uid_t uid)>
 
-Changes the ownership of the pty device referred to by C<pty_device_name> to
-the user id, C<uid>. Group ownership of the pty device will be changed to
-the C<tty> group if it exists. Otherwise, it will be changed to the given
-user's primary group. The pty device's permissions are set to C<rw--w---->.
-Note that only root can execute this function successfully on most systems.
-Also note that the ownership of the device is automatically set to the real
-uid of the process by I<pty_open(3)> and I<pty_fork(3)>. The permissions are
-also set automatically by these functions. So I<pty_set_owner(3)> is only
-needed when the device needs to be owned by some user other than the real
-user. On success, returns C<0>. On error, returns C<-1> with C<errno> set
-appropriately.
+Changes the ownership of the pseudo terminal device referred to by
+C<pty_device_name> to the user id, C<uid>. Group ownership of the device
+will be changed to the C<tty> group if it exists. Otherwise, it will be
+changed to the given user's primary group. The device's permissions will be
+set to C<rw--w---->. Note that only I<root> can execute this function
+successfully on most systems. Also note that the ownership of the device is
+automatically set to the real uid of the process by I<pty_open(3)> and
+I<pty_fork(3)>. The permissions are also set automatically by these
+functions. So I<pty_set_owner(3)> is only needed when the device needs to be
+owned by some user other than the real user. On success, returns C<0>. On
+error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -659,12 +661,12 @@ int pty_set_owner(const char *pty_device_name, uid_t uid)
 
 =item C<int pty_make_controlling_tty(int *pty_process_fd, const char *pty_device_name)>
 
-Makes the pty process file descriptor the controlling terminal.
-C<*pty_process_fd> contains the descriptor for the process side of a pseudo
-terminal. The descriptor of the resulting controlling terminal will be
-stored in C<*pty_process_fd>. C<pty_device_name> is the device name of the
-process side of the pseudo terminal. On success, returns C<0>. On error,
-returns C<-1> with C<errno> set appropriately.
+Makes the pseudo terminal's process file descriptor the controlling
+terminal. C<*pty_process_fd> contains the file descriptor for the process
+side of a pseudo terminal. The file descriptor of the resulting controlling
+terminal will be stored in C<*pty_process_fd>. C<pty_device_name> is the
+device name of the process side of the pseudo terminal. On success, returns
+C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -741,9 +743,9 @@ int pty_make_controlling_tty(int *pty_process_fd, const char *pty_device_name)
 =item C<int pty_change_window_size(int pty_user_fd, int row, int col, int xpixel, int ypixel)>
 
 Changes the window size associated with the pseudo terminal referred to by
-C<pty_user_fd>. The C<row>, C<col>, C<xpixel> and C<ypixel> specify the new
-window size. On success, returns C<0>. On error, returns C<-1> with C<errno>
-set appropriately.
+C<pty_user_fd>. The C<row>, C<col>, C<xpixel>, and C<ypixel> parameters
+specify the new window size. On success, returns C<0>. On error, returns
+C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -768,22 +770,22 @@ int pty_change_window_size(int pty_user_fd, int row, int col, int xpixel, int yp
 
 =item C<pid_t pty_fork(int *pty_user_fd, char *pty_device_name, size_t pty_device_name_size, const struct termios *pty_device_termios, const struct winsize *pty_device_winsize)>
 
-A safe version of I<forkpty(3)>. Creates a pseudo terminal and then calls
+A safe version of I<forkpty(3)>. Creates a pseudo terminal, and then calls
 I<fork(2)>. In the parent process, the process side of the pseudo terminal
 is closed. In the child process, the user side of the pseudo terminal is
-closed and the process side is made the controlling terminal. It is
-duplicated onto standard input, output and error and then closed. The user
-(or controlling process) side of the pseudo terminal is stored in
+closed, and the process side is made the controlling terminal. It is
+duplicated onto standard input, output, and error, and is then closed. The
+user (or controlling process) side of the pseudo terminal is stored in
 C<*pty_user_fd> for the parent process. The device name of the process side
 of the pseudo terminal is stored in the buffer pointed to by
-C<pty_device_name> which must be able to hold at least 64 bytes.
+C<pty_device_name> which must be able to hold at least C<64> bytes.
 C<pty_device_name_size> is the size of the buffer pointed to by
 C<pty_device_name>. No more than C<pty_device_name_size> bytes will be
 written to C<pty_device_name>, including the terminating C<nul> byte. If
 C<pty_device_termios> is not null, it is passed to I<tcsetattr(3)> with the
 command C<TCSANOW> to set the terminal attributes of the process side of the
-pseudo terminal device. If C<pty_device_winsize> is not null, it is passed to
-I<ioctl(2)> with the command C<TIOCSWINSZ> to set the window size of the
+pseudo terminal device. If C<pty_device_winsize> is not null, it is passed
+to I<ioctl(2)> with the command C<TIOCSWINSZ> to set the window size of the
 process side of the pseudo terminal device. On success, returns C<0> to the
 child process and returns the process id of the child process to the parent
 process. On error, returns C<-1> with C<errno> set appropriately.
@@ -799,7 +801,7 @@ pid_t pty_fork(int *pty_user_fd, char *pty_device_name, size_t pty_device_name_s
 
 	/*
 	** Note: we don't use forkpty() because it closes the pty user side file
-	** desriptor in the child process before making the process side of the
+	** descriptor in the child process before making the process side of the
 	** pseudo terminal the controlling terminal of the child process and
 	** this can prevent the pty process side file descriptor from becoming
 	** the controlling terminal (but I have no idea why).
@@ -881,7 +883,7 @@ I<ptsname(3)> failed to return the pty device name.
 
 =item C<ENOENT>
 
-The old BSD-style pty device search failed to locate an available pseudo
+The old I<BSD>-style pty device search failed to locate an available pseudo
 terminal.
 
 =item C<ENOSPC>
@@ -898,13 +900,14 @@ terminal.
 
 =head1 MT-Level
 
-MT-Safe if and only if I<ttyname_r(3)> or I<ptsname_r(3)> are available when
-needed. On systems that have I<openpty(3)> or C<"/dev/ptc">, I<ttyname_r(3)>
-is required, otherwise the unsafe I<ttyname(3)> will be used. On systems
-that have C<"/dev/ptmx">, I<ptsname_r(3)> is required, otherwise the unsafe
-I<ptsname(3)> will be used. On systems that have I<_getpty(2)>,
-I<pty_open(3)> is unsafe because I<_getpty(2)> is unsafe. In short, it's
-MT-Safe under Linux, Unsafe under Solaris and OpenBSD.
+I<MT-Safe> if and only if I<ttyname_r(3)> or I<ptsname_r(3)> are available
+when needed. On systems that have I<openpty(3)> or C<"/dev/ptc">,
+I<ttyname_r(3)> is required, otherwise the unsafe I<ttyname(3)> will be
+used. On systems that have C<"/dev/ptmx">, I<ptsname_r(3)> is required,
+otherwise the unsafe I<ptsname(3)> will be used. On systems that have
+I<_getpty(2)>, I<pty_open(3)> is unsafe because I<_getpty(2)> is unsafe. In
+short, it's I<MT-Safe> under I<Linux>, Unsafe under I<Solaris> and
+I<OpenBSD>.
 
 =head1 EXAMPLE
 
@@ -1102,7 +1105,7 @@ I<dup2(2)>
 =head1 AUTHOR
 
 1995 Tatu Ylonen <ylo@cs.hut.fi>
-2001-2010 raf <raf@raf.org>
+2001-2021 raf <raf@raf.org>
 
 =cut
 
@@ -1196,7 +1199,7 @@ int main(int ac, char **av)
 			break;
 
 		case 0:
-			exit(isatty(STDIN_FILENO) ? 0 : 1);
+			exit(isatty(STDIN_FILENO) ? EXIT_SUCCESS : EXIT_FAILURE);
 			break; /* unreached */
 
 		default:

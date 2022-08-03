@@ -2,7 +2,7 @@
 #
 # libslack - http://libslack.org/
 #
-# Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
 
-# 20201111 raf <raf@raf.org>
+# 20210220 raf <raf@raf.org>
 
 die() { echo "$0: $@" >&2; exit 1; }
 
@@ -80,6 +80,44 @@ case "`uname -a`" in
 		die "Unknown platform: please configure manually"
 		;;
 esac
+
+# Set CC from $CC (for macports)
+
+if [ "x$CC" != x ]
+then
+	echo "Configuring CC as $CC"
+	conf/ccenv
+fi
+
+# Process command line options
+
+for opt in "$@"
+do
+	case "$opt" in
+		--prefix=*)
+			echo "Configuring $opt"
+			conf/prefix "$opt"
+			;;
+		--enable-test)
+			echo "Configuring to include backup function implementations."
+			conf/test
+			;;
+		--enable-test-rwlock)
+			echo "Configuring to include backup rwlock implementation."
+			conf/test-rwlock-start
+			;;
+		--disable-test-rwlock)
+			echo "Configuring to exclude backup rwlock implementation (default)."
+			conf/test-rwlock-stop
+			;;
+		*)
+			echo "$0: Unknown argument: $@" >&2
+			exit 1
+			;;
+	esac
+done
+
+# Prepare for parallel make
 
 if [ x"`which gmake`" != x"" ]
 then

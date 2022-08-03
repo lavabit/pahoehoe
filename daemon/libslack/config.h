@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,11 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
+
+#ifndef LIBSLACK_CONFIG_H
+#define LIBSLACK_CONFIG_H
 
 /* Define if defining _POSIX_SOURCE breaks things */
 /* #undef NO_POSIX_SOURCE */
@@ -226,5 +229,9 @@
 /* Define if we have ptsname() */
 #define HAVE_PTSNAME 1
 
-/* Define if we have an evil poll() that aborts when pollfds is null */
+/* Define if we have a poll() that aborts when pollfds is null */
 /* #undef HAVE_POLL_THAT_ABORTS_WHEN_POLLFDS_IS_NULL */
+
+#endif
+
+/* vi:set ts=4 sw=4: */

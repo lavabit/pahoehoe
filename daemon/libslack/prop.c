@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -52,15 +52,21 @@ I<libslack(prop)> - program properties file module
 This module provides support for system-wide and user-specific (generic and
 program-specific) properties in "well-known" locations:
 
-    /etc/properties/app             - system-wide, generic properties
-    $HOME/.properties/app           - user-defined, generic properties
-    /etc/properties/app.progname    - system-wide, program-specific properties
-    $HOME/.properties/app.progname  - user-defined, program-specific properties
+    /etc/properties/app          - system-wide, generic properties
+    ~/.properties/app            - user-defined, generic properties
+    /etc/properties/app.progname - system-wide, program-specific properties
+    ~/.properties/app.progname   - user-defined, program-specific properties
 
-When the client first requests, sets or unsets a property, all properties
+Note that, depending on how I<libslack> was installed, the system-wide
+C</etc/properties> directory might not be under C</etc>. It might be under
+another directory, such as C</usr/local/etc> or C</opt/local/etc>. If you
+aren't sure where it is expected, run C<libslack-config --cflags> and look
+for the definition of C<ETC_DIR>.
+
+When the client first requests, sets, or unsets a property, all properties
 relevant to the current program are loaded from these files in the order
 given above. This order ensures that program-specific properties override
-generic properties and user-defined properties override system-wide
+generic properties and that user-defined properties override system-wide
 properties. The client can change properties at runtime and save the current
 properties back to disk (to the user-defined, program-specific properties
 file).
@@ -71,7 +77,7 @@ with a C<'-'>. Properties files consist of one property per line.
 
 Each property is specified by its name, followed by C<'='> followed by its
 value. The name must not have a C<'='> in it unless it is quoted with a
-preceding C<'\'>. Special characters are expressed in C string literal
+preceding C<'\'>. Special characters are expressed in I<C> string literal
 notation (e.g. C<\a\b\f\n\r\t\v\x1b>). Spaces immediately before and after
 the C<'='> are stripped unless they are quoted with a preceding C<'\'>. The
 properties files may also contain blank lines and comments (C<'#'> until the
@@ -187,7 +193,7 @@ static void prop_release(Prop *prop)
 
 C<int key_cmp(const char **a, const char **b)>
 
-Compares the two strings pointed to by C<a> and C<b>.
+Compares the two strings pointed to by C<a> and C<b> using I<strcmp(3)>.
 
 */
 
@@ -207,8 +213,10 @@ C<String *quote_special(const char *src)>
 Replaces every occurrence in C<src> of special characters (represented in
 I<C> by C<"\a">, C<"\b">, C<"\f">, C<"\n">, C<"\r">, C<"\t">, C<"\v">) with
 their corresponding I<C> representation. Other non-printable characters are
-replaced with their ASCII codes in hexadecimal (i.e. "\xhh"). The caller
-must deallocate the memory returned.
+replaced with their I<ASCII> codes in hexadecimal (i.e. "\xhh"). It is the
+caller's responsibility to deallocate the returned I<String> with
+I<str_release(3)> or I<str_destroy(3)>. It is strongly recommended to use
+I<str_destroy(3)>, because it also sets the pointer variable to C<null>.
 
 */
 
@@ -224,8 +232,10 @@ C<String *unquote_special(const char *src)>
 Replaces every occurrence in C<src> of C<"\a">, C<"\b">, C<"\f">, C<"\n">,
 C<"\r">, C<"\t"> or C<"\v"> with the corresponding special characters (as
 interpreted by I<C>). Ascii codes in octal or hexadecimal (i.e. "\ooo" or
-"\xhh") are replaced with their corresponding ASCII characters. The caller
-must deallocate the memory returned.
+"\xhh") are replaced with their corresponding I<ASCII> characters. It is the
+caller's responsibility to deallocate the returned I<String> with
+I<str_release(3)> or I<str_destroy(3)>. It is strongly recommended to use
+I<str_destroy(3)>, because it also sets the pointer variable to C<null>.
 
 */
 
@@ -238,8 +248,10 @@ static String *unquote_special(const char *src)
 
 C<String *quote_equals(const char *src)>
 
-Replace every occurrence in C<src> of C<"="> with C<"\=">. The caller must
-deallocate the memory returned.
+Replaces every occurrence in C<src> of C<"="> with C<"\=">. It is the
+caller's responsibility to deallocate the returned I<String> with
+I<str_release(3)> or I<str_destroy(3)>. It is strongly recommended to use
+I<str_destroy(3)>, because it also sets the pointer variable to C<null>.
 
 */
 
@@ -252,8 +264,10 @@ static String *quote_equals(const char *src)
 
 C<String *quote_equals(const char *src)>
 
-Replace every occurrence in C<src> of C<"\="> with C<"=">. The caller must
-deallocate the memory returned.
+Replaces every occurrence in C<src> of C<"\="> with C<"=">. It is the
+caller's responsibility to deallocate the returned I<String> with
+I<str_release(3)> or I<str_destroy(3)>. It is strongly recommended to use
+I<str_destroy(3)>, because it also sets the pointer variable to C<null>.
 
 */
 
@@ -267,7 +281,7 @@ static String *unquote_equals(const char *src)
 C<char *user_home(void)>
 
 Returns the user's home directory (obtained from C</etc/passwd>). The return
-value is cached so any subsequent calls are faster.
+value is cached so that any subsequent calls will be faster.
 
 */
 
@@ -289,12 +303,12 @@ static char *user_home(void)
 
 C<void prop_parse(Map *map, const char *path, char *line, size_t lineno)>
 
-Parses a line from a properties file. C<path> if the path of the properties
-file. C<line> is the text to parse. C<lineno> is the current line number.
-The property parsed, if any, is added to C<map>. Emits error messages when
-syntax errors occur. That's probably a mistake. To suppress the error
-messages, call I<prog_err_none(3)> first and restore error message afterwards
-with something like I<prog_err_stderr(3)>.
+Parses one line from a properties file. C<path> is the path of the
+properties file. C<line> is the text to parse. C<lineno> is the current line
+number. The property parsed, if any, is added to C<map>. Emits error
+messages when syntax errors occur. That's probably a mistake. To suppress
+the error messages, call I<prog_err_none(3)> first and restore error
+messages afterwards with something like I<prog_err_stderr(3)>.
 
 */
 
@@ -386,8 +400,8 @@ static void prop_parse(Map *map, const char *path, char *line, size_t lineno)
 C<Prop *prop_load(const char *path, Prop *defaults)>
 
 Creates and returns a new I<Prop> containing C<defaults> and the properties
-obtained from the properties file named C<path>. On error, returns C<null>
-with C<errno> set appropriately.
+obtained from the properties file specified by C<path>. On error, returns
+C<null> with C<errno> set appropriately.
 
 */
 
@@ -420,16 +434,22 @@ C<int prop_init(void)>
 
 Initialises the I<prop(3)> module. Loads properties from the following locations:
 
-    /etc/properties/app             - system-wide, generic properties
-    $HOME/.properties/app           - user-defined, generic properties
-    /etc/properties/app.progname    - system-wide, program-specific properties
-    $HOME/.properties/app.progname  - user-defined, program-specific properties
+    /etc/properties/app          - system-wide, generic properties
+    ~/.properties/app            - user-defined, generic properties
+    /etc/properties/app.progname - system-wide, program-specific properties
+    ~/.properties/app.progname   - user-defined, program-specific properties
 
-Properties from the first three files become (nesting) defaults. Properties
-from the last file becomes the top level I<Prop>. If the last file doesn't
-exist, an empty I<Prop> becomes the top level I<Prop>.
+Note that, depending on how I<libslack> was installed, the system-wide
+C</etc/properties> directory might not be under C</etc>. It might be under
+another directory, such as C</usr/local/etc> or C</opt/local/etc>. If you
+aren't sure where it is expected, run C<libslack-config --cflags> and look
+for the definition of C<ETC_DIR>.
 
-Called at the start of the first get, set or unset function called.
+Properties from the first three files become (nested) defaults. Properties
+from the last file becomes the top-level I<Prop>. If the last file doesn't
+exist, an empty I<Prop> becomes the top-level I<Prop>.
+
+Called at the start of the first get, set, or unset function called.
 
 */
 
@@ -453,7 +473,7 @@ static int prop_init(void)
 	if ((prop_next = prop_load(path, prop)))
 		prop = prop_next;
 
-	/* User defined generic properties: $HOME/.properties/app */
+	/* User defined generic properties: ~/.properties/app */
 
 	if ((home = user_home()))
 	{
@@ -482,7 +502,7 @@ static int prop_init(void)
 		if ((prop_next = prop_load(path, prop)))
 			prop = prop_next;
 
-		/* User defined program specific properties: $HOME/.properties/app.progname */
+		/* User defined program specific properties: ~/.properties/app.progname */
 
 		if (home)
 		{
@@ -569,7 +589,7 @@ const char *prop_get(const char *name)
 =item C<const char *prop_get_or(const char *name, const char *default_value)>
 
 Returns the value of the property named C<name>. Returns C<default_value> on
-error or if there is no such property.
+error, or if there is no such property.
 
 =cut
 
@@ -586,11 +606,11 @@ const char *prop_get_or(const char *name, const char *default_value)
 
 =item C<const char *prop_set(const char *name, const char *value)>
 
-Sets the property named C<name> to a copy of C<value>. If I<prop_save(3)> is
-called after a call to this function, the new property will be saved to disk
-and will be available the next time this program is executed. On success,
-returns the copy of C<value>. On error, returns C<null> with C<errno> set
-appropriately.
+Sets the property named C<name> to a dynamically allocated copy of C<value>.
+If I<prop_save(3)> is called after a call to this function, the new property
+will be saved to disk, and will be available the next time this program is
+executed. On success, returns the copy of C<value>. On error, returns
+C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -636,8 +656,8 @@ const char *prop_set(const char *name, const char *value)
 =item C<int prop_get_int(const char *name)>
 
 Returns the value of the property named C<name> as an integer. Returns C<0>
-on error or if there is no such property or if it is not interpretable as a
-decimal integer.
+on error, or if there is no such property, or if it is not interpretable as
+a decimal integer.
 
 =cut
 
@@ -653,7 +673,7 @@ int prop_get_int(const char *name)
 =item C<int prop_get_int_or(const char *name, int default_value)>
 
 Returns the value of the property named C<name> as an integer. Returns
-C<default_value> on error or if there is no such property or if it is not
+C<default_value> on error, or if there is no such property, or if it is not
 interpretable as a decimal integer.
 
 =cut
@@ -684,7 +704,7 @@ returns C<value>. On error, returns C<0>.
 int prop_set_int(const char *name, int value)
 {
 	char buf[128];
-	snprintf(buf, 128, "%d", value);
+	snprintf(buf, sizeof(buf), "%d", value);
 	return prop_set(name, buf) ? value : 0;
 }
 
@@ -693,8 +713,8 @@ int prop_set_int(const char *name, int value)
 =item C<double prop_get_double(const char *name)>
 
 Returns the value of the property named C<name> as a double. Returns C<0.0>
-on error or if there is no such property or if it is not interpretable as a
-floating point number.
+on error, or if there is no such property, or if it is not interpretable as
+a floating point number.
 
 =cut
 
@@ -710,7 +730,7 @@ double prop_get_double(const char *name)
 =item C<double prop_get_double_or(const char *name, double default_value)>
 
 Returns the value of the property named C<name> as a double. Returns
-C<default_value> on error or if there is no such property or if it is not
+C<default_value> on error, or if there is no such property, or if it is not
 interpretable as a floating point number.
 
 =cut
@@ -768,7 +788,7 @@ int prop_get_bool(const char *name)
 =item C<int prop_get_bool_or(const char *name, int default_value)>
 
 Returns the value of the property named C<name> as a boolean value. Returns
-C<default_value> on error or if there is no such property or if it is not
+C<default_value> on error, or if there is no such property, or if it is not
 interpretable as a boolean value. The values: C<"true">, C<"yes">, C<"on">
 and C<"1"> are all interpreted as C<true>. The values: C<"false">, C<"no">,
 C<"off"> and C<"0"> are all interpreted as C<false>. All other values are
@@ -894,19 +914,19 @@ int prop_unset(const char *name)
 
 =item C<int prop_save(void)>
 
-Saves the program's properties to disk. If the C<"save"> property is set to
-C<"false">, C<"no">, C<"off"> or C<"0">, nothing is written to disk. If no
-properties were added, removed or changed, nothing is written to disk. Only
-the user-defined, program-specific properties are saved. Generic and
+Saves the program's properties to disk. If the property named C<"save"> is
+set to C<"false">, C<"no">, C<"off"> or C<"0">, nothing is written to disk.
+If no properties were added, removed or changed, nothing is written to disk.
+Only the user-defined, program-specific properties are saved. Generic and
 system-wide properties files must be edited by hand. Each program can only
 save its own properties. They are saved in the following file:
 
-    $HOME/.properties/app.progname
+    ~/.properties/app.progname
 
 Where C<progname> is the name of the program after being translated as
-described at the top of the DESCRIPTION section.
+described at the top of the I<DESCRIPTION> section.
 
-The F<.properties> directory is created if necessary. On success, returns
+The C<~/.properties> directory is created if necessary. On success, returns
 C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -1143,7 +1163,7 @@ int prop_clear(void)
 =item C<int prop_locker(Locker *locker)>
 
 Sets the locking strategy for the I<prop(3)> module to C<locker>. This is
-only needed in multi threaded programs. It must only be called once, from
+only needed in multi-threaded programs. It must only be called once, from
 the main thread. On success, returns C<0>. On error, returns C<-1> with
 C<errno> set appropriately.
 
@@ -1173,23 +1193,23 @@ On error, C<errno> is set either by an underlying function, or as follows:
 
 =item C<EINVAL>
 
-When there is no prog_name or home directory or when there is a parse error
-in a properties file or if the F<~/.properties> exists but is not a
-directory. I<prop_locker(3)> sets this when an attempt is made to change the
-locker that has already been set.
+When there is no prog_name or home directory, or when there is a parse error
+in a properties file, or if C<~/.properties> exists but is not a directory.
+I<prop_locker(3)> sets this when an attempt is made to change the locker
+after one has already been set.
 
 =back
 
 =head1 MT-Level
 
-MT-Disciplined
+I<MT-Disciplined>
 
 =head1 FILES
 
     /etc/properties/app
-    $HOME/.properties/app
+    ~/.properties/app
     /etc/properties/app.*
-    $HOME/.properties/app.*
+    ~/.properties/app.*
 
 =head1 EXAMPLE
 
@@ -1235,7 +1255,7 @@ I<prog(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 
@@ -1400,7 +1420,7 @@ int main(int ac, char **av)
 		++errors, printf("Test11: prop_set(key, value) failed (%s not %s)\n", val, value);
 	ival = prop_save();
 	if (ival != 0)
-		++errors, printf("Test12: prop_save() (with progname) failed (%d not 0)\n", ival);
+		++errors, printf("Test12: prop_save() (with progname) failed (%d not 0, errno = %s)\n", ival, strerror(errno));
 
 	clean(has_props);
 	prop_clear();
@@ -1417,7 +1437,7 @@ int main(int ac, char **av)
 
 	ival = prop_save();
 	if (ival != 0)
-		++errors, printf("Test25: prop_save() (with progname) failed (%d not 0)\n", ival);
+		++errors, printf("Test25: prop_save() (with progname) failed (%d not 0, errno = %s)\n", ival, strerror(errno));
 
 	prop_clear();
 

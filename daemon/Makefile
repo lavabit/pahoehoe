@@ -1,7 +1,7 @@
 #
 # daemon - http://libslack.org/daemon/
 #
-# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,10 +17,11 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
 
-# 20201111 raf <raf@raf.org>
+# 20210304 raf <raf@raf.org>
 
 CC := gcc
 # CC := cc
+# CC := other
 AR := ar
 RANLIB := ranlib
 POD2MAN := pod2man
@@ -28,8 +29,8 @@ POD2HTML := pod2html
 GZIP := gzip -f -9
 
 DESTDIR :=
-PREFIX := $(DESTDIR)/usr/local
-# PREFIX := $(DESTDIR)/usr/pkg
+PREFIX := /usr/local
+# PREFIX := /usr/pkg
 APP_INSDIR := $(PREFIX)/bin
 LIB_INSDIR := $(PREFIX)/lib
 MAN_SYSDIR := $(PREFIX)/share/man
@@ -62,6 +63,8 @@ CLEAN_FILES += tags core Makefile.bak .makefile.bak pod2htm*
 
 DAEMON_SRCDIR := .
 DAEMON_INCDIRS := libslack
+# Uncomment this for Linux systems without systemd but with elogind (e.g. Slackware)
+# DAEMON_INCDIRS += /usr/include/elogind
 DAEMON_LIBDIRS := libslack
 include $(DAEMON_SRCDIR)/macros.mk
 
@@ -161,8 +164,12 @@ depend: ready $(DEPEND_CFILES) $(DEPEND_HFILES)
 clean::
 	@rm -rf $(CLEAN_FILES)
 
+ifeq ($(shell uname -a 2>/dev/null | grep -i Debian),)
 clobber::
 	@rm -rf $(CLEAN_FILES) $(CLOBBER_FILES)
+else
+clobber:: debian-clobber
+endif
 
 distclean:: clobber
 	@perl -pi -e 'last if /[D]O NOT DELETE/;' $(patsubst %, %/Makefile, $(DAEMON_SRCDIR) $(DAEMON_SUBDIRS))

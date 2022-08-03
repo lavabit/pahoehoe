@@ -1,7 +1,7 @@
 #
 # daemon - http://libslack.org/daemon/
 #
-# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
 
-# 20201111 raf <raf@raf.org>
+# 20210304 raf <raf@raf.org>
 
-# Uncomment this to override the default value of 600 seconds
-# as the minimum amount of time that a client can live if it
-# is to be respawned
+# Uncomment this to override the default value of 300 seconds
+# as the minimum amount of time that a non-root client can live
+# if it is to be respawned
 #
-# DAEMON_DEFINES += -DRESPAWN_THRESHOLD=600
+# DAEMON_DEFINES += -DRESPAWN_ACCEPTABLE=300
 
 # Uncomment this to override the default configuration file path
 #
@@ -35,8 +35,8 @@
 # DAEMON_DEFINES += -DNDEBUG
 
 DAEMON_NAME := daemon
-DAEMON_VERSION := 0.7
-DAEMON_DATE := 20201111
+DAEMON_VERSION := 0.8
+DAEMON_DATE := 20210304
 DAEMON_URL := http://libslack.org/daemon/
 DAEMON_ID := $(DAEMON_NAME)-$(DAEMON_VERSION)
 DAEMON_DIST := $(DAEMON_ID).tar.gz
@@ -47,6 +47,12 @@ DAEMON_DEFINES += -DDAEMON_NAME=\"$(DAEMON_NAME)\"
 DAEMON_DEFINES += -DDAEMON_VERSION=\"$(DAEMON_VERSION)\"
 DAEMON_DEFINES += -DDAEMON_DATE=\"$(DAEMON_DATE)\"
 DAEMON_DEFINES += -DDAEMON_URL=\"$(DAEMON_URL)\"
+
+# DAEMON_DEFINES += -DPATH_SEP=\'/\'
+# DAEMON_DEFINES += -DROOT_DIR=\"/\"
+# DAEMON_DEFINES += -DETC_DIR=\"/etc\"
+# DAEMON_DEFINES += -DROOT_PID_DIR=\"/var/run\"
+# DAEMON_DEFINES += -DUSER_PID_DIR=\"/tmp\"
 
 # Uncomment this if your system has POSIX threads reader/writer locks.
 #
@@ -134,6 +140,10 @@ DAEMON_CFLAGS += $(DAEMON_CPPFLAGS) $(DAEMON_CCFLAGS)
 DAEMON_LIBS += slack
 DAEMON_LIBS += pthread
 DAEMON_LIBS += util
+# Uncomment this for --bind on Linux systems with systemd (e.g. Debian)
+# DAEMON_LIBS += systemd
+# Uncomment this for --bind on Linux systems with elogind (e.g. Slackware)
+# DAEMON_LIBS += elogind
 
 # Uncomment these on Solaris for sockets
 #
@@ -143,9 +153,17 @@ DAEMON_LIBS += util
 
 DAEMON_LDFLAGS += $(patsubst %, -L%, $(DAEMON_LIBDIRS)) $(patsubst %, -l%, $(DAEMON_LIBS))
 
+# Inherit $(CPPFLAGS), $(CFLAGS) and $(LDFLAGS) from the caller
+#
+DAEMON_CPPFLAGS += $(CPPFLAGS)
+DAEMON_CFLAGS += $(CFLAGS)
+DAEMON_LDFLAGS += $(LDFLAGS)
+
+# Include the libslack sub-target
+#
 SLACK_SRCDIR := libslack
-SLACK_INCDIRS := libslack
-SLACK_LIBDIRS := libslack
+SLACK_INCDIRS := $(SLACK_SRCDIR)
+SLACK_LIBDIRS := $(SLACK_SRCDIR)
 include $(SLACK_SRCDIR)/macros.mk
 
 DAEMON_SUBTARGETS := $(SLACK_TARGET)

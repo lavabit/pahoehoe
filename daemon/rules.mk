@@ -1,7 +1,7 @@
 
 # daemon - http://libslack.org/daemon/
 #
-# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 #
 
-# 20201111 raf <raf@raf.org>
+# 20210304 raf <raf@raf.org>
 
 ifneq ($(DAEMON_TARGET),./$(DAEMON_NAME))
 
@@ -41,42 +41,42 @@ html-daemon: $(DAEMON_HTMLFILES)
 install-daemon: install-daemon-bin install-daemon-man
 
 install-daemon-bin:
-	mkdir -p $(APP_INSDIR)
-	install -m 755 $(DAEMON_TARGET) $(APP_INSDIR)
-	case "$$DEB_BUILD_OPTIONS" in *nostrip*);; *) strip $(patsubst %, $(APP_INSDIR)/%, $(notdir $(DAEMON_TARGET)));; esac
+	mkdir -p $(DESTDIR)$(APP_INSDIR)
+	install -m 755 $(DAEMON_TARGET) $(DESTDIR)$(APP_INSDIR)
+	case "$$DEB_BUILD_OPTIONS" in *nostrip*);; *) strip $(patsubst %, $(DESTDIR)$(APP_INSDIR)/%, $(notdir $(DAEMON_TARGET)));; esac
 
 install-daemon-man: man-daemon
-	@mkdir -p $(APP_MANDIR); \
-	install -m 644 $(DAEMON_MANFILES) $(APP_MANDIR); \
-	mkdir -p $(FMT_MANDIR); \
-	rm -f $(FMT_MANDIR)/$(notdir $(DAEMON_MANLINK)); \
-	ln -s ../man$(APP_MANSECT)/$(notdir $(DAEMON_MANFILES)) $(FMT_MANDIR)/$(notdir $(DAEMON_MANLINK))
+	@mkdir -p $(DESTDIR)$(APP_MANDIR); \
+	install -m 644 $(DAEMON_MANFILES) $(DESTDIR)$(APP_MANDIR); \
+	mkdir -p $(DESTDIR)$(FMT_MANDIR); \
+	rm -f $(DESTDIR)$(FMT_MANDIR)/$(notdir $(DAEMON_MANLINK)); \
+	ln -s ../man$(APP_MANSECT)/$(notdir $(DAEMON_MANFILES)) $(DESTDIR)$(FMT_MANDIR)/$(notdir $(DAEMON_MANLINK))
 
 install-daemon-html: html-daemon
-	@mkdir -p $(DAEMON_HTMLDIR); \
-	install -m 644 $(DAEMON_HTMLFILES) $(DAEMON_HTMLDIR)
+	@mkdir -p $(DESTDIR)$(DAEMON_HTMLDIR); \
+	install -m 644 $(DAEMON_HTMLFILES) $(DESTDIR)$(DAEMON_HTMLDIR)
 
 install-daemon-conf: $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE)
-	@mkdir -p $(DAEMON_CONF_INSDIR); \
-	[ -f $(DAEMON_CONF_INSDIR)/$(DAEMON_CONFFILE) ] || install -m 644 $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE) $(DAEMON_CONF_INSDIR); \
-	[ -d $(DAEMON_CONF_INSDIR)/$(DAEMON_CONFDIR) ] || mkdir $(DAEMON_CONF_INSDIR)/$(DAEMON_CONFDIR)
+	@mkdir -p $(DESTDIR)$(DAEMON_CONF_INSDIR); \
+	[ -f $(DESTDIR)$(DAEMON_CONF_INSDIR)/$(DAEMON_CONFFILE) ] || install -m 644 $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE) $(DESTDIR)$(DAEMON_CONF_INSDIR); \
+	[ -d $(DESTDIR)$(DAEMON_CONF_INSDIR)/$(DAEMON_CONFDIR) ] || mkdir $(DESTDIR)$(DAEMON_CONF_INSDIR)/$(DAEMON_CONFDIR)
 
 .PHONY: uninstall-daemon uninstall-daemon-bin uninstall-daemon-man uninstall-daemon-html uninstall-daemon-conf
 
 uninstall-daemon: uninstall-daemon-bin uninstall-daemon-man
 
 uninstall-daemon-bin:
-	rm -f $(patsubst %, $(APP_INSDIR)/%, $(notdir $(DAEMON_TARGET)))
+	rm -f $(patsubst %, $(DESTDIR)$(APP_INSDIR)/%, $(notdir $(DAEMON_TARGET)))
 
 uninstall-daemon-man:
-	@rm -f $(patsubst %, $(APP_MANDIR)/%, $(notdir $(DAEMON_MANFILES))) \
-	$(FMT_MANDIR)/$(notdir $(DAEMON_MANLINK))
+	@rm -f $(patsubst %, $(DESTDIR)$(APP_MANDIR)/%, $(notdir $(DAEMON_MANFILES))) \
+	$(DESTDIR)$(FMT_MANDIR)/$(notdir $(DAEMON_MANLINK))
 
 uninstall-daemon-html:
-	@rm -f $(patsubst %, $(DAEMON_HTMLDIR)/%, $(notdir $(DAEMON_HTMLFILES)))
+	@rm -f $(patsubst %, $(DESTDIR)$(DAEMON_HTMLDIR)/%, $(notdir $(DAEMON_HTMLFILES)))
 
 uninstall-daemon-conf:
-	@rm -rf $(DAEMON_CONF_INSDIR)/$(DAEMON_CONFFILE) $(DAEMON_CONF_INSDIR)/$(DAEMON_CONFDIR)
+	@rm -rf $(DESTDIR)$(DAEMON_CONF_INSDIR)/$(DAEMON_CONFFILE) $(DESTDIR)$(DAEMON_CONF_INSDIR)/$(DAEMON_CONFDIR)
 
 .PHONY: dist-daemon dist-html-daemon rpm-daemon deb-daemon sol-daemon obsd-daemon fbsd-daemon nbsd-daemon osx-daemon
 
@@ -225,10 +225,10 @@ DAEMON_DEBIAN_CONTROL_CODE := perl -p -i -e ' \
 
 DAEMON_DEBIAN_COPYRIGHT_CODE := perl -p -i -e ' \
 		s/<url:\/\/example\.com>/<http:\/\/libslack.org\/daemon\/>/; \
-		s/Copyright: <years> <put author.s name and email here>/Copyright: 1999-2004, 2010, 2020 raf <raf\@raf.org>/; \
+		s/Copyright: <years> <put author.s name and email here>/Copyright: 1999-2004, 2010, 2020-2021 raf <raf\@raf.org>/; \
 		s/\s+<years> <likewise for another author>\n//; \
 		s/License: <special license>/License: GPL-2+/; \
-		s/<Put the license of the package here indented by 1 space>/This software is released under the terms of the GNU General Public License v2+:\n\n    http:\/\/www.gnu.org\/copyleft\/gpl.html   (on the Web)\n    file:\/usr\/share\/common-licenses\/GPL-2  (on Debian systems)/; \
+		s/<Put the license of the package here indented by 1 space>/This software is released under the terms of the GNU General Public License v2+:\n\n    https:\/\/www.gnu.org\/licenses\/   (on the Web)\n    file:\/usr\/share\/common-licenses\/GPL-2  (on Debian systems)/; \
 		s/ <This follows the format of Description: lines in control file>\n//; \
 		s/ <Including paragraphs>\n//; \
 		s/\#.*//'
@@ -296,12 +296,15 @@ debian-clobber::
 
 $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE):
 	@echo '# /etc/daemon.conf: system-wide daemon(1) configuration.' > $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
-	echo '# See daemon(1) for full documentation.' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
+	echo '# See daemon(1) or daemon.conf(5) for full documentation.' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
 	echo '#' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
-	echo '# Format: <name|"*"> <option(","option)*>' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
+	echo '# Format:' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
+	echo '# VAR=value' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
+	echo '# <name|"*"> <option(","option)*>' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
 	echo '#' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
-	echo '# Examples:' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
-	echo '# *      pidfiles=/var/tmp' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
+	echo '# Example:' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
+	echo '# PATH=$$PATH:~/bin' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
+	echo '# *      pidfiles=~/.pidfiles' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
 	echo '# name   respawn,command=/usr/bin/command args' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE); \
 	echo '' >> $(DAEMON_SRCDIR)/$(DAEMON_CONFFILE)
 
@@ -535,15 +538,15 @@ help::
 	echo " man-$(DAEMON_NAME)           -- makes the $(DAEMON_NAME) manpages"; \
 	echo " html-$(DAEMON_NAME)          -- makes the $(DAEMON_NAME) manpages in html"; \
 	echo " install-daemon        -- installs $(DAEMON_NAME) and its manpage"; \
-	echo " install-daemon-bin    -- installs $(DAEMON_NAME) in $(APP_INSDIR)"; \
-	echo " install-daemon-man    -- installs the $(DAEMON_NAME) manpage in $(APP_MANDIR)"; \
-	echo " install-daemon-html   -- installs the $(DAEMON_NAME) html manpage in $(DAEMON_HTMLDIR)"; \
-	echo " install-daemon-conf   -- installs the $(DAEMON_NAME).conf{,.d} file/directory in $(DAEMON_CONF_INSDIR)"; \
+	echo " install-daemon-bin    -- installs $(DAEMON_NAME) in $(DESTDIR)$(APP_INSDIR)"; \
+	echo " install-daemon-man    -- installs the $(DAEMON_NAME) manpage in $(DESTDIR)$(APP_MANDIR)"; \
+	echo " install-daemon-html   -- installs the $(DAEMON_NAME) html manpage in $(DESTDIR)$(DAEMON_HTMLDIR)"; \
+	echo " install-daemon-conf   -- installs the $(DAEMON_NAME).conf{,.d} file/directory in $(DESTDIR)$(DAEMON_CONF_INSDIR)"; \
 	echo " uninstall-daemon      -- uninstalls $(DAEMON_NAME) and its manpage"; \
-	echo " uninstall-daemon-bin  -- uninstalls $(DAEMON_NAME) from $(APP_INSDIR)"; \
-	echo " uninstall-daemon-man  -- uninstalls the $(DAEMON_NAME) manpage from $(APP_MANDIR)"; \
-	echo " uninstall-daemon-html -- uninstalls the $(DAEMON_NAME) html manpage from $(DAEMON_HTMLDIR)"; \
-	echo " uninstall-daemon-conf -- uninstalls the $(DAEMON_NAME).conf{,.d} file/directory from $(DAEMON_CONF_INSDIR)"; \
+	echo " uninstall-daemon-bin  -- uninstalls $(DAEMON_NAME) from $(DESTDIR)$(APP_INSDIR)"; \
+	echo " uninstall-daemon-man  -- uninstalls the $(DAEMON_NAME) manpage from $(DESTDIR)$(APP_MANDIR)"; \
+	echo " uninstall-daemon-html -- uninstalls the $(DAEMON_NAME) html manpage from $(DESTDIR)$(DAEMON_HTMLDIR)"; \
+	echo " uninstall-daemon-conf -- uninstalls the $(DAEMON_NAME).conf{,.d} file/directory from $(DESTDIR)$(DAEMON_CONF_INSDIR)"; \
 	echo " dist-daemon           -- makes a source tarball for daemon+libslack"; \
 	echo " dist-html-daemon      -- makes a tarball of daemon's html manpages"; \
 	echo " rpm-daemon            -- makes source and binary rpm packages for daemon"; \
@@ -593,12 +596,8 @@ include $(SLACK_SRCDIR)/rules.mk
 $(DAEMON_SRCDIR)/%.o: $(DAEMON_SRCDIR)/%.c
 	$(CC) $(DAEMON_CFLAGS) -o $@ -c $<
 
-ifneq ($(findstring quotes,$(shell $(POD2MAN) --help 2>&1)),)
-NOQUOTES := --quotes=none
-endif
-
 $(DAEMON_SRCDIR)/%.$(APP_MANSECT): $(DAEMON_SRCDIR)/%.c
-	$(POD2MAN) --center='$(APP_MANSECTNAME)' --section=$(APP_MANSECT) $(NOQUOTES) $< > $@
+	$(POD2MAN) --section=$(APP_MANSECT) --center='$(APP_MANSECTNAME)' --name=$(shell echo $(DAEMON_NAME) | tr a-z A-Z) --release=$(DAEMON_ID) --date=$(DAEMON_DATE) --quotes=none $< > $@
 
 $(DAEMON_SRCDIR)/%.gz: $(DAEMON_SRCDIR)/%
 	$(GZIP) $<

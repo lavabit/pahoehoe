@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,14 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
 
 =head1 NAME
 
-I<libslack(sig)> - ISO C compliant signal handling module
+I<libslack(sig)> - I<ISO C>-compliant signal handling module
 
 =head1 SYNOPSIS
 
@@ -43,20 +43,20 @@ I<libslack(sig)> - ISO C compliant signal handling module
 
 =head1 DESCRIPTION
 
-This module provides functions for ISO C compliant signal handling. ISO C
-compliant signal handlers may only set a single value of type
+This module provides functions for I<ISO C>-compliant signal handling. I<ISO
+C>-compliant signal handlers may only set a single value of type
 I<sig_atomic_t>. This is a very restrictive requirement. This module allows
 you to specify unrestricted signal handlers while (almost) transparently
-enforcing ISO C compliance.
+enforcing I<ISO C> compliance.
 
-When a handled signal arrives, an ISO C compliant signal handler is invoked
-to merely record the fact that the signal was received. Then, in the main
-thread of execution, when I<signal_handle(3)> or I<signal_handle_all(3)> is
-invoked, the client supplied signal handlers for all signals received since
-the last invocation of I<signal_handle(3)> or I<signal_handle_all(3)> are
-invoked.
+When a handled signal arrives, an I<ISO C>-compliant signal handler is
+invoked to merely record the fact that the signal was received. Then, in the
+main thread of execution, when I<signal_handle(3)> or
+I<signal_handle_all(3)> is invoked, the client supplied signal handlers for
+all signals received since the last invocation of I<signal_handle(3)> or
+I<signal_handle_all(3)> are invoked.
 
-Since the user supplied signal handlers execute in the main thread on
+Since the user-supplied signal handlers execute in the main thread on
 execution, they are not subject to the normal restrictions on signal
 handlers. Also, they will execute with the same signals blocked as the real
 signal handler.
@@ -66,27 +66,28 @@ C<SIGILL>, C<SIGABRT>, C<SIGFPE>, C<SIGSEGV>, C<SIGBUS> and C<SIGSYS>) whose
 signal I<handler> functions are installed directly as the real signal
 handlers. Signal I<siginfo> handler functions installed with
 I<signal_set_siginfo_handler(3)> are installed directly as well. In general,
-these I<handler> and I<siginfo_handler> functions probably won't be ISO C
-compliant signal handler functions but as long as they are POSIX compliant
-signal handler functions (which is far less restrictive) it will be fine.
+these I<handler> and I<siginfo_handler> functions probably won't be I<ISO
+C>-compliant signal handler functions but as long as they are
+I<POSIX>-compliant signal handler functions (which is far less restrictive)
+it will be fine.
 
 =over 4
 
 =cut
 
-One of the nicest things about POSIX MT programming is how it simplifies
+One of the nicest things about I<POSIX> MT programming is how it simplifies
 signal handling. A single thread can be devoted to handling signals
 synchronously with I<sigwait(3)> while all other threads go about their
 business, free from signals, and most importantly, free from the code
 clutter of checking every blocking system call to see if it was interrupted
 by a signal. To do this, block all signals in all threads except for the
 signal-handling thread. Then that thread will be the only one to receive
-signals, according to POSIX.
+signals, according to I<POSIX>.
 
-Unfortunately, if you have a Linux system, you may notice that the MT signal
-handling is not POSIX compliant in this way. On the other hand, Linux
-provides the I<signalfd(2)> system call which is even better. If you use
-that, you won't need this module at all.
+Unfortunately, if you have a I<Linux> system, you may notice that the MT
+signal handling is not I<POSIX>-compliant in this way. On the other hand,
+I<Linux> provides the I<signalfd(2)> system call which is even better. If
+you use that, you won't need this module at all.
 
 */
 
@@ -123,7 +124,7 @@ static volatile sig_atomic_t g_received[SIG_MAX];
 
 C<void signal_catcher(int signo)>
 
-This is an ISO C compliant signal handler function. It is used to catch all
+This is an I<ISO C>-compliant signal handler function. It is used to catch all
 signals. It records that the signal C<signo> was received.
 
 */
@@ -140,9 +141,9 @@ static void signal_catcher(int signo)
 Installs C<handler> as the signal handler function for the signal C<signo>.
 C<flags> is used as the I<sa_flags> field of the C<struct sigaction *act>
 argument to I<sigaction(2)>. The actual function that is set as the signal
-handler is not C<handler>. It is an ISO C compliant signal handler function
-that just records the fact that a signal was received. C<handler> will only
-be invoked when the client invokes I<signal_handle(3)> or
+handler is not C<handler>. It is an I<ISO C>-compliant signal handler
+function that just records the fact that a signal was received. C<handler>
+will only be invoked when the client invokes I<signal_handle(3)> or
 I<signal_handle_all(3)> from the main thread of execution. So there are no
 restrictions on C<handler>. When C<handler> is invoked, the C<signo> signal
 will be blocked. Other signals can also be blocked when C<handler> is
@@ -206,12 +207,12 @@ signo>, C<siginfo_t *siginfo> and C<void *context>), rather than the usual
 single argument (C<int signo>). C<flags> is used as the I<sa_flags> field of
 the I<struct sigaction *act> argument to I<sigaction(2)> (combined with
 C<SA_SIGINFO>). Unlike usual signal C<handler> functions, signal
-I<siginfo_hndler> functions are installed directly. So there are no
-restrictions on C<siginfo_handler>. When C<siginfo_handler> is invoked, the
-C<signo> signal will be blocked. Other signals can also be blocked when
-C<siginfo_handler> is invoked using I<signal_addset(3)> or I<sigaddset(3)>.
-On success, returns C<0>. On error, returns C<-1> with C<errno> set
-appropriately.
+I<siginfo_hndler> functions are installed directly. So there are
+I<POSIX>-imposed restrictions on C<siginfo_handler>. When C<siginfo_handler>
+is invoked, the C<signo> signal will be blocked. Other signals can also be
+blocked when C<siginfo_handler> is invoked using I<signal_addset(3)> or
+I<sigaddset(3)>. On success, returns C<0>. On error, returns C<-1> with
+C<errno> set appropriately.
 
 =cut
 
@@ -369,7 +370,7 @@ When a signal number argument is out of range.
 
 =head1 MT-Level
 
-Unsafe
+I<Unsafe>
 
 =head1 EXAMPLE
 
@@ -414,7 +415,7 @@ I<prog(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

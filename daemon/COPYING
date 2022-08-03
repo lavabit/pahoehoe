@@ -2,7 +2,7 @@ COPYING
 =======
 daemon - turns other processes into daemons
 
-Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
 
 libslack - A UNIX/C library of general utilities for programmers with Slack
 
-Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
 
     This library is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,6 +67,6 @@ All rights reserved.
     URL: http://libslack.org/daemon
     URL: http://raf.org/daemon
     GIT: https://github.com/raforg/daemon
-    Date: 20201111
+    Date: 20210304
     Author: raf <raf@raf.org>
 

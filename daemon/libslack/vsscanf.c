@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -43,31 +43,32 @@ Note that this may not be identical in behaviour to the I<sscanf(3)> on your
 system because this was implemented from scratch for systems that lack
 I<vsscanf(3)>. So your I<sscanf(3)> and this I<vsscanf(3)> share no common
 code. Your I<sscanf(3)> may support extensions that I<vsscanf(3)> does not
-support. I<vsscanf(3)> complies with all of the relevant ISO C requirements
-for I<sscanf(3)> except:
+support. I<vsscanf(3)> complies with all of the relevant I<ISO C>
+requirements for I<sscanf(3)> except:
 
 =over 4
 
 =item *
 
-C<format> may not be a multibyte character string; and
+C<format> may not be a multi-byte character string; and
 
 =item *
 
 Scanning a pointer (C<"%p">) may not exactly match the format that your
 I<printf(3)> uses to print pointers on your system. This version accepts
-pointers as a hexadecimal number with or without a preceding C<0x>.
+pointers as a hexadecimal number, with or without a preceding C<0x>.
 
 =back
 
 =head1 MT-Level
 
-MT-Safe if and only if no thread calls I<setlocale(3)>. Since locales are
+I<MT-Safe> if and only if no thread calls I<setlocale(3)>. Since locales are
 inherently non-threadsafe as they are currently defined, this shouldn't be a
 problem. Just call C<setlocale(LC_ALL, "")> once after program
 initialisation and never again (at least not after creating any threads). If
-it is a problem, just change C<localeconv()-E<gt>decimal_point[0]> in the source
-to C<'.'> and it will be MT-Safe at the expense of losing locale support.
+it is a problem, just change C<localeconv()-E<gt>decimal_point[0]> in the
+source to C<'.'>, and it will be I<MT-Safe> at the expense of losing locale
+support.
 
 =head1 EXAMPLE
 
@@ -112,7 +113,7 @@ I<gcc(1)> warns that:
     warning: ANSI C does not support the `L' length modifier
     warning: use of `l' length character with `e' type character
 
-However, the ANSI C standard (Section 7.9.6.2) states that:
+However, the I<ANSI C> standard (Section 7.9.6.2) states that:
 
 "Finally, the conversion specifiers C<e>, C<f>, and C<g> shall be preceded
 by C<l> if the corresponding argument is a pointer to I<double> rather than
@@ -129,7 +130,7 @@ I<sscanf(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

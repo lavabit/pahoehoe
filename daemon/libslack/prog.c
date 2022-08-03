@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -163,18 +163,18 @@ that the client specify the syntax and partial semantics for all options in
 the same place (if it is to be done statically). This can be annoying when
 library modules require their own command line options. This module allows
 various parts of a program to (statically) specify their own command line
-options independently and link them together via C<parent> pointers.
+options independently, and link them together via C<parent> pointers.
 
 Option syntax is specified in much the same way as for I<GNU
 getopt_long(3)>. Option semantics are specified by an action
 (C<OPT_NOTHING>, C<OPT_VARIABLE> or C<OPT_FUNCTION>), an argument type
-(C<OPT_NONE>, C<OPT_INTEGER> or C<OPT_STRING>) and either an object
+(C<OPT_NONE>, C<OPT_INTEGER> or C<OPT_STRING>), and either an object
 (C<int *>, C<char **>) or function (C<func()>, C<func(int)> or C<func(char *)>).
 
 The I<opt_process(3)> and I<opt_usage(3)> functions are used by the I<prog>
 functions and needn't be used directly. Instead, use I<prog_opt_process(3)>
 to execute options and I<prog_usage_msg(3)> and I<prog_help_msg(3)> to
-construct usage and help message directly from the supplied option data.
+construct usage and help messages directly from the supplied option data.
 They are exposed in case you don't want to use any other part of this
 module.
 
@@ -240,8 +240,8 @@ static Prog g =
 
 =item C<void prog_init(void)>
 
-Initialises the message, error, debug and alert destinations to C<stdout>,
-C<stderr>, C<stderr> and C<stderr>, respectively. These are all C<null> by
+Initialises the message, error, debug, and alert destinations to C<stdout>,
+C<stderr>, C<stderr>, and C<stderr>, respectively. These are all C<null> by
 default so this function must be called before any messages are emitted.
 
 =cut
@@ -261,7 +261,7 @@ void prog_init(void)
 =item C<const char *prog_set_name(const char *name)>
 
 Sets the program's name to C<name>. This is used when composing usage, help,
-version and error messages. On success, returns C<name>. On error, returns
+version, and error messages. On success, returns C<name>. On error, returns
 C<null> with C<errno> set appropriately.
 
 =cut
@@ -272,13 +272,13 @@ C<null> with C<errno> set appropriately.
 #define WRLOCK(ret) { int rc; if ((rc = locker_wrlock(g.locker))) { set_errno(rc); return (ret); } }
 #define UNLOCK(ret) { int rc; if ((rc = locker_unlock(g.locker))) { set_errno(rc); return (ret); } }
 
-#define prog_set_str(name, value) \
+#define PROG_SET_STR_AND_RETURN(name, value) \
 	WRLOCK(NULL) \
 	name = value; \
 	UNLOCK(NULL) \
-	return name
+	return value
 
-#define prog_set_msg(name, value) \
+#define PROG_SET_MSG_AND_RETURN(name, value) \
 	WRLOCK(NULL) \
 	if (name && name != value) \
 		msg_release(name); \
@@ -286,13 +286,13 @@ C<null> with C<errno> set appropriately.
 	UNLOCK(NULL) \
 	return value
 
-#define prog_pop_msg(name, lvalue) \
+#define PROG_POP_MSG(name, lvalue) \
 	WRLOCK(-1) \
 	lvalue = name; \
 	name = NULL; \
 	UNLOCK(-1) \
 
-#define prog_set_int(name, value) \
+#define PROG_SET_INT_AND_RETURN_PREVIOUS(name, value) \
 	size_t prev; \
 	WRLOCK(-1) \
 	prev = name; \
@@ -300,14 +300,14 @@ C<null> with C<errno> set appropriately.
 	UNLOCK(-1) \
 	return prev
 
-#define prog_get_ptr(name) \
+#define PROG_GET_PTR_AND_RETURN(name) \
 	void *value; \
 	RDLOCK(NULL) \
 	value = (void *)name; \
 	UNLOCK(NULL) \
 	return value
 
-#define prog_get_int(name) \
+#define PROG_GET_INT_AND_RETURN(name) \
 	int value; \
 	RDLOCK(0) \
 	value = name; \
@@ -316,7 +316,7 @@ C<null> with C<errno> set appropriately.
 
 const char *prog_set_name(const char *name)
 {
-	prog_set_str(g.name, name);
+	PROG_SET_STR_AND_RETURN(g.name, name);
 }
 
 /*
@@ -333,17 +333,18 @@ C<options>. On error, returns C<null> with C<errno> set appropriately.
 
 Options *prog_set_options(Options *options)
 {
-	prog_set_str(g.options, options);
+	PROG_SET_STR_AND_RETURN(g.options, options);
 }
 
 /*
 
 =item C<const char *prog_set_syntax(const char *syntax)>
 
-Sets the program's syntax description to C<syntax>. This is used when
-composing usage and help messages. It must contain a one line description of
-the command line arguments, excluding any options. On success, returns
-C<syntax>. On error, returns C<null> with C<errno> set appropriately.
+Sets the program's command line syntax summary to C<syntax>. This is used
+when composing usage and help messages. It must contain a one line summary
+of the command line arguments, excluding the program name (e.g. C<"[options]
+arg...">). On success, returns C<syntax>. On error, returns C<null> with
+C<errno> set appropriately.
 
 =cut
 
@@ -351,7 +352,7 @@ C<syntax>. On error, returns C<null> with C<errno> set appropriately.
 
 const char *prog_set_syntax(const char *syntax)
 {
-	prog_set_str(g.syntax, syntax);
+	PROG_SET_STR_AND_RETURN(g.syntax, syntax);
 }
 
 /*
@@ -368,15 +369,15 @@ C<errno> set appropriately.
 
 const char *prog_set_desc(const char *desc)
 {
-	prog_set_str(g.desc, desc);
+	PROG_SET_STR_AND_RETURN(g.desc, desc);
 }
 
 /*
 
 =item C<const char *prog_set_version(const char *version)>
 
-Sets the program's version to C<version>. This is used when composing help
-and version messages. On success, returns C<version>. On error, returns
+Sets the program's version string to C<version>. This is used when composing
+help and version messages. On success, returns C<version>. On error, returns
 C<null> with C<errno> set appropriately.
 
 =cut
@@ -385,7 +386,7 @@ C<null> with C<errno> set appropriately.
 
 const char *prog_set_version(const char *version)
 {
-	prog_set_str(g.version, version);
+	PROG_SET_STR_AND_RETURN(g.version, version);
 }
 
 /*
@@ -402,7 +403,7 @@ C<errno> set appropriately.
 
 const char *prog_set_date(const char *date)
 {
-	prog_set_str(g.date, date);
+	PROG_SET_STR_AND_RETURN(g.date, date);
 }
 
 /*
@@ -419,7 +420,7 @@ C<author>. On error, returns C<null> with C<errno> set appropriately.
 
 const char *prog_set_author(const char *author)
 {
-	prog_set_str(g.author, author);
+	PROG_SET_STR_AND_RETURN(g.author, author);
 }
 
 /*
@@ -437,7 +438,7 @@ C<null> with C<errno> set appropriately.
 
 const char *prog_set_contact(const char *contact)
 {
-	prog_set_str(g.contact, contact);
+	PROG_SET_STR_AND_RETURN(g.contact, contact);
 }
 
 /*
@@ -454,7 +455,7 @@ C<vendor>. On error, returns C<null> with C<errno> set appropriately.
 
 const char *prog_set_vendor(const char *vendor)
 {
-	prog_set_str(g.vendor, vendor);
+	PROG_SET_STR_AND_RETURN(g.vendor, vendor);
 }
 
 /*
@@ -471,7 +472,7 @@ returns C<url>. On error, returns C<null> with C<errno> set appropriately.
 
 const char *prog_set_url(const char *url)
 {
-	prog_set_str(g.url, url);
+	PROG_SET_STR_AND_RETURN(g.url, url);
 }
 
 /*
@@ -489,7 +490,7 @@ C<legal>. On error, returns C<null> with C<errno> set appropriately.
 
 const char *prog_set_legal(const char *legal)
 {
-	prog_set_str(g.legal, legal);
+	PROG_SET_STR_AND_RETURN(g.legal, legal);
 }
 
 /*
@@ -499,10 +500,10 @@ const char *prog_set_legal(const char *legal)
 Sets the program's message destination to C<out>. This is used by I<msg(3)>
 and I<vmsg(3)> which are, in turn, used to emit usage, version and help
 messages. The program message destination is set to standard output by
-I<prog_init(3)> but it can be anything. However, it is probably best to
-leave it as standard output until after command line option processing is
-complete. See I<msg(3)> for details. On success, returns C<out>. On error,
-returns C<null> with C<errno> set appropriately.
+I<prog_init(3)>, but it can be anything. However, it is probably best to
+leave it as standard output at least until after command line option
+processing is complete. See I<msg(3)> for details. On success, returns
+C<out>. On error, returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -510,7 +511,7 @@ returns C<null> with C<errno> set appropriately.
 
 Msg *prog_set_out(Msg *out)
 {
-	prog_set_msg(g.out, out);
+	PROG_SET_MSG_AND_RETURN(g.out, out);
 }
 
 /*
@@ -520,7 +521,7 @@ Msg *prog_set_out(Msg *out)
 Sets the program's error message destination to C<err>. This is used by
 I<error(3)>, I<errorsys(3)>, I<fatal(3)>, I<fatalsys(3)>, I<dump(3)> and
 I<dumpsys(3)>. The program error message destination is set to standard
-error by I<prog_init(3)> but it can be anything. See I<msg(3)> for details.
+error by I<prog_init(3)>, but it can be anything. See I<msg(3)> for details.
 On success, returns C<err>. On error, returns C<null> with C<errno> set
 appropriately.
 
@@ -530,7 +531,7 @@ appropriately.
 
 Msg *prog_set_err(Msg *err)
 {
-	prog_set_msg(g.err, err);
+	PROG_SET_MSG_AND_RETURN(g.err, err);
 }
 
 /*
@@ -538,7 +539,7 @@ Msg *prog_set_err(Msg *err)
 =item C<Msg *prog_set_dbg(Msg *dbg)>
 
 Sets the program's debug message destination to C<dbg>. This is set to
-standard error by I<prog_init(3)> but it can be set to anything. See
+standard error by I<prog_init(3)>, but it can be set to anything. See
 I<msg(3)> for details. On success, returns C<dbg>. On error, returns C<null>
 with C<errno> set appropriately.
 
@@ -548,7 +549,7 @@ with C<errno> set appropriately.
 
 Msg *prog_set_dbg(Msg *dbg)
 {
-	prog_set_msg(g.dbg, dbg);
+	PROG_SET_MSG_AND_RETURN(g.dbg, dbg);
 }
 
 /*
@@ -566,7 +567,7 @@ C<null> with C<errno> set appropriately.
 
 Msg *prog_set_alert(Msg *alert)
 {
-	prog_set_msg(g.log, alert);
+	PROG_SET_MSG_AND_RETURN(g.log, alert);
 }
 
 /*
@@ -614,7 +615,7 @@ Example:
 
 ssize_t prog_set_debug_level(size_t debug_level)
 {
-	prog_set_int(g.debug_level, debug_level);
+	PROG_SET_INT_AND_RETURN_PREVIOUS(g.debug_level, debug_level);
 }
 
 /*
@@ -633,7 +634,7 @@ returns C<-1> with C<errno> set appropriately.
 
 ssize_t prog_set_verbosity_level(size_t verbosity_level)
 {
-	prog_set_int(g.verbosity_level, verbosity_level);
+	PROG_SET_INT_AND_RETURN_PREVIOUS(g.verbosity_level, verbosity_level);
 }
 
 /*
@@ -663,8 +664,8 @@ int prog_set_locker(Locker *locker)
 
 =item C<const char *prog_name(void)>
 
-Returns the program's name. On error, returns C<null> with C<errno> set
-appropriately.
+Returns the program's name as set by I<prog_set_name(3)>. On error, returns
+C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -672,15 +673,15 @@ appropriately.
 
 const char *prog_name(void)
 {
-	prog_get_ptr(g.name);
+	PROG_GET_PTR_AND_RETURN(g.name);
 }
 
 /*
 
 =item C<const Options *prog_options(void)>
 
-Returns the program's options. On error, returns C<null> with C<errno> set
-appropriately.
+Returns the program's options as set by I<prog_set_options(3)>. On error,
+returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -688,15 +689,16 @@ appropriately.
 
 const Options *prog_options(void)
 {
-	prog_get_ptr(g.options);
+	PROG_GET_PTR_AND_RETURN(g.options);
 }
 
 /*
 
 =item C<const char *prog_syntax(void)>
 
-Returns the program's syntax description. On error, returns C<null> with
-C<errno> set appropriately.
+Returns the program's command line syntax summary as set by
+I<prog_set_syntax(3)>. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -704,15 +706,15 @@ C<errno> set appropriately.
 
 const char *prog_syntax(void)
 {
-	prog_get_ptr(g.syntax);
+	PROG_GET_PTR_AND_RETURN(g.syntax);
 }
 
 /*
 
 =item C<const char *prog_desc(void)>
 
-Returns the program's description. On error, returns C<null> with C<errno>
-set appropriately.
+Returns the program's description as set by I<prog_set_desc(3)>. On error,
+returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -720,15 +722,15 @@ set appropriately.
 
 const char *prog_desc(void)
 {
-	prog_get_ptr(g.desc);
+	PROG_GET_PTR_AND_RETURN(g.desc);
 }
 
 /*
 
 =item C<const char *prog_version(void)>
 
-Returns the program's version string. On error, returns C<null> with
-C<errno> set appropriately.
+Returns the program's version string as set by I<prog_set_version(3)>. On
+error, returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -736,15 +738,15 @@ C<errno> set appropriately.
 
 const char *prog_version(void)
 {
-	prog_get_ptr(g.version);
+	PROG_GET_PTR_AND_RETURN(g.version);
 }
 
 /*
 
 =item C<const char *prog_date(void)>
 
-Returns the program's release date. On error, returns C<null> with C<errno>
-set appropriately.
+Returns the program's release date as set by I<prog_set_date(3)>. On error,
+returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -752,15 +754,15 @@ set appropriately.
 
 const char *prog_date(void)
 {
-	prog_get_ptr(g.date);
+	PROG_GET_PTR_AND_RETURN(g.date);
 }
 
 /*
 
 =item C<const char *prog_author(void)>
 
-Returns the program's author. On error, returns C<null> with C<errno> set
-appropriately.
+Returns the program's author as set by I<prog_set_author(3)>. On error,
+returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -768,15 +770,15 @@ appropriately.
 
 const char *prog_author(void)
 {
-	prog_get_ptr(g.author);
+	PROG_GET_PTR_AND_RETURN(g.author);
 }
 
 /*
 
 =item C<const char *prog_contact(void)>
 
-Returns the program's contact address. On error, returns C<null> with
-C<errno> set appropriately.
+Returns the program's contact address as set by I<prog_set_contact(3)>. On
+error, returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -784,15 +786,15 @@ C<errno> set appropriately.
 
 const char *prog_contact(void)
 {
-	prog_get_ptr(g.contact);
+	PROG_GET_PTR_AND_RETURN(g.contact);
 }
 
 /*
 
 =item C<const char *prog_vendor(void)>
 
-Returns the program's vendor. On error, returns C<null> with C<errno> set
-appropriately.
+Returns the program's vendor as set by I<prog_set_vendor(3)>. On error,
+returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -800,15 +802,15 @@ appropriately.
 
 const char *prog_vendor(void)
 {
-	prog_get_ptr(g.vendor);
+	PROG_GET_PTR_AND_RETURN(g.vendor);
 }
 
 /*
 
 =item C<const char *prog_url(void)>
 
-Returns the program's URL. On error, returns C<null> with C<errno> set
-appropriately.
+Returns the program's URL as set by I<prog_set_url(3)>. On error, returns
+C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -816,15 +818,15 @@ appropriately.
 
 const char *prog_url(void)
 {
-	prog_get_ptr(g.url);
+	PROG_GET_PTR_AND_RETURN(g.url);
 }
 
 /*
 
 =item C<const char *prog_legal(void)>
 
-Returns the program's legal notice. On error, returns C<null> with C<errno>
-set appropriately.
+Returns the program's legal notice as set by I<prog_set_legal(3)>. On error,
+returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -832,15 +834,15 @@ set appropriately.
 
 const char *prog_legal(void)
 {
-	prog_get_ptr(g.legal);
+	PROG_GET_PTR_AND_RETURN(g.legal);
 }
 
 /*
 
 =item C<Msg *prog_out(void)>
 
-Returns the program's message destination. On error, returns C<null> with
-C<errno> set appropriately.
+Returns the program's message destination as set by I<prog_set_out(3)>. On
+error, returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -848,15 +850,16 @@ C<errno> set appropriately.
 
 Msg *prog_out(void)
 {
-	prog_get_ptr(g.out);
+	PROG_GET_PTR_AND_RETURN(g.out);
 }
 
 /*
 
 =item C<Msg *prog_err(void)>
 
-Returns the program's error message destination. On error, returns C<null>
-with C<errno> set appropriately.
+Returns the program's error message destination as set by
+I<prog_set_err(3)>. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -864,15 +867,16 @@ with C<errno> set appropriately.
 
 Msg *prog_err(void)
 {
-	prog_get_ptr(g.err);
+	PROG_GET_PTR_AND_RETURN(g.err);
 }
 
 /*
 
 =item C<Msg *prog_dbg(void)>
 
-Returns the program's debug message destination. On error, returns C<null>
-with C<errno> set appropriately.
+Returns the program's debug message destination as set by
+I<prog_set_dbg(3)>. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -880,15 +884,16 @@ with C<errno> set appropriately.
 
 Msg *prog_dbg(void)
 {
-	prog_get_ptr(g.dbg);
+	PROG_GET_PTR_AND_RETURN(g.dbg);
 }
 
 /*
 
 =item C<Msg *prog_alert(void)>
 
-Returns the program's alert message destination. On error, returns C<null>
-with C<errno> set appropriately.
+Returns the program's alert message destination as set by
+I<prog_set_alert(3)>. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -896,15 +901,15 @@ with C<errno> set appropriately.
 
 Msg *prog_alert(void)
 {
-	prog_get_ptr(g.log);
+	PROG_GET_PTR_AND_RETURN(g.log);
 }
 
 /*
 
 =item C<size_t prog_debug_level(void)>
 
-Returns the program's debug level. On error, returns C<0> with C<errno> set
-appropriately.
+Returns the program's debug level as set by I<prog_set_debug_level(3)>. On
+error, returns C<0> with C<errno> set appropriately.
 
 =cut
 
@@ -912,15 +917,16 @@ appropriately.
 
 size_t prog_debug_level(void)
 {
-	prog_get_int(g.debug_level);
+	PROG_GET_INT_AND_RETURN(g.debug_level);
 }
 
 /*
 
 =item C<size_t prog_verbosity_level(void)>
 
-Returns the program's verbosity level. On error, returns C<0> with C<errno>
-set appropriately.
+Returns the program's verbosity level as set by
+I<prog_set_verbosity_level(3)>. On error, returns C<0> with C<errno> set
+appropriately.
 
 =cut
 
@@ -928,16 +934,16 @@ set appropriately.
 
 size_t prog_verbosity_level(void)
 {
-	prog_get_int(g.verbosity_level);
+	PROG_GET_INT_AND_RETURN(g.verbosity_level);
 }
 
 /*
 
 =item C<int prog_out_fd(int fd)>
 
-Sets the program's message destination to be the file descriptor specified
-by C<fd>. On success, returns C<0>. On error, returns C<-1> with C<errno>
-set appropriately.
+Sets the program's normal message destination to be the file descriptor,
+C<fd>. On success, returns C<0>. On error, returns C<-1> with C<errno> set
+appropriately.
 
 =cut
 
@@ -963,8 +969,9 @@ int prog_out_fd(int fd)
 
 =item C<int prog_out_stdout(void)>
 
-Sets the program's message destination to be standard output. On success,
-returns C<0>. On error, returns C<-1> with C<errno> set appropriately.
+Sets the program's normal message destination to be standard output. On
+success, returns C<0>. On error, returns C<-1> with C<errno> set
+appropriately.
 
 =cut
 
@@ -979,8 +986,8 @@ int prog_out_stdout(void)
 
 =item C<int prog_out_file(const char *path)>
 
-Sets the program's message destination to be the file specified by C<path>.
-On success, returns C<0>. On error, returns C<-1> with C<errno> set
+Sets the program's normal message destination to be the file specified by
+C<path>. On success, returns C<0>. On error, returns C<-1> with C<errno> set
 appropriately.
 
 =cut
@@ -1007,9 +1014,9 @@ int prog_out_file(const char *path)
 
 =item C<int prog_out_syslog(const char *ident, int option, int facility, int priority)>
 
-Sets the program's message destination to be I<syslog> initialised with
-C<ident>, C<option>, C<facility> and C<priority>. On success, returns C<0>.
-On error, returns C<-1> with C<errno> set appropriately.
+Sets the program's normal message destination to be I<syslog> initialised
+with C<ident>, C<option>, C<facility>, and C<priority>. On success, returns
+C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -1035,8 +1042,8 @@ int prog_out_syslog(const char *ident, int option, int facility, int priority)
 
 =item C<int prog_out_push_filter(msg_filter_t *filter)>
 
-Pushes a msg filter I<filter> function onto the program's message
-destination. On success, returns C<0>. On error, retturns C<-1> with
+Pushes the message filter function, I<filter>, onto the program's normal
+message destination. On success, returns C<0>. On error, returns C<-1> with
 C<errno> set appropriately.
 
 =cut
@@ -1047,7 +1054,7 @@ int prog_out_push_filter(msg_filter_t *filter)
 {
 	Msg *mesg, *top;
 
-	prog_pop_msg(g.out, top);
+	PROG_POP_MSG(g.out, top);
 
 	if (!(mesg = msg_create_filter_with_locker(g.locker, filter, top)))
 		return -1;
@@ -1065,8 +1072,9 @@ int prog_out_push_filter(msg_filter_t *filter)
 
 =item C<int prog_out_none(void)>
 
-Sets the program's message destination to C<null>. This disables all normal
-messages. On success, returns 0. On error, sets C<errno> appropriately.
+Sets the program's normal message destination to C<null>. This disables all
+normal messages. On success, returns C<0>. On error, returns C<-1> with
+C<errno> set appropriately.
 
 =cut
 
@@ -1074,18 +1082,19 @@ messages. On success, returns 0. On error, sets C<errno> appropriately.
 
 int prog_out_none(void)
 {
+	errno = 0;
 	prog_set_out(NULL);
 
-	return 0;
+	return (errno) ? -1 : 0;
 }
 
 /*
 
 =item C<int prog_err_fd(int fd)>
 
-Sets the program's error message destination to be the file descriptor
-specified by C<fd>. On success, returns C<0>. On error, returns C<-1> with
-C<errno> set appropriately.
+Sets the program's error message destination to be the file descriptor,
+C<fd>. On success, returns C<0>. On error, returns C<-1> with C<errno> set
+appropriately.
 
 =cut
 
@@ -1157,7 +1166,7 @@ int prog_err_file(const char *path)
 =item C<int prog_err_syslog(const char *ident, int option, int facility, int priority)>
 
 Sets the program's error message destination to be I<syslog> initialised
-with C<ident>, C<option>, C<facility> and C<priority>. On success, returns
+with C<ident>, C<option>, C<facility>, and C<priority>. On success, returns
 C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -1184,8 +1193,8 @@ int prog_err_syslog(const char *ident, int option, int facility, int priority)
 
 =item C<int prog_err_push_filter(msg_filter_t *filter)>
 
-Pushes a msg filter I<filter> function onto the program's error message
-destination. On success, returns C<0>. On error, retturns C<-1> with
+Pushes the message filter function, I<filter>, onto the program's error
+message destination. On success, returns C<0>. On error, returns C<-1> with
 C<errno> set appropriately.
 
 =cut
@@ -1196,7 +1205,7 @@ int prog_err_push_filter(msg_filter_t *filter)
 {
 	Msg *mesg, *top;
 
-	prog_pop_msg(g.err, top);
+	PROG_POP_MSG(g.err, top);
 
 	if (!(mesg = msg_create_filter_with_locker(g.locker, filter, top)))
 		return -1;
@@ -1215,8 +1224,8 @@ int prog_err_push_filter(msg_filter_t *filter)
 =item C<int prog_err_none(void)>
 
 Sets the program's error message destination to C<null>. This disables all
-error messages. On success, returns C<0>. On error, returns C<-1> with set
-C<errno> appropriately.
+error messages. On success, returns C<0>. On error, returns C<-1> with
+C<errno> set appropriately.
 
 =cut
 
@@ -1224,16 +1233,19 @@ C<errno> appropriately.
 
 int prog_err_none(void)
 {
-	return (prog_set_err(NULL)) ? 0 : -1;
+	errno = 0;
+	prog_set_err(NULL);
+
+	return (errno) ? -1 : 0;
 }
 
 /*
 
 =item C<int prog_dbg_fd(int fd)>
 
-Sets the program's debug message destination to be the file descriptor
-specified by C<fd>. On success, returns C<0>. On error, returns C<-1> with
-C<errno> set appropriately.
+Sets the program's debug message destination to be the file descriptor,
+C<fd>. On success, returns C<0>. On error, returns C<-1> with C<errno> set
+appropriately.
 
 =cut
 
@@ -1322,7 +1334,7 @@ int prog_dbg_file(const char *path)
 =item C<int prog_dbg_syslog(const char *id, int option, int facility, int priority)>
 
 Sets the program's debug message destination to be I<syslog> initialised
-with C<ident>, C<option>, C<facility> and C<priority>. On success, returns
+with C<ident>, C<option>, C<facility>, and C<priority>. On success, returns
 C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -1349,8 +1361,8 @@ int prog_dbg_syslog(const char *id, int option, int facility, int priority)
 
 =item C<int prog_dbg_push_filter(msg_filter_t *filter)>
 
-Pushes a msg filter I<filter> function onto the program's debug message
-destination. On success, returns C<0>. On error, retturns C<-1> with
+Pushes the message filter function, I<filter>, onto the program's debug
+message destination. On success, returns C<0>. On error, returns C<-1> with
 C<errno> set appropriately.
 
 =cut
@@ -1361,7 +1373,7 @@ int prog_dbg_push_filter(msg_filter_t *filter)
 {
 	Msg *mesg, *top;
 
-	prog_pop_msg(g.dbg, top);
+	PROG_POP_MSG(g.dbg, top);
 
 	if (!(mesg = msg_create_filter_with_locker(g.locker, filter, top)))
 		return -1;
@@ -1389,7 +1401,10 @@ C<errno> set appropriately.
 
 int prog_dbg_none(void)
 {
-	return (prog_set_dbg(NULL)) ? 0 : -1;
+	errno = 0;
+	prog_set_dbg(NULL);
+
+	return (errno) ? -1 : 0;
 }
 
 /*
@@ -1487,7 +1502,7 @@ int prog_alert_file(const char *path)
 =item C<int prog_alert_syslog(const char *id, int option, int facility, int priority)>
 
 Sets the program's alert message destination to be I<syslog> initialised
-with C<ident>, C<option>, C<facility> and C<priority>. On success, returns
+with C<ident>, C<option>, C<facility>, and C<priority>. On success, returns
 C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -1514,8 +1529,8 @@ int prog_alert_syslog(const char *id, int option, int facility, int priority)
 
 =item C<int prog_alert_push_filter(msg_filter_t *filter)>
 
-Pushes a msg filter I<filter> function onto the program's alert message
-destination. On success, returns C<0>. On error, retturns C<-1> with
+Pushes the message filter function, I<filter>, onto the program's alert
+message destination. On success, returns C<0>. On error, returns C<-1> with
 C<errno> set appropriately.
 
 =cut
@@ -1526,7 +1541,7 @@ int prog_alert_push_filter(msg_filter_t *filter)
 {
 	Msg *mesg, *top;
 
-	prog_pop_msg(g.log, top);
+	PROG_POP_MSG(g.log, top);
 
 	if (!(mesg = msg_create_filter_with_locker(g.locker, filter, top)))
 		return -1;
@@ -1556,7 +1571,10 @@ C<errno> set appropriately.
 
 int prog_alert_none(void)
 {
-	return (prog_set_alert(NULL)) ? 0 : -1;
+	errno = 0;
+	prog_set_alert(NULL);
+
+	return (errno) ? -1 : 0;
 }
 
 /*
@@ -1607,17 +1625,17 @@ int prog_opt_process(int ac, char **av)
 
 =item C<void prog_usage_msg(const char *format, ...)>
 
-Emits a program usage error message then terminates the program with a
+Emits a program usage error message, then terminates the program with a
 return code of C<EXIT_FAILURE>. The usage message consists of the program's
-name, syntax, options and descriptions (if they have been supplied) and the
-given message. C<format> is a I<printf(3)>-like format string. Any remaining
-arguments are processed as in I<printf(3)>.
+name, command line syntax, options and their descriptions (if they have been
+supplied), and the given message. C<format> is a I<printf(3)>-like format
+string. Any remaining arguments are processed as in I<printf(3)>.
 
 B<Warning: Do not under any circumstances ever pass a non-literal string as
 the format argument unless you know exactly how many conversions will take
 place. Being careless with this is a very good way to build potential
-security holes into your programs. The same is true for all functions that
-take a printf()-like format string as an argument.>
+security vulnerabilities into your programs. The same is true for all
+functions that take a printf()-like format string as an argument.>
 
     prog_usage_msg(buf);       // EVIL
     prog_usage_msg("%s", buf); // GOOD
@@ -1662,7 +1680,7 @@ void prog_usage_msg(const char *format, ...)
 
 =item C<void prog_help_msg(void)>
 
-Emits a program help message then terminates the program with a return code
+Emits a program help message, then terminates the program with a return code
 of C<EXIT_SUCCESS>. This message consists of the program's usage message,
 description, name, version, release date, author, vendor, URL, legal notice
 and contact address (if they have been supplied).
@@ -1757,7 +1775,7 @@ void prog_help_msg(void)
 
 =item C<void prog_version_msg(void)>
 
-Emits a program version message then terminates the program with a return
+Emits a program version message, then terminates the program with a return
 code of C<EXIT_SUCCESS>. This message consists of the program's name and
 version (if they have been supplied).
 
@@ -1887,9 +1905,11 @@ Options prog_options_table[1] = {{ NULL, prog_optab }};
 C<opt_convert(Options *options)>
 
 Creates and returns a flat table of option structs from C<options>. The
-resulting array is for use with I<GNU getopt_long(3)>. The memory returned
-must be I<free(3)>d by the caller. On error, returns C<null> with C<errno>
-set appropriately.
+resulting array is for use with I<GNU getopt_long(3)>. It is the caller's
+responsibility to deallocate the returned memory with I<free(3)>,
+I<mem_release(3)>, or I<mem_destroy(3)>. It is strongly recommended to use
+I<mem_destroy(3)>, because it also sets the pointer variable to C<null>. On
+error, returns C<null> with C<errno> set appropriately.
 
 */
 
@@ -1931,9 +1951,12 @@ static option *opt_convert(Options *options)
 C<opt_optstring(Options *options)>
 
 Creates and returns a string containing all of the short option names from
-C<options>. The resulting string is for use with I<GNU getopt_long(3)>. The
-memory returned must be I<free(3)>d by the caller. On error, returns C<null>
-with C<errno> set appropriately.
+C<options>. The resulting string is for use with I<GNU getopt_long(3)>. It
+is the caller's responsibility to deallocate the returned memory with
+I<free(3)>, I<mem_release(3)>, or I<mem_destroy(3)>. It is strongly
+recommended to use I<mem_destroy(3)>, because it also sets the pointer
+variable to C<null>. On error, returns C<null> with C<errno> set
+appropriately.
 
 */
 
@@ -2016,7 +2039,7 @@ C<void opt_action(Options *options, int rc, int longindex, const char *argument)
 
 Performs the action associated with the option in C<options> when I<GNU
 getopt_long(3)> returned C<rc> or C<longindex>. C<argument> is a pointer to
-an C<int> or C<char *>. See I<opt_process(3)> for details.
+an C<int> or a C<char *>. See I<opt_process(3)> for details.
 
 */
 
@@ -2468,12 +2491,12 @@ C<INT_MAX> or C<INT_MIN> is used.
 
 =head1 MT-Level
 
-MT-Disciplined - prog functions
+I<MT-Disciplined> - prog functions
 
-By default, this module is not thread safe because most programs are single
-threaded and synchronisation doesn't come for free. For multi threaded
-programs, use I<prog_set_locker(3)> to synchronise access to this module's
-data before creating the threads that will access it.
+By default, this module is not threadsafe, because most programs are
+single-threaded, and synchronisation doesn't come for free. For
+multi-threaded programs, use I<prog_set_locker(3)> to synchronise access to
+this module's data, before creating the threads that will access it.
 
 Unsafe - opt functions
 
@@ -2532,7 +2555,7 @@ The following program:
      prog_set_syntax("[options] arg...");
      prog_set_options(options);
      prog_set_version("1.0");
-     prog_set_date("20201111");
+     prog_set_date("20210220");
      prog_set_author("raf <raf@raf.org>");
      prog_set_contact(prog_author());
      prog_set_url("http://libslack.org/");
@@ -2570,7 +2593,7 @@ will behave like:
 
  Name: example
  Version: 1.0
- Date: 20201111
+ Date: 20210220
  Author: raf <raf@raf.org>
  URL: http://libslack.org/
 
@@ -2612,7 +2635,7 @@ I<locker(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 
@@ -2756,7 +2779,7 @@ int main(int ac, char **av)
 			"\n"
 			"Name: %s\n"
 			"Version: 1.0\n"
-			"Date: 20201111\n"
+			"Date: 20210220\n"
 			"Author: raf <raf@raf.org>\n"
 			"Vendor: A Software Vendor\n"
 			"URL: http://libslack.org/test/\n"
@@ -2849,7 +2872,7 @@ int main(int ac, char **av)
 	prog_set_syntax("[options]");
 	prog_set_options(prog_options_table);
 	prog_set_version("1.0");
-	prog_set_date("20201111");
+	prog_set_date("20210220");
 	prog_set_author("raf <raf@raf.org>");
 	prog_set_contact("raf <raf@raf.org>");
 	prog_set_vendor("A Software Vendor");

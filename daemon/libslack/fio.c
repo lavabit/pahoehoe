@@ -1,7 +1,7 @@
 /*
 # libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -96,20 +96,19 @@ void (funlockfile)(FILE *stream);
 
 =item C<char *fgetline(char *line, size_t size, FILE *stream)>
 
-Similar to I<fgets(3)> except that it recognises UNIX (C<"\n">), DOS
-(C<"\r\n">) and Macintosh (C<"\r">) line endings (even different line
-endings in the same file). Reads characters from C<stream> and stores them
-in the buffer pointed to by C<line>. Reading stops after an C<EOF> or the
-end of the line is reached or when C<size - 1> characters have been stored.
-If the end of the line was reached, it is stored as a C<"\n"> character. A
-C<null> is stored after the last character in the buffer. On success,
-returns C<line>. On error, or when the end of file occurs while no
-characters have been read, returns C<null>. Note that even when C<null> is
-returned, C<line> is modified and will always be C<nul>-terminated. So it is
-safe to examine C<line> even when this function returns C<null>. Calls to
-this function can be mixed with calls to other input functions from the
-I<stdio> library for the same input stream. This is a drop-in replacement
-for I<fgets(3)>.
+Similar to I<fgets(3)> except that it recognises UNIX (C<"\n">), DOS/Windows
+(C<"\r\n">) and old Macintosh (C<"\r">) line endings (even different line
+endings in the same file). Reads bytes from C<stream> and stores them in the
+buffer pointed to by C<line>. Reading stops after an C<EOF>, or the end of
+the line is reached, or when C<size - 1> bytes have been stored. If the end
+of the line was reached, it is stored as a C<"\n"> byte. A C<nul> byte is
+stored after the last byte in the buffer. On success, returns C<line>. On
+error, or when the end of file occurs while no bytes have been read, returns
+C<null>. Note that even when C<null> is returned, C<line> is modified and
+will always be C<nul>-terminated. So it is safe to examine C<line> even when
+this function returns C<null>. Calls to this function can be mixed with
+calls to other input functions from the I<stdio> library for the same input
+stream. This is a drop-in replacement for I<fgets(3)>.
 
     char line[BUFSIZ];
     while (fgetline(line, BUFSIZ, stdin))
@@ -337,8 +336,10 @@ int rw_timeout(int fd, long sec, long usec)
 =item C<int nap(long sec, long usec)>
 
 Puts the process to sleep for C<sec> seconds and C<usec> microseconds. Note,
-however, that many systems' timers only have 10ms resolution. On success,
-returns C<0>. On error, returns C<-1> with C<errno> set appropriately.
+however, that many systems' timers only have 10ms resolution. This uses
+I<select(3)> to ensure that I<alarm(3)> and C<SIGALRM> signals are not used
+(best avoided). On success, returns C<0>. On error, returns C<-1> with
+C<errno> set appropriately.
 
     nap(1, 500000); // Sleep for 1.5 seconds
     nap(0, 100000); // Sleep for 0.1 seconds
@@ -575,8 +576,8 @@ int fifo_exists(const char *path, int prepare)
 =item C<int fifo_has_reader(const char *path, int prepare)>
 
 Determines whether or not C<path> refers to a fifo that is being read by
-another process. If C<path> does not exist or does not refer to a fifo or if
-the fifo can't be opened for non-blocking I<write(2)>, returns C<0>. If
+another process. If C<path> does not exist, or does not refer to a fifo, or
+if the fifo can't be opened for non-blocking I<write(2)>, returns C<0>. If
 C<prepare> is non-zero, and path refers to a non-fifo, it will be unlinked.
 On error, returns C<-1> with C<errno> set by I<stat(2)> or I<open(2)>.
 
@@ -619,14 +620,14 @@ int fifo_has_reader(const char *path, int prepare)
 =item C<int fifo_open(const char *path, mode_t mode, int lock, int *writefd)>
 
 Creates a fifo named C<path> with creation mode C<mode> for reading. If
-C<path> already exists, is a fifo and has a reader process, returns C<-1>
+C<path> already exists, is a fifo, and has a reader process, returns C<-1>
 with C<errno> set to C<EADDRINUSE>. If the fifo is created (or an existing
 one can be reused), two file descriptors are opened to the fifo. A read
 descriptor and a write descriptor. On success, returns the read descriptor.
 The write descriptor only exists to ensure that there is always at least one
 writer process for the fifo. This allows a I<read(2)> on the read descriptor
 to block until another process writes to the fifo rather than returning an
-C<EOF> condition. This is done in a POSIX compliant way. If C<lock> is
+C<EOF> condition. This is done in a I<POSIX>-compliant way. If C<lock> is
 non-zero, the fifo is exclusively locked. If C<writefd> is not C<null>, the
 write descriptor is stored there. On error, returns C<-1> with C<errno> set
 by I<stat(2)>, I<open(2)>, I<mkfifo(2)>, I<fstat(2)> or I<fcntl(2)>.
@@ -794,11 +795,11 @@ another process reading from it.
 
 =head1 MT-Level
 
-MT-Safe
+I<MT-Safe>
 
-Mac OS X doesn't have I<flockfile(3)>, I<funlockfile(3)> or
-I<getc_unlocked(3)> so I<fgetline(3)> is not MT-Safe on such platforms. You
-must guard all stdio calls in multi threaded programs with explicit
+I<Mac OS X> doesn't have I<flockfile(3)>, I<funlockfile(3)> or
+I<getc_unlocked(3)> so I<fgetline(3)> is not I<MT-Safe> on such platforms.
+You must guard all I<stdio> calls in multi-threaded programs with explicit
 synchronisation variables.
 
 =head1 EXAMPLES
@@ -947,7 +948,7 @@ Turn a logfile into a fifo that sends log messages to syslog instead:
 
 =head1 BUGS
 
-Some systems, such as Mac OS X, can't lock fifos. On these systems,
+Some systems, such as I<Mac OS X>, can't lock fifos. On these systems,
 I<fifo_open(3)> ignores the locking failure and returns successfully. This
 means that there is no guarantee of a unique reader process on these
 systems. You will need to lock an ordinary file yourself to provide this
@@ -966,7 +967,7 @@ I<mkfifo(2)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

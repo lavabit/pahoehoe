@@ -19,7 +19,7 @@ should always be easy to read.
 
 *Libslack* contains the following modules:
 
-    agent    - agent oriented programming
+    agent    - agent-oriented programming
     coproc   - coprocess using pipes or pseudo terminals
     daemon   - becoming a daemon
     err      - message/error/debug/verbosity/alert messaging
@@ -47,6 +47,6 @@ should always be easy to read.
     URL: http://libslack.org
     URL: http://raf.org/libslack
     GIT: https://github.com/raforg/libslack
-    Date: 20201111
+    Date: 20210220
     Author: raf <raf@raf.org>
 

@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -172,7 +172,7 @@ struct syslog_map_t
 };
 
 /*
-** The following masks may be wrong on some systems.
+** The following masks might be wrong on some systems.
 */
 
 #ifndef LOG_PRIMASK
@@ -231,10 +231,11 @@ static Locker *timestamp_format_locker = NULL;
 =item C<Msg *msg_create(int type, msg_out_t *out, void *data, msg_release_t *destroy)>
 
 Creates a I<Msg> object initialised with C<type>, C<out>, C<data> and
-C<destroy>. Client defined message handlers must specify a C<type> greater
+C<destroy>. Client-defined message handlers must specify a C<type> greater
 than C<5>. It is the caller's responsibility to deallocate the new I<Msg>
-with I<msg_release(3)> or I<msg_destroy>. On success, returns the new I<Msg>
-object. On error, returns C<null>.
+with I<msg_release(3)> or I<msg_destroy>. It is strongly recommended to use
+I<msg_destroy(3)>, because it also sets the pointer variable to C<null>. On
+success, returns the new I<Msg> object. On error, returns C<null>.
 
 =cut
 
@@ -277,11 +278,11 @@ Msg *msg_create_with_locker(Locker *locker, int type, msg_out_t *out, void *data
 =item C<int msg_rdlock(Msg *mesg)>
 
 Claims a read lock on C<mesg> (if C<mesg> was created with a I<Locker>).
-This is needed when multiple read only I<msg(3)> module functions
+This is needed when multiple read-only I<msg(3)> module functions
 need to be called atomically. It is the caller's responsibility to call
 I<msg_unlock(3)> after the atomic operation. The only functions that may be
 called on C<mesg> between calls to I<msg_rdlock(3)> and I<msg_unlock(3)> are
-any read only I<msg(3)> module functions whose name ends with
+any read-only I<msg(3)> module functions whose name ends with
 C<_unlocked>. On success, returns C<0>. On error, returns an error code.
 
 =cut
@@ -389,8 +390,8 @@ Any remaining arguments are processed as in I<printf(3)>.
 B<Warning: Do not under any circumstances ever pass a non-literal string as
 the format argument unless you know exactly how many conversions will take
 place. Being careless with this is a very good way to build potential
-security holes into your programs. The same is true for all functions that
-take a printf()-like format string as an argument.>
+security vulnerabilities into your programs. The same is true for all
+functions that take a printf()-like format string as an argument.>
 
     msg_out(dst, buf);       // EVIL
     msg_out(dst, "%s", buf); // GOOD
@@ -411,7 +412,7 @@ void msg_out(Msg *dst, const char *format, ...)
 
 =item C<void msg_out_unlocked(Msg *dst, const char *format, ...)>
 
-Equivalent to I<msg_out(3)> except that C<dst> is not read locked.
+Equivalent to I<msg_out(3)> except that C<dst> is not read-locked.
 
 =cut
 
@@ -459,7 +460,7 @@ void vmsg_out(Msg *dst, const char *format, va_list args)
 
 =item C<void vmsg_out_unlocked(Msg *dst, const char *format, va_list args)>
 
-Equivalent to I<vmsg_out(3)> except that C<dst> is not read locked.
+Equivalent to I<vmsg_out(3)> except that C<dst> is not read-locked.
 
 =cut
 
@@ -519,7 +520,7 @@ static void msg_fddata_release(MsgFDData *data)
 C<void msg_out_fd(void *data, const void *mesg, size_t mesglen)>
 
 Sends a message to a file descriptor. C<data> is a pointer to the file
-descriptor. C<mesg> is the message. C<mesglen> is it's length.
+descriptor. C<mesg> is the message. C<mesglen> is its length.
 
 */
 
@@ -582,8 +583,9 @@ Msg *msg_create_fd_with_locker(Locker *locker, int fd)
 
 Creates a I<Msg> object that sends messages to standard error. It is the
 caller's responsibility to deallocate the new I<Msg> with I<msg_release(3)>
-or I<msg_destroy(3)>. On success, returns the new I<Msg> object. On error,
-returns C<null>.
+or I<msg_destroy(3)>. It is strongly recommended to use I<msg_destroy(3)>,
+because it also sets the pointer variable to C<null>. On success, returns
+the new I<Msg> object. On error, returns C<null>.
 
 =cut
 
@@ -616,8 +618,9 @@ Msg *msg_create_stderr_with_locker(Locker *locker)
 
 Creates a I<Msg> object that sends messages to standard output. It is the
 caller's responsibility to deallocate the new I<Msg> with I<msg_release(3)>
-or I<msg_destroy(3)>. On success, returns the new I<Msg> object. On error,
-returns C<null>.
+or I<msg_destroy(3)>. It is strongly recommended to use I<msg_destroy(3)>,
+because it also sets the pointer variable to C<null>. On success, returns
+the new I<Msg> object. On error, returns C<null>.
 
 =cut
 
@@ -651,8 +654,8 @@ C<int msg_filedata_init(MsgFileData *data, const char *path)>
 Initialises the internal data needed by a I<Msg> object that sends messages
 to the file specified by C<path>. This data consists of a copy of C<path>
 and an open file descriptor to the file. The file descriptor is opened with
-the C<O_WRONLY>, C<O_CREAT> and C<O_APPEND> flags. On success, returns C<0>.
-On error, returns C<-1> with C<errno> set appropriately.
+the C<O_WRONLY>, C<O_CREAT>, and C<O_APPEND> flags. On success, returns
+C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 */
 
@@ -722,7 +725,7 @@ static void msg_filedata_release(MsgFileData *data)
 C<void msg_out_file(void *data, const void *mesg, size_t mesglen)>
 
 Sends a message to a file. C<data> contains the file descriptor. C<mesg> is
-the message. C<mesglen> is it's length. On error, sets C<errno>
+the message. C<mesglen> is its length. On error, sets C<errno>
 appropriately.
 
 */
@@ -766,8 +769,10 @@ static void msg_out_file(void *data, const void *mesg, size_t mesglen)
 
 Creates a I<Msg> object that sends messages to the file specified by
 C<path>. It is the caller's responsibility to deallocate the new I<Msg> with
-I<msg_release(3)> or I<msg_destroy(3)>. On success, returns the new I<Msg>
-object. On error, returns C<null> with C<errno> set appropriately.
+I<msg_release(3)> or I<msg_destroy(3)>. It is strongly recommended to use
+I<msg_destroy(3)>, because it also sets the pointer variable to C<null>. On
+success, returns the new I<Msg> object. On error, returns C<null> with
+C<errno> set appropriately.
 
 =cut
 
@@ -880,8 +885,9 @@ static void msg_sysdata_release(MsgSyslogData *data)
 
 C<void msg_out_syslog(void *data, const void *mesg, size_t mesglen)>
 
-Sends a message to I<syslog>. C<data> contains the facility to use. C<mesg>
-is the message. C<mesglen> is it's length.
+Sends a message to I<syslog>. C<data> is a pointer to a C<MsgSyslogData>
+object that contains the facility and priority to use. C<mesg> is the
+message. C<mesglen> is its length.
 
 */
 
@@ -900,8 +906,10 @@ static void msg_out_syslog(void *data, const void *mesg, size_t mesglen)
 Creates a I<Msg> object that sends messages to I<syslog> initialised with
 C<ident>, C<option>, C<facility> and C<priority>. It is the caller's
 responsibility to deallocate the new I<Msg> with I<msg_release(3)> or
-I<msg_destroy(3)>. On success, returns the new I<Msg> object. On error,
-returns C<null> with C<errno> set appropriately.
+I<msg_destroy(3)>. It is strongly recommended to use I<msg_destroy(3)>,
+because it also sets the pointer variable to C<null>. On success, returns
+the new I<Msg> object. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -974,8 +982,8 @@ Msg *msg_syslog_set_facility(Msg *mesg, int facility)
 
 =item C<Msg *msg_syslog_set_facility_unlocked(Msg *mesg, int facility)>
 
-Equivalent to I<msg_syslog_set_facility(3)> except that C<mesg> is not write
-locked.
+Equivalent to I<msg_syslog_set_facility(3)> except that C<mesg> is not
+write-locked.
 
 =cut
 
@@ -1028,8 +1036,8 @@ Msg *msg_syslog_set_priority(Msg *mesg, int priority)
 
 =item C<Msg *msg_syslog_set_priority_unlocked(Msg *mesg, int priority)>
 
-Equivalent to I<msg_syslog_set_priority(3)> except that C<mesg> is not write
-locked.
+Equivalent to I<msg_syslog_set_priority(3)> except that C<mesg> is not
+write-locked.
 
 =cut
 
@@ -1153,7 +1161,7 @@ static void msg_plexdata_release(MsgPlexData *data)
 C<void msg_out_plex(void *data, const void *mesg, size_t mesglen)>
 
 Multiplexes a message to several I<Msg> objects. C<data> contains the list
-of I<Msg> objects. C<mesg> is the message. C<mesglen> is it's length.
+of I<Msg> objects. C<mesg> is the message. C<mesglen> is its length.
 
 */
 
@@ -1180,8 +1188,10 @@ static void msg_out_plex(void *data, const void *mesg, size_t mesglen)
 Creates a I<Msg> object that multiplexes messages to C<msg1> and C<msg2>.
 Further I<Msg> objects may be added to its list using I<msg_add_plex(3)>. It
 is the caller's responsibility to deallocate the new I<Msg> with
-I<msg_release(3)> or I<msg_destroy(3)>. On success, returns the new I<Msg>
-object. On error, returns C<null> with C<errno> set appropriately.
+I<msg_release(3)> or I<msg_destroy(3)>. It is strongly recommended to use
+I<msg_destroy(3)>, because it also sets the pointer variable to C<null>. On
+success, returns the new I<Msg> object. On error, returns C<null> with
+C<errno> set appropriately.
 
 =cut
 
@@ -1255,7 +1265,7 @@ int msg_add_plex(Msg *mesg, Msg *item)
 
 =item C<int msg_add_plex_unlocked(Msg *mesg, Msg *item)>
 
-Equivalent to I<msg_add_plex(3)> except that C<mesg> is not write locked.
+Equivalent to I<msg_add_plex(3)> except that C<mesg> is not write-locked.
 
 =cut
 
@@ -1320,7 +1330,7 @@ C<void msg_out_filter(void *data, const void *mesg, size_t mesglen)>
 
 Filters and sends a message to another I<Msg> object. C<data> contains the
 filter function and the destination I<Msg> object. C<mesg> is the unfiltered
-message. C<mesglen> is it's length.
+message. C<mesglen> is its length.
 
 */
 
@@ -1348,8 +1358,10 @@ Creates a I<Msg> object that sends messages to I<mesg> after filtering
 messages through the I<filter> function which must dynamically create a
 modified version of its input message which will be deallocated by its
 caller. It is the caller's responsibility to deallocate the new I<Msg> with
-I<msg_release(3)> or I<msg_destroy(3)>. On success, returns the new I<Msg>
-object. On error, returns C<null> with C<errno> set appropriately.
+I<msg_release(3)> or I<msg_destroy(3)>. It is strongly recommended to use
+I<msg_destroy(3)>, because it also sets the pointer variable to C<null>. On
+success, returns the new I<Msg> object. On error, returns C<null> with
+C<errno> set appropriately.
 
 =cut
 
@@ -1555,6 +1567,9 @@ C<facility>. If C<priority> is non-C<null> the parsed priority is stored in
 the location pointed to by C<priority>. On success, returns C<0>. On error,
 returns C<-1> with C<errno> set appropriately.
 
+These are the supported syslog facility and priority names and their
+corresponding symbolic constants:
+
     syslog facilities          syslog priorities
     ----------------------     -----------------------
     "kern"      LOG_KERN       "emerg"       LOG_EMERG
@@ -1622,15 +1637,15 @@ On error, C<errno> is set by underlying functions or as follows:
 
 =item C<EINVAL>
 
-An argument was C<null> or could not be parsed.
+An argument was C<null>, or could not be parsed.
 
 =back
 
 =head1 MT-Level
 
-MT-Disciplined - msg functions - See I<locker(3)> for details.
+I<MT-Disciplined> - msg functions - See I<locker(3)> for details.
 
-MT-Safe - syslog functions
+I<MT-Safe> - syslog functions
 
 =head1 EXAMPLE
 
@@ -1682,7 +1697,7 @@ I<locker(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -294,10 +294,10 @@ I<libslack(str)> - string module
 
 =head1 DESCRIPTION
 
-This module provides text strings that grow and shrink automatically and
+This module provides text strings that grow and shrink automatically, and
 functions for manipulating them. Some of the functions were modelled on the
 I<list(3)> module. Others were modelled on the string functions and
-operators in I<perlfunc(1)> and I<perlop(1)>. Others came from OpenBSD.
+operators in I<perlfunc(1)> and I<perlop(1)>. Others came from I<OpenBSD>.
 
 =over 4
 
@@ -514,14 +514,15 @@ static int adjust(String *str, ssize_t index, size_t range, size_t length)
 Creates a I<String> specified by C<format> and the following arguments as in
 I<sprintf(3)>. On success, returns the new string. It is the caller's
 responsibility to deallocate the new string with I<str_release(3)> or
-I<str_destroy(3)>. On error, returns C<null> with C<errno> set
-appropriately.
+I<str_destroy(3)>. It is strongly recommended to use I<str_destroy(3)>,
+because it also sets the pointer variable to C<null>. On error, returns
+C<null> with C<errno> set appropriately.
 
 B<Warning: Do not under any circumstances ever pass a non-literal string as
 the format argument unless you know exactly how many conversions will take
 place. Being careless with this is a very good way to build potential
-security holes into your programs. The same is true for all functions that
-take a printf()-like format string as an argument.>
+security vulnerabilities into your programs. The same is true for all
+functions that take a printf()-like format string as an argument.>
 
     String *str = str_create(buf);       // EVIL
     String *str = str_create("%s", buf); // GOOD
@@ -601,8 +602,9 @@ Creates a I<String> specified by C<format> and the following arguments as in
 I<sprintf(3)>. The initial allocation for the string data is at least
 C<size> bytes. On success, returns the new string. It is the caller's
 responsibility to deallocate the new string with I<str_release(3)> or
-I<str_destroy(3)>. On error, returns C<null> with C<errno> set
-appropriately.
+I<str_destroy(3)>. It is strongly recommended to use I<str_destroy(3)>,
+because it also sets the pointer variable to C<null>. On error, returns
+C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -732,8 +734,9 @@ String *str_vcreate_with_locker_sized(Locker *locker, size_t size, const char *f
 
 Creates a copy of C<str>. On success, returns the copy. It is the caller's
 responsibility to deallocate the new string with I<str_release(3)> or
-I<str_destroy(3)>. On error, returns C<null> with C<errno> set
-appropriately.
+I<str_destroy(3)>. It is strongly recommended to use I<str_destroy(3)>,
+because it also sets the pointer variable to C<null>. On error, returns
+C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -748,7 +751,7 @@ String *str_copy(const String *str)
 
 =item C<String *str_copy_unlocked(const String *str)>
 
-Equivalent to I<str_copy(3)> except that C<str> is not read locked.
+Equivalent to I<str_copy(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -779,8 +782,8 @@ String *str_copy_with_locker(Locker *locker, const String *str)
 
 =item C<String *str_copy_with_locker_unlocked(Locker *locker, const String *str)>
 
-Equivalent to I<str_copy_with_locker(3)> except that C<str> is not read
-locked.
+Equivalent to I<str_copy_with_locker(3)> except that C<str> is not
+read-locked.
 
 =cut
 
@@ -795,17 +798,19 @@ String *str_copy_with_locker_unlocked(Locker *locker, const String *str)
 
 =item C<String *str_fgetline(FILE *stream)>
 
-Similar to I<fgets(3)> except that it recognises UNIX (C<"\n">), DOS
-(C<"\r\n">) and Macintosh (C<"\r">) line endings (even different line
-endings in the same file) and it can read a line of any size into the
-I<String> that it returns. Reading stops after the C<EOF> or the end of the
-line is reached. Line endings are always stored as a single C<"\n">
+Similar to I<fgets(3)> except that it recognises UNIX (C<"\n">), DOS/Windows
+(C<"\r\n">) and old Macintosh (C<"\r">) line endings (even different line
+endings in the same file), and it can read a line of any size into the
+I<String> that it returns. Reading stops after the C<EOF>, or after the end
+of the line is reached. Line endings are always stored as a single C<"\n">
 character. A C<nul> is placed after the last character in the buffer. On
 success, returns a new I<String>. It is the caller's responsibility to
-deallocate the new string with I<str_release(3)> or I<str_destroy(3)>. On
-error, or when the end of file occurs while no characters have been read,
-returns C<null>. Calls to this function can be mixed with calls to other
-input functions from the I<stdio> library on the same input stream.
+deallocate the new string with I<str_release(3)> or I<str_destroy(3)>. It is
+strongly recommended to use I<str_destroy(3)>, because it also sets the
+pointer variable to C<null>. On error, or when the end of file occurs while
+no characters have been read, returns C<null>. Calls to this function can be
+mixed with calls to other input functions from the I<stdio> library on the
+same input stream.
 
 =cut
 
@@ -912,11 +917,11 @@ Claims a read lock on C<str> (if C<str> was created with a I<Locker>).
 Clients must call this before calling I<cstr(3)> (for the purpose of reading
 the raw string data) on a string that was created with a I<Locker>. It is
 the client's responsibility to call I<str_unlock(3)> when finished with the
-raw string data. It is also needed when multiple read only I<str(3)> module
+raw string data. It is also needed when multiple read-only I<str(3)> module
 functions need to be called atomically. It is the caller's responsibility to
 call I<str_unlock(3)> after the atomic operation. The only functions that
 may be called on C<str> between calls to I<str_rdlock(3)> and
-I<str_unlock(3)> are I<cstr(3)> and any read only I<str(3)> module functions
+I<str_unlock(3)> are I<cstr(3)> and any read-only I<str(3)> module functions
 whose name ends with C<_unlocked>. On success, returns C<0>. On error,
 returns an error code.
 
@@ -962,8 +967,8 @@ int (str_wrlock)(const String *str)
 
 =item C<int str_unlock(const String *str)>
 
-Unlocks a read or write lock on C<str> obtained with I<str_rdlock(3)> or
-I<str_wrlock(3)> (if C<str> was created with a I<Locker>). On success,
+Unlocks a read lock or a write lock on C<str> obtained with I<str_rdlock(3)>
+or I<str_wrlock(3)> (if C<str> was created with a I<Locker>). On success,
 returns C<0>. On error, returns an error code.
 
 =cut
@@ -1009,7 +1014,7 @@ int str_empty(const String *str)
 
 =item C<int str_empty_unlocked(const String *str)>
 
-Equivalent to I<str_empty(3)> except that C<str> is not read locked.
+Equivalent to I<str_empty(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -1056,7 +1061,7 @@ ssize_t str_length(const String *str)
 
 =item C<ssize_t str_length_unlocked(const String *str)>
 
-Equivalent to I<str_length(3)> except that C<str> is not read locked.
+Equivalent to I<str_length(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -1074,9 +1079,9 @@ ssize_t str_length_unlocked(const String *str)
 
 =item C<char *cstr(const String *str)>
 
-Returns the raw C string in C<str>. Do not use this pointer to extend the
-length of the string. It's ok to use it to reduce the length of the string
-provided you call I<str_set_length_unlocked(3)> or
+Returns the raw I<C> string in C<str>. Do not use this pointer to extend the
+length of the string. It's OK to use it to reduce the length of the string,
+provided that you call I<str_set_length_unlocked(3)> or
 I<str_recalc_length_unlocked(3)> immediately afterwards. When used on a
 string that is shared by multiple threads, I<cstr(3)> must appear between
 calls to I<str_rdlock(3)> or I<str_wrlock(3)> and I<str_unlock(3)>.
@@ -1097,8 +1102,8 @@ char *cstr(const String *str)
 
 =item C<ssize_t str_set_length(String *str, size_t length)>
 
-Sets the length of C<str> to C<length>. Only needed after the raw C string
-returned by I<cstr(3)> has been used to shorten a string. On success,
+Sets the length of C<str> to C<length>. Only needed after the raw I<C>
+string returned by I<cstr(3)> has been used to shorten a string. On success,
 returns the length of C<str>. On error, returns C<-1> with C<errno> set
 appropriately.
 
@@ -1129,7 +1134,7 @@ ssize_t str_set_length(String *str, size_t length)
 
 =item C<ssize_t str_set_length_unlocked(String *str, size_t length)>
 
-Equivalent to I<str_set_length(3)> except that C<str> is not write locked.
+Equivalent to I<str_set_length(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1150,7 +1155,7 @@ ssize_t str_set_length_unlocked(String *str, size_t length)
 
 =item C<ssize_t str_recalc_length(String *str)>
 
-Calculates and stores the length of C<str>. Only needed after the raw C
+Calculates and stores the length of C<str>. Only needed after the raw I<C>
 string returned by I<cstr(3)> has been used to shorten a string. Note:
 Treats C<str> as a C<nul>-terminated string and should be avoided. Use
 I<str_set_length(3)> instead. On success, returns the length of C<str>. On
@@ -1183,8 +1188,8 @@ ssize_t str_recalc_length(String *str)
 
 =item C<ssize_t str_recalc_length_unlocked(String *str)>
 
-Equivalent to I<str_recalc_length(3)> except that C<str> is not write
-locked.
+Equivalent to I<str_recalc_length(3)> except that C<str> is not
+write-locked.
 
 =cut
 
@@ -1220,7 +1225,7 @@ String *str_clear(String *str)
 
 =item C<String *str_clear_unlocked(String *str)>
 
-Equivalent to I<str_clear(3)> except that C<str> is not write locked.
+Equivalent to I<str_clear(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1238,7 +1243,7 @@ String *str_clear_unlocked(String *str)
 Removes the C<index>'th character from C<str>. If C<index> is negative, it
 refers to a character position relative to the end of the string (C<-1> is
 the position after the last character, C<-2> is the position of the last
-character and so on). On success, returns C<str>. On error, returns C<null>
+character, and so on). On success, returns C<str>. On error, returns C<null>
 with C<errno> set appropriately.
 
 =cut
@@ -1254,7 +1259,7 @@ String *str_remove(String *str, ssize_t index)
 
 =item C<String *str_remove_unlocked(String *str, ssize_t index)>
 
-Equivalent to I<str_remove(3)> except that C<str> is not write locked.
+Equivalent to I<str_remove(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1272,7 +1277,7 @@ String *str_remove_unlocked(String *str, ssize_t index)
 Removes C<range> characters from C<str> starting at C<index>. If C<index> or
 C<range> are negative, they refer to character positions relative to the end
 of the string (C<-1> is the position after the last character, C<-2> is the
-position of the last character and so on). On success, returns C<str>. On
+position of the last character, and so on). On success, returns C<str>. On
 error, returns C<null> with C<errno> set appropriately.
 
 =cut
@@ -1302,7 +1307,7 @@ String *str_remove_range(String *str, ssize_t index, ssize_t range)
 
 =item C<String *str_remove_range_unlocked(String *str, ssize_t index, ssize_t range)>
 
-Equivalent to I<str_remove_range(3)> except that C<str> is not write locked.
+Equivalent to I<str_remove_range(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1340,7 +1345,7 @@ String *str_remove_range_unlocked(String *str, ssize_t index, ssize_t range)
 Adds the string specified by C<format> to C<str> at position C<index>. If
 C<index> is negative, it refers to a character position relative to the end
 of the string (C<-1> is the position after the last character, C<-2> is the
-position of the last character and so on). On success, returns C<str>. On
+position of the last character, and so on). On success, returns C<str>. On
 error, returns C<null> with C<errno> set appropriately.
 
 =cut
@@ -1361,7 +1366,7 @@ String *str_insert(String *str, ssize_t index, const char *format, ...)
 
 =item C<String *str_insert_unlocked(String *str, ssize_t index, const char *format, ...)>
 
-Equivalent to I<str_insert(3)> except that C<str> is not write locked.
+Equivalent to I<str_insert(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1411,7 +1416,7 @@ String *str_vinsert(String *str, ssize_t index, const char *format, va_list args
 
 =item C<String *str_vinsert_unlocked(String *str, ssize_t index, const char *format, va_list args)>
 
-Equivalent to I<str_vinsert(3)> except that C<str> is not write locked.
+Equivalent to I<str_vinsert(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1449,7 +1454,7 @@ String *str_vinsert_unlocked(String *str, ssize_t index, const char *format, va_
 Inserts C<src> into C<str>, starting at position C<index>. If C<index> is
 negative, it refers to a character position relative to the end of the
 string (C<-1> is the position after the last character, C<-2> is the
-position of the last character and so on). On success, returns C<str>. On
+position of the last character, and so on). On success, returns C<str>. On
 error, returns C<null> with C<errno> set appropriately.
 
 =cut
@@ -1491,8 +1496,8 @@ String *str_insert_str(String *str, ssize_t index, const String *src)
 
 =item C<String *str_insert_str_unlocked(String *str, ssize_t index, const String *src)>
 
-Equivalent to I<str_insert_str(3)> except that C<str> is not write locked
-and C<src> is not read locked. Note: If C<src> needs to be read locked, it
+Equivalent to I<str_insert_str(3)> except that C<str> is not write-locked
+and C<src> is not read-locked. Note: If C<src> needs to be read-locked, it
 is the caller's responsibility to lock and unlock it explicitly with
 I<str_rdlock(3)> and I<str_unlock(3)>.
 
@@ -1551,7 +1556,7 @@ String *str_append(String *str, const char *format, ...)
 
 =item C<String *str_append_unlocked(String *str, const char *format, ...)>
 
-Equivalent to I<str_append(3)> except that C<str> is not write locked.
+Equivalent to I<str_append(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1587,7 +1592,7 @@ String *str_vappend(String *str, const char *format, va_list args)
 
 =item C<String *str_vappend_unlocked(String *str, const char *format, va_list args)>
 
-Equivalent to I<str_vappend(3)> except that C<str> is not write locked.
+Equivalent to I<str_vappend(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1618,8 +1623,8 @@ String *str_append_str(String *str, const String *src)
 
 =item C<String *str_append_str_unlocked(String *str, const String *src)>
 
-Equivalent to I<str_append_str(3)> except that C<str> is not write locked
-and C<src> is not read locked. Note: If C<src> needs to be read locked, it
+Equivalent to I<str_append_str(3)> except that C<str> is not write-locked
+and C<src> is not read-locked. Note: If C<src> needs to be read-locked, it
 is the caller's responsibility to lock and unlock it explicitly with
 I<str_rdlock(3)> and I<str_unlock(3)>.
 
@@ -1657,7 +1662,7 @@ String *str_prepend(String *str, const char *format, ...)
 
 =item C<String *str_prepend_unlocked(String *str, const char *format, ...)>
 
-Equivalent to I<str_prepend(3)> except that C<str> is not write locked.
+Equivalent to I<str_prepend(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1693,7 +1698,7 @@ String *str_vprepend(String *str, const char *format, va_list args)
 
 =item C<String *str_vprepend_unlocked(String *str, const char *format, va_list args)>
 
-Equivalent to I<str_vprepend(3)> except that C<str> is not write locked.
+Equivalent to I<str_vprepend(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1724,8 +1729,8 @@ String *str_prepend_str(String *str, const String *src)
 
 =item C<String *str_prepend_str_unlocked(String *str, const String *src)>
 
-Equivalent to I<str_prepend_str(3)> except that C<str> is not write locked
-and C<src> is not read locked. Note: If C<src> needs to be read locked, it
+Equivalent to I<str_prepend_str(3)> except that C<str> is not write-locked
+and C<src> is not read-locked. Note: If C<src> needs to be read-locked, it
 is the caller's responsibility to lock and unlock it explicitly with
 I<str_rdlock(3)> and I<str_unlock(3)>.
 
@@ -1746,7 +1751,7 @@ Replaces C<range> characters in C<str>, starting at C<index>, with the
 string specified by C<format>. If C<index> or C<range> are negative, they
 refer to character positions relative to the end of the string (C<-1> is the
 position after the last character, C<-2> is the position of the last
-character and so on). On success, returns C<str>. On error, returns C<null>
+character, and so on). On success, returns C<str>. On error, returns C<null>
 with C<errno> set appropriately.
 
 =cut
@@ -1767,7 +1772,7 @@ String *str_replace(String *str, ssize_t index, ssize_t range, const char *forma
 
 =item C<String *str_replace_unlocked(String *str, ssize_t index, ssize_t range, const char *format, ...)>
 
-Equivalent to I<str_replace(3)> except that C<str> is not write locked.
+Equivalent to I<str_replace(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1814,7 +1819,7 @@ String *str_vreplace(String *str, ssize_t index, ssize_t range, const char *form
 
 =item C<String *str_vreplace_unlocked(String *str, ssize_t index, ssize_t range, const char *format, va_list args)>
 
-Equivalent to I<str_vreplace(3)> except that C<str> is not write locked.
+Equivalent to I<str_vreplace(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -1843,7 +1848,7 @@ String *str_vreplace_unlocked(String *str, ssize_t index, ssize_t range, const c
 Replaces C<range> characters in C<str>, starting at C<index>, with C<src>.
 If C<index> or C<range> are negative, they refer to character positions
 relative to the end of the string (C<-1> is the position after the last
-character, C<-2> is the position of the last character and so on). On
+character, C<-2> is the position of the last character, and so on). On
 success, return C<str>. On error, returns C<null> with C<errno> set
 appropriately.
 
@@ -1886,8 +1891,8 @@ String *str_replace_str(String *str, ssize_t index, ssize_t range, const String 
 
 =item C<String *str_replace_str_unlocked(String *str, ssize_t index, ssize_t range, const String *src)>
 
-Equivalent to I<str_replace_str(3)> except that C<str> is not write locked
-and C<src> is not read locked. Note: If C<src> needs to be read locked, it
+Equivalent to I<str_replace_str(3)> except that C<str> is not write-locked
+and C<src> is not read-locked. Note: If C<src> needs to be read-locked, it
 is the caller's responsibility to lock and unlock it explicitly with
 I<str_rdlock(3)> and I<str_unlock(3)>.
 
@@ -1935,9 +1940,9 @@ Creates a new I<String> object consisting of C<range> characters from
 C<str>, starting at C<index>. If C<index> or C<range> are negative, they
 refer to character positions relative to the end of the string (C<-1> is the
 position after the last character, C<-2> is the position of the last
-character and so on). On success, returns the new string. It is the caller's
-responsibility to deallocate the new string with I<str_release(3)> or
-I<str_destroy(3)>. On error, returns C<null> with C<errno> set
+character, and so on). On success, returns the new string. It is the
+caller's responsibility to deallocate the new string with I<str_release(3)>
+or I<str_destroy(3)>. On error, returns C<null> with C<errno> set
 appropriately.
 
 =cut
@@ -1953,7 +1958,7 @@ String *str_substr(const String *str, ssize_t index, ssize_t range)
 
 =item C<String *str_substr_unlocked(const String *str, ssize_t index, ssize_t range)>
 
-Equivalent to I<str_substr(3)> except that C<str> is not read locked.
+Equivalent to I<str_substr(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -1998,8 +2003,8 @@ String *str_substr_with_locker(Locker *locker, const String *str, ssize_t index,
 
 =item C<String *str_substr_with_locker_unlocked(Locker *locker, const String *str, ssize_t index, ssize_t range)>
 
-Equivalent to I<str_substr_with_locker(3)> except that C<str> is not read
-locked.
+Equivalent to I<str_substr_with_locker(3)> except that C<str> is not
+read-locked.
 
 =cut
 
@@ -2041,7 +2046,7 @@ String *str_substr_with_locker_unlocked(Locker *locker, const String *str, ssize
 
 =item C<String *substr(const char *str, ssize_t index, ssize_t range)>
 
-Equivalent to I<str_substr(3)> but works on an ordinary C string.
+Equivalent to I<str_substr(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -2058,7 +2063,7 @@ String *substr(const char *str, ssize_t index, ssize_t range)
 
 Equivalent to I<substr(3)> except that multiple threads accessing the new
 substring will be synchronised by C<locker>. Note that no locking is
-performed on C<str> as it is a raw C string.
+performed on C<str> as it is a raw I<C> string.
 
 =cut
 
@@ -2104,10 +2109,12 @@ String *substr_with_locker(Locker *locker, const char *str, ssize_t index, ssize
 Removes a substring from C<str> starting at C<index> of length C<range>
 characters. If C<index> or C<range> are negative, they refer to character
 positions relative to the end of the string (C<-1> is the position after the
-last character, C<-2> is the position of the last character and so on). On
+last character, C<-2> is the position of the last character, and so on). On
 success, returns the substring. It is the caller's responsibility to
-deallocate the new substring with I<str_release(3)> or I<str_destroy(3)>. On
-error, returns C<null> with C<errno> set appropriately.
+deallocate the new substring with I<str_release(3)> or I<str_destroy(3)>. It
+is strongly recommended to use I<str_destroy(3)>, because it also sets the
+pointer variable to C<null>. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -2122,7 +2129,7 @@ String *str_splice(String *str, ssize_t index, ssize_t range)
 
 =item C<String *str_splice_unlocked(String *str, ssize_t index, ssize_t range)>
 
-Equivalent to I<str_splice(3)> except that C<str> is not write locked.
+Equivalent to I<str_splice(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -2170,8 +2177,8 @@ String *str_splice_with_locker(Locker *locker, String *str, ssize_t index, ssize
 
 =item C<String *str_splice_with_locker_unlocked(Locker *locker, String *str, ssize_t index, ssize_t range)>
 
-Equivalent to I<str_splice_with_locker(3)> except that C<str> is not write
-locked.
+Equivalent to I<str_splice_with_locker(3)> except that C<str> is not
+write-locked.
 
 =cut
 
@@ -2203,8 +2210,9 @@ String *str_splice_with_locker_unlocked(Locker *locker, String *str, ssize_t ind
 Creates a new I<String> containing the string determined by C<format>
 repeated C<count> times. On success, return the new string. It is the
 caller's responsibility to deallocate the new string with I<str_release(3)>
-or I<str_destroy(3)>. On error, returns C<null> with C<errno> set
-appropriately.
+or I<str_destroy(3)>. It is strongly recommended to use I<str_destroy(3)>,
+because it also sets the pointer variable to C<null>. On error, returns
+C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -2313,12 +2321,12 @@ corresponding character in C<to>. On success, returns the number of
 characters replaced or deleted. On error, returns C<-1> with C<errno> set
 appropriately.
 
-A character range may be specified with a hyphen, so C<str_tr(str, "A-J",
+A character range can be specified with a hyphen, so C<str_tr(str, "A-J",
 "0-9")> does the same replacement as C<str_tr(str, "ACEGIBDFHJ",
 "0246813579")>.
 
 Note also that the whole range idea is rather unportable between character
-sets - and even within character sets they may cause results you probably
+sets - and even within character sets they might cause results you probably
 didn't expect. A sound principle is to use only ranges that begin from and
 end at either alphabets of equal case (a-e, A-E), or digits (0-4). Anything
 else is unsafe. If in doubt, spell out the character sets in full.
@@ -2329,14 +2337,14 @@ Options:
     TR_DELETE     Delete found but unreplaced characters.
     TR_SQUASH     Squash duplicate replaced characters.
 
-If TR_COMPLEMENT is specified, C<from> is complemented. If TR_DELETE is
-specified, any characters specified by C<from> not found in C<to> are
+If C<TR_COMPLEMENT> is specified, C<from> is complemented. If C<TR_DELETE>
+is specified, any characters specified by C<from> not found in C<to> are
 deleted. (Note that this is slightly more flexible than the behavior of some
-tr programs, which delete anything they find in C<from>.) If TR_SQUASH is
+tr programs, which delete anything they find in C<from>.) If C<TR_SQUASH> is
 specified, sequences of characters that were transliterated to the same
 character are squashed down to a single instance of the character.
 
-If TR_DELETE is used, C<to> is always interpreted exactly as specified.
+If C<TR_DELETE> is used, C<to> is always interpreted exactly as specified.
 Otherwise, if C<to> is shorter than C<from>, the final character is
 replicated till it is long enough. If C<to> is empty or C<null>, C<from> is
 replicated. This latter is useful for counting characters in a class or for
@@ -2389,7 +2397,7 @@ int str_tr(String *str, const char *from, const char *to, int option)
 
 =item C<int str_tr_unlocked(String *str, const char *from, const char *to, int option)>
 
-Equivalent to I<str_tr(3)> except that C<str> is not write locked.
+Equivalent to I<str_tr(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -2443,9 +2451,9 @@ int str_tr_str(String *str, const String *from, const String *to, int option)
 
 =item C<int str_tr_str_unlocked(String *str, const String *from, const String *to, int option)>
 
-Equivalent to I<str_tr_str(3)> except that C<str> is not write locked and
-C<from> and C<to> are not read locked. Note: If C<to> and C<from> need to be
-read locked, it is the caller's responsibility to lock and unlock them
+Equivalent to I<str_tr_str(3)> except that C<str> is not write-locked and
+C<from> and C<to> are not read-locked. Note: If C<to> and C<from> need to be
+read-locked, it is the caller's responsibility to lock and unlock them
 explicitly with I<str_rdlock(3)> and I<str_unlock(3)>.
 
 =cut
@@ -2473,7 +2481,7 @@ int str_tr_str_unlocked(String *str, const String *from, const String *to, int o
 
 =item C<int tr(char *str, const char *from, const char *to, int option)>
 
-Equivalent to I<str_tr(3)> but works on an ordinary C string.
+Equivalent to I<str_tr(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -2501,8 +2509,10 @@ int tr(char *str, const char *from, const char *to, int option)
 Compiles C<from>, C<to> and C<option> into a translation table to be passed
 to I<str_tr_compiled(3)> or I<tr_compiled(3)>. On success, returns the new
 translation table. It is the caller's responsibility to deallocate the
-translation table with I<tr_release(3)> or I<tr_destroy(3)>. On error,
-returns C<null> with C<errno> set appropriately.
+translation table with I<tr_release(3)> or I<tr_destroy(3)>. It is strongly
+recommended to use I<tr_destroy(3)>, because it also sets the pointer
+variable to C<null>. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -2558,7 +2568,7 @@ StringTR *str_tr_compile(const String *from, const String *to, int option)
 =item C<StringTR *str_tr_compile_unlocked(const String *from, const String *to, int option)>
 
 Equivalent to I<str_tr_compile(3)> except that C<from> and C<to> are not
-read locked.
+read-locked.
 
 =cut
 
@@ -2597,7 +2607,7 @@ StringTR *str_tr_compile_with_locker(Locker *locker, const String *from, const S
 =item C<StringTR *str_tr_compile_with_locker_unlocked(Locker *locker, const String *from, const String *to, int option)>
 
 Equivalent to I<str_tr_compile_with_locker(3)> except that C<from> and C<to>
-are not read locked. Note: If C<to> and C<from> need to be read locked, it
+are not read-locked. Note: If C<to> and C<from> need to be read-locked, it
 is the caller's responsibility to lock and unlock them explicitly with
 I<str_rdlock(3)> and I<str_unlock(3)>.
 
@@ -2671,9 +2681,9 @@ C<static StringTR *do_tr_compile_table(StringTR *table, const char *from, ssize_
 
 Compiles C<from>, C<to> and C<option> into the translation table, C<table>,
 to be passed to I<str_tr_compiled(3)> or I<tr_compiled(3)>. If C<fromlen> is
-C<-1>, then C<from> is interpreted as a C<nul>-terminated C string.
+C<-1>, then C<from> is interpreted as a C<nul>-terminated I<C> string.
 Otherwise, C<from> is an arbitrary string of length C<fromlen>. If C<tolen>
-is C<-1>, then C<to> is interpreted as a C<nul>-terminated C string.
+is C<-1>, then C<to> is interpreted as a C<nul>-terminated I<C> string.
 Otherwise, C<to> is an arbitrary string of length C<tolen>. On success,
 returns C<table>. On error, returns C<null> with C<errno> set appropriately.
 
@@ -2839,8 +2849,8 @@ static StringTR *str_tr_compile_table(StringTR *table, const String *from, const
 
 C<StringTR *str_tr_compile_table_unlocked(StringTR *table, const String *from, const String *to, int option)>
 
-Equivalent to I<str_tr_compile_table(3)> except that C<from> and C<to> are not
-read locked.
+Equivalent to I<str_tr_compile_table(3)> except that C<from> and C<to> are
+not read-locked.
 
 */
 
@@ -2855,13 +2865,11 @@ C<static int do_tr_compiled(unsigned char *str, size_t *length, StringTR *table)
 
 Performs the character translation specified by C<table> (as created by
 I<tr_compile(3)> or equivalent) on C<str>. If C<length> is C<null>, C<str> is
-interpreted as a C<nul>-terminated C string. Otherwise, C<str> is
+interpreted as a C<nul>-terminated I<C> string. Otherwise, C<str> is
 interpreted as an arbitrary string of length C<*length>. The integer that
 C<length> points to is decremented by the number of bytes deleted by the
 translation. On success, returns the number of characters replaced or
 deleted. On error, returns C<-1> with C<errno> set appropriately.
-
-=cut
 
 */
 
@@ -2964,7 +2972,7 @@ int str_tr_compiled(String *str, StringTR *table)
 
 =item C<int str_tr_compiled_unlocked(String *str, StringTR *table)>
 
-Equivalent to I<str_tr_compiled(3)> except that C<str> is not write locked.
+Equivalent to I<str_tr_compiled(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -2982,7 +2990,7 @@ int str_tr_compiled_unlocked(String *str, StringTR *table)
 
 =item C<int tr_compiled(char *str, StringTR *table)>
 
-Equivalent to I<str_tr_compiled(3)> but works on an ordinary C string.
+Equivalent to I<str_tr_compiled(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -3013,7 +3021,7 @@ int tr_compiled(char *str, StringTR *table)
 
 =item C<List *str_regexpr(const char *pattern, const String *text, int cflags, int eflags)>
 
-I<str_regexpr(3)> is an interface to POSIX 1003.2 compliant regular
+I<str_regexpr(3)> is an interface to I<POSIX 1003.2>-compliant regular
 expression matching. C<pattern> is a regular expression. C<text> is the
 string to be searched for matches. C<cflags> is passed to I<regcomp(3)>
 along with C<REG_EXTENDED>. C<eflags> is passed to I<regexec(3)>. On
@@ -3043,7 +3051,7 @@ List *str_regexpr(const char *pattern, const String *text, int cflags, int eflag
 
 =item C<List *str_regexpr_unlocked(const char *pattern, const String *text, int cflags, int eflags)>
 
-Equivalent to I<str_regexpr(3)> except that C<text> is not read locked.
+Equivalent to I<str_regexpr(3)> except that C<text> is not read-locked.
 
 =cut
 
@@ -3091,8 +3099,8 @@ List *str_regexpr_with_locker(Locker *locker, const char *pattern, const String 
 
 =item C<List *str_regexpr_with_locker_unlocked(Locker *locker, const char *pattern, const String *text, int cflags, int eflags)>
 
-Equivalent to I<str_regexpr_with_locker(3)> except that C<text> is not read
-locked.
+Equivalent to I<str_regexpr_with_locker(3)> except that C<text> is not
+read-locked.
 
 =cut
 
@@ -3110,7 +3118,7 @@ List *str_regexpr_with_locker_unlocked(Locker *locker, const char *pattern, cons
 
 =item C<List *regexpr(const char *pattern, const char *text, int cflags, int eflags)>
 
-Equivalent to I<str_regexpr(3)> but works on an ordinary C string.
+Equivalent to I<str_regexpr(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -3154,7 +3162,7 @@ List *regexpr_with_locker(Locker *locker, const char *pattern, const char *text,
 
 =item C<int regexpr_compile(regex_t *compiled, const char *pattern, int cflags)>
 
-Compiles a POSIX 1003.2 compliant regular expression. C<compiled> is the
+Compiles a I<POSIX 1003.2>-compliant regular expression. C<compiled> is the
 location in which to compile the expression. C<pattern> is the regular
 expression. C<cflags> is passed to I<regcomp(3)> along with C<REG_EXTENDED>.
 Call this, followed by I<re_compiled(3)> when the regular expression will be
@@ -3193,7 +3201,7 @@ void regexpr_release(regex_t *compiled)
 
 =item C<List *str_regexpr_compiled(const regex_t *compiled, const String *text, int eflags)>
 
-I<regexpr_compiled(3)> is an interface to the POSIX 1003.2 regular
+I<regexpr_compiled(3)> is an interface to the I<POSIX 1003.2> regular
 expression function, I<regexec(3)>. C<compiled> is the compiled regular
 expression prepared by I<regexpr_compile(3)> or I<regcomp(3)>. C<text> is
 the string to be searched for a match. C<eflags> is passed to I<regexec(3)>.
@@ -3216,8 +3224,8 @@ List *str_regexpr_compiled(const regex_t *compiled, const String *text, int efla
 
 =item C<List *str_regexpr_compiled_unlocked(const regex_t *compiled, const String *text, int eflags)>
 
-Equivalent to I<str_regexpr_compiled(3)> except that C<text> is not write
-locked.
+Equivalent to I<str_regexpr_compiled(3)> except that C<text> is not
+write-locked.
 
 =cut
 
@@ -3266,7 +3274,7 @@ List *str_regexpr_compiled_with_locker(Locker *locker, const regex_t *compiled, 
 =item C<List *str_regexpr_compiled_with_locker_unlocked(Locker *locker, const regex_t *compiled, const String *text, int eflags)>
 
 Equivalent to I<str_regexpr_compiled_with_locker(3)> except that C<text> is
-not read locked.
+not read-locked.
 
 =cut
 
@@ -3284,7 +3292,7 @@ List *str_regexpr_compiled_with_locker_unlocked(Locker *locker, const regex_t *c
 
 =item C<List *regexpr_compiled(const regex_t *compiled, const char *text, int eflags)>
 
-Equivalent to I<str_regexpr_compiled(3)> but works on an ordinary C string.
+Equivalent to I<str_regexpr_compiled(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -3347,7 +3355,7 @@ List *regexpr_compiled_with_locker(Locker *locker, const regex_t *compiled, cons
 
 =item C<String *str_regsub(const char *pattern, const char *replacement, String *text, int cflags, int eflags, int all)>
 
-I<str_regsub(3)> is an interface to POSIX 1003.2 compliant regular
+I<str_regsub(3)> is an interface to I<POSIX 1003.2>-compliant regular
 expression matching and substitution. C<pattern> is a regular expression.
 C<text> is the string to be searched for matches. C<cflags> is passed to
 I<regcomp(3)> along with C<REG_EXTENDED>. C<eflags> is passed to
@@ -3403,7 +3411,7 @@ String *str_regsub(const char *pattern, const char *replacement, String *text, i
 
 =item C<String *str_regsub_unlocked(const char *pattern, const char *replacement, String *text, int cflags, int eflags, int all)>
 
-Equivalent to I<str_regsub(3)> except that C<text> is not write locked.
+Equivalent to I<str_regsub(3)> except that C<text> is not write-locked.
 
 =cut
 
@@ -3461,8 +3469,8 @@ String *str_regsub_compiled(const regex_t *compiled, const char *replacement, St
 
 =item C<String *str_regsub_compiled_unlocked(const regex_t *compiled, const char *replacement, String *text, int eflags, int all)>
 
-Equivalent to I<str_regsub_compiled(3)> except that C<text> is not write
-locked.
+Equivalent to I<str_regsub_compiled(3)> except that C<text> is not
+write-locked.
 
 =cut
 
@@ -3683,7 +3691,7 @@ List *str_fmt(const String *str, size_t line_width, StringAlignment alignment)
 
 =item C<List *str_fmt_unlocked(const String *str, size_t line_width, StringAlignment alignment)>
 
-Equivalent to I<str_fmt(3)> except that C<str> is not read locked.
+Equivalent to I<str_fmt(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -3731,8 +3739,8 @@ List *str_fmt_with_locker(Locker *locker, const String *str, size_t line_width, 
 
 =item C<List *str_fmt_with_locker_unlocked(Locker *locker, const String *str, size_t line_width, StringAlignment alignment)>
 
-Equivalent to I<str_fmt_with_locker(3)> except that C<str> is not read
-locked.
+Equivalent to I<str_fmt_with_locker(3)> except that C<str> is not
+read-locked.
 
 =cut
 
@@ -3750,7 +3758,7 @@ List *str_fmt_with_locker_unlocked(Locker *locker, const String *str, size_t lin
 
 =item C<List *fmt(const char *str, size_t line_width, StringAlignment alignment)>
 
-Equivalent to I<str_fmt(3)> but works on an ordinary C string.
+Equivalent to I<str_fmt(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -3956,10 +3964,10 @@ C<List *do_split_with_locker(Locker *locker, const char *str, ssize_t length, co
 
 Splits C<str> into tokens separated by sequences of characters occurring in
 C<delim>. If C<length> is C<-1>, C<str> is interpreted as a
-C<nul>-terminated C string. Otherwise, C<str> is interpreted as an arbitrary
-string of length C<length>. On success, returns a new I<List> of I<String>
-objects. It is the caller's responsibility to deallocate the list with
-I<list_release(3)> or I<list_destroy(3)>. If C<locker> is non-C<null>,
+C<nul>-terminated I<C> string. Otherwise, C<str> is interpreted as an
+arbitrary string of length C<length>. On success, returns a new I<List> of
+I<String> objects. It is the caller's responsibility to deallocate the list
+with I<list_release(3)> or I<list_destroy(3)>. If C<locker> is non-C<null>,
 multiple threads accessing the new list will be synchronised by C<locker>.
 On error, returns C<null> with C<errno> set appropriately.
 
@@ -4038,7 +4046,7 @@ List *str_split(const String *str, const char *delim)
 
 =item C<List *str_split_unlocked(const String *str, const char *delim)>
 
-Equivalent to I<str_split(3)> except that C<str> is not read locked.
+Equivalent to I<str_split(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -4086,8 +4094,8 @@ List *str_split_with_locker(Locker *locker, const String *str, const char *delim
 
 =item C<List *str_split_with_locker_unlocked(Locker *locker, const String *str, const char *delim)>
 
-Equivalent to I<str_split_with_locker(3)> except that C<str> is not read
-locked.
+Equivalent to I<str_split_with_locker(3)> except that C<str> is not
+read-locked.
 
 =cut
 
@@ -4105,7 +4113,7 @@ List *str_split_with_locker_unlocked(Locker *locker, const String *str, const ch
 
 =item C<List *split(const char *str, const char *delim)>
 
-Equivalent to I<str_split(3)> but works on an ordinary C string.
+Equivalent to I<str_split(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -4142,8 +4150,8 @@ List *split_with_locker(Locker *locker, const char *str, const char *delim)
 =item C<List *str_regexpr_split(const String *str, const char *delim, int cflags, int eflags)>
 
 Splits C<str> into tokens separated by occurrences of the regular
-expression, C<delim>. C<str> is interpreted as a C<nul>-terminated C string.
-C<cflags> is passed to I<regcomp(3)> along with C<REG_EXTENDED> and
+expression, C<delim>. C<str> is interpreted as a C<nul>-terminated I<C>
+string. C<cflags> is passed to I<regcomp(3)> along with C<REG_EXTENDED> and
 C<eflags> is passed to I<regexec(3)>. On success, returns a new I<List> of
 I<String> objects. It is the caller's responsibility to deallocate the list
 with I<list_release(3)> or I<list_destroy(3)>. On error, returns C<null>
@@ -4162,7 +4170,7 @@ List *str_regexpr_split(const String *str, const char *delim, int cflags, int ef
 
 =item C<List *str_regexpr_split_unlocked(const String *str, const char *delim, int cflags, int eflags)>
 
-Equivalent to I<str_regexpr_split(3)> except that C<str> is not read locked.
+Equivalent to I<str_regexpr_split(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -4211,7 +4219,7 @@ List *str_regexpr_split_with_locker(Locker *locker, const String *str, const cha
 =item C<List *str_regexpr_split_with_locker_unlocked(Locker *locker, const String *str, const char *delim, int cflags, int eflags)>
 
 Equivalent to I<str_regexpr_split_with_locker(3)> except that C<str> is not
-read locked.
+read-locked.
 
 =cut
 
@@ -4229,7 +4237,7 @@ List *str_regexpr_split_with_locker_unlocked(Locker *locker, const String *str, 
 
 =item C<List *regexpr_split(const char *str, const char *delim, int cflags, int eflags)>
 
-Equivalent to I<str_regexpr_split(3)> but works on an ordinary C string.
+Equivalent to I<str_regexpr_split(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -4349,7 +4357,7 @@ String *str_join(const List *list, const char *delim)
 
 =item C<String *str_join_unlocked(const List *list, const char *delim)>
 
-Equivalent to I<str_join(3)> except that C<list> is not read locked.
+Equivalent to I<str_join(3)> except that C<list> is not read-locked.
 
 =cut
 
@@ -4394,8 +4402,8 @@ String *str_join_with_locker(Locker *locker, const List *list, const char *delim
 
 =item C<String *str_join_with_locker_unlocked(Locker *locker, const List *list, const char *delim)>
 
-Equivalent to I<str_join_with_locker(3)> except that C<list> is not read
-locked.
+Equivalent to I<str_join_with_locker(3)> except that C<list> is not
+read-locked.
 
 =cut
 
@@ -4458,7 +4466,7 @@ String *str_join_with_locker_unlocked(Locker *locker, const List *list, const ch
 
 =item C<String *join(const List *list, const char *delim)>
 
-Equivalent to I<str_join(3)> but works on a list of ordinary C strings.
+Equivalent to I<str_join(3)> but works on a list of ordinary I<C> strings.
 
 =cut
 
@@ -4567,7 +4575,7 @@ int str_soundex(const String *str)
 
 =item C<int str_soundex_unlocked(const String *str)>
 
-Equivalent to I<str_soundex(3)> except that C<str> is not read locked.
+Equivalent to I<str_soundex(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -4585,7 +4593,7 @@ int str_soundex_unlocked(const String *str)
 
 =item C<int soundex(const char *str)>
 
-Equivalent to I<str_soundex(3)> but works on an ordinary C string.
+Equivalent to I<str_soundex(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -4666,7 +4674,7 @@ String *str_trim(String *str)
 
 =item C<String *str_trim_unlocked(String *str)>
 
-Equivalent to I<str_trim(3)> except that C<str> is not write locked.
+Equivalent to I<str_trim(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -4704,7 +4712,7 @@ String *str_trim_unlocked(String *str)
 
 =item C<char *trim(char *str)>
 
-Equivalent to I<str_trim(3)> but works on an ordinary C string.
+Equivalent to I<str_trim(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -4766,7 +4774,7 @@ String *str_trim_left(String *str)
 
 =item C<String *str_trim_left_unlocked(String *str)>
 
-Equivalent to I<str_trim_left(3)> except that C<str> is not write locked.
+Equivalent to I<str_trim_left(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -4793,7 +4801,7 @@ String *str_trim_left_unlocked(String *str)
 
 =item C<char *trim_left(char *str)>
 
-Equivalent to I<str_trim_left(3)> but works on an ordinary C string.
+Equivalent to I<str_trim_left(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -4852,7 +4860,7 @@ String *str_trim_right(String *str)
 
 =item C<String *str_trim_right_unlocked(String *str)>
 
-Equivalent to I<str_trim_right(3)> except that C<str> is not write locked.
+Equivalent to I<str_trim_right(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -4879,7 +4887,7 @@ String *str_trim_right_unlocked(String *str)
 
 =item C<char *trim_right(char *str)>
 
-Equivalent to I<str_trim_right(3)> but works on an ordinary C string.
+Equivalent to I<str_trim_right(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -4936,7 +4944,7 @@ String *str_squeeze(String *str)
 
 =item C<String *str_squeeze_unlocked(String *str)>
 
-Equivalent to I<str_squeeze(3)> except that C<str> is not write locked.
+Equivalent to I<str_squeeze(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -4975,7 +4983,7 @@ String *str_squeeze_unlocked(String *str)
 
 =item C<char *squeeze(char *str)>
 
-Equivalent to I<str_squeeze(3)> but works on an ordinary C string.
+Equivalent to I<str_squeeze(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -5031,7 +5039,7 @@ String *str_quote(const String *str, const char *quotable, char quote_char)
 
 =item C<String *str_quote_unlocked(const String *str, const char *quotable, char quote_char)>
 
-Equivalent to I<str_quote(3)> except that C<str> is not read locked.
+Equivalent to I<str_quote(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -5083,7 +5091,8 @@ String *str_quote_with_locker(Locker *locker, const String *str, const char *quo
 
 =item C<String *str_quote_with_locker_unlocked(Locker *locker, const String *str, const char *quotable, char quote_char)>
 
-Equivalent to I<str_quote_with_locker(3)> except that C<str> is not read locked.
+Equivalent to I<str_quote_with_locker(3)> except that C<str> is not
+read-locked.
 
 =cut
 
@@ -5119,7 +5128,7 @@ String *str_quote_with_locker_unlocked(Locker *locker, const String *str, const 
 
 =item C<String *quote(const char *str, const char *quotable, char quote_char)>
 
-Equivalent to I<str_quote(3)> but works on an ordinary C string.
+Equivalent to I<str_quote(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -5190,7 +5199,7 @@ String *str_unquote(const String *str, const char *quotable, char quote_char)
 
 =item C<String *str_unquote_unlocked(const String *str, const char *quotable, char quote_char)>
 
-Equivalent to I<str_unquote(3)> except that C<str> is not read locked.
+Equivalent to I<str_unquote(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -5242,8 +5251,8 @@ String *str_unquote_with_locker(Locker *locker, const String *str, const char *q
 
 =item C<String *str_unquote_with_locker_unlocked(Locker *locker, const String *str, const char *quotable, char quote_char)>
 
-Equivalent to I<str_unquote_with_locker(3)> except that C<str> is not read
-locked.
+Equivalent to I<str_unquote_with_locker(3)> except that C<str> is not
+read-locked.
 
 =cut
 
@@ -5279,7 +5288,7 @@ String *str_unquote_with_locker_unlocked(Locker *locker, const String *str, cons
 
 =item C<String *unquote(const char *str, const char *quotable, char quote_char)>
 
-Equivalent to I<str_unquote(3)> but works on an ordinary C string.
+Equivalent to I<str_unquote(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -5499,10 +5508,11 @@ static String *do_decode_with_locker(Locker *locker, const char *str, size_t len
 Returns a copy of C<str> with every occurrence in C<str> of characters in
 C<uncoded> replaced with C<quote_char> followed by the corresponding (by
 position) character in C<coded>. If C<printable> is non-zero, other
-non-printable characters are replaced with their ASCII codes in hexadecimal.
-It is the caller's responsibility to deallocate the new string with
-I<str_release(3)> or I<str_destroy(3)>. On error, returns C<null> with
-C<errno> set appropriately.
+non-printable characters are replaced with their I<ASCII> codes in
+hexadecimal. It is the caller's responsibility to deallocate the new string
+with I<str_release(3)> or I<str_destroy(3)>. It is strongly recommended to
+use I<str_destroy(3)>, because it also sets the pointer variable to C<null>.
+On error, returns C<null> with C<errno> set appropriately.
 
 Example:
 
@@ -5525,7 +5535,7 @@ String *str_encode(const String *str, const char *uncoded, const char *coded, ch
 
 =item C<String *str_encode_unlocked(const String *str, const char *uncoded, const char *coded, char quote_char, int printable)>
 
-Equivalent to I<str_encode(3)> except that C<str> is not read locked.
+Equivalent to I<str_encode(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -5573,8 +5583,8 @@ String *str_encode_with_locker(Locker *locker, const String *str, const char *un
 
 =item C<String *str_encode_with_locker_unlocked(Locker *locker, const String *str, const char *uncoded, const char *coded, char quote_char, int printable)>
 
-Equivalent to I<str_encode_with_locker(3)> except that C<str> is not read
-locked.
+Equivalent to I<str_encode_with_locker(3)> except that C<str> is not
+read-locked.
 
 =cut
 
@@ -5595,11 +5605,12 @@ String *str_encode_with_locker_unlocked(Locker *locker, const String *str, const
 Returns a copy of C<str> with every occurrence in C<str> of C<quote_char>
 followed by a character in C<coded> replaced with the corresponding (by
 position) character in C<uncoded>. If C<printable> is non-zero, every
-occurrence in C<str> of an ASCII code in octal or hexadecimal (i.e. "\ooo"
-or "\xhh") is replaced with the corresponding ASCII character. It is the
-caller's responsibility to deallocate the new string with I<str_release(3)>
-or I<str_destroy(3)>. On error, returns C<null> with C<errno> set
-appropriately.
+occurrence in C<str> of an I<ASCII> code in octal or hexadecimal (i.e.
+"\ooo" or "\xhh") is replaced with the corresponding I<ASCII> character. It
+is the caller's responsibility to deallocate the new string with
+I<str_release(3)> or I<str_destroy(3)>. It is strongly recommended to use
+I<str_destroy(3)>, because it also sets the pointer variable to C<null>. On
+error, returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -5614,7 +5625,7 @@ String *str_decode(const String *str, const char *uncoded, const char *coded, ch
 
 =item C<String *str_decode_unlocked(const String *str, const char *uncoded, const char *coded, char quote_char, int printable)>
 
-Equivalent to I<str_decode(3)> except that C<str> is not read locked.
+Equivalent to I<str_decode(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -5662,8 +5673,8 @@ String *str_decode_with_locker(Locker *locker, const String *str, const char *un
 
 =item C<String *str_decode_with_locker_unlocked(Locker *locker, const String *str, const char *uncoded, const char *coded, char quote_char, int printable)>
 
-Equivalent to I<str_decode_with_locker(3)> except that C<str> is not read
-locked.
+Equivalent to I<str_decode_with_locker(3)> except that C<str> is not
+read-locked.
 
 =cut
 
@@ -5681,7 +5692,7 @@ String *str_decode_with_locker_unlocked(Locker *locker, const String *str, const
 
 =item C<String *encode(const char *str, const char *uncoded, const char *coded, char quote_char, int printable)>
 
-Equivalent to I<str_encode(3)> but works on an ordinary C string.
+Equivalent to I<str_encode(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -5715,7 +5726,7 @@ String *encode_with_locker(Locker *locker, const char *str, const char *uncoded,
 
 =item C<String *decode(const char *str, const char *uncoded, const char *coded, char quote_char, int printable)>
 
-Equivalent to I<str_decode(3)> but works on an ordinary C string.
+Equivalent to I<str_decode(3)> but works on an ordinary I<C> string.
 
 =cut
 
@@ -5779,7 +5790,7 @@ String *str_lc(String *str)
 
 =item C<String *str_lc_unlocked(String *str)>
 
-Equivalent to I<str_lc(3)> except that C<str> is not write locked.
+Equivalent to I<str_lc(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -5856,7 +5867,7 @@ String *str_lcfirst(String *str)
 
 =item C<String *str_lcfirst_unlocked(String *str)>
 
-Equivalent to I<str_lcfirst(3)> except that C<str> is not write locked.
+Equivalent to I<str_lcfirst(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -5928,7 +5939,7 @@ String *str_uc(String *str)
 
 =item C<String *str_uc_unlocked(String *str)>
 
-Equivalent to I<str_uc(3)> except that C<str> is not write locked.
+Equivalent to I<str_uc(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -6005,7 +6016,7 @@ String *str_ucfirst(String *str)
 
 =item C<String *str_ucfirst_unlocked(String *str)>
 
-Equivalent to I<str_ucfirst(3)> except that C<str> is not write locked.
+Equivalent to I<str_ucfirst(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -6047,8 +6058,9 @@ char *ucfirst(char *str)
 
 =item C<int str_chop(String *str)>
 
-Chops a character off the end of C<str>. On success, returns the character
-chopped. On error, returns C<-1> with C<errno> set appropriately.
+Removes a character from the end of C<str>. On success, returns the
+character that was removed. On error, returns C<-1> with C<errno> set
+appropriately.
 
 =cut
 
@@ -6077,7 +6089,7 @@ int str_chop(String *str)
 
 =item C<int str_chop_unlocked(String *str)>
 
-Equivalent to I<str_chop(3)> except that C<str> is not write locked.
+Equivalent to I<str_chop(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -6105,8 +6117,9 @@ int str_chop_unlocked(String *str)
 
 =item C<int chop(char *str)>
 
-Chops a character off the end of C<str>. On success, returns the character
-chopped. On error, returns C<-1> with C<errno> set appropriately.
+Removes a character from the end of C<str>. On success, returns the
+character that was removed. On error, returns C<-1> with C<errno> set
+appropriately.
 
 =cut
 
@@ -6122,7 +6135,7 @@ int chop(char *str)
 	while (str[1])
 		++str;
 
-	ret = *str;
+	ret = (int)*str;
 	*str = '\0';
 
 	return ret;
@@ -6132,9 +6145,9 @@ int chop(char *str)
 
 =item C<int str_chomp(String *str)>
 
-Chops line ending characters (i.e. C<'\n'> and C<'\r'>) off the end of
-C<str>. On success, returns the number of characters chomped. On error,
-returns C<-1> with C<errno> set appropriately.
+Removes line ending characters (i.e. C<'\n'> and C<'\r'>) from the end of
+C<str>. On success, returns the number of characters that were removed. On
+error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -6163,7 +6176,7 @@ int str_chomp(String *str)
 
 =item C<int str_chomp_unlocked(String *str)>
 
-Equivalent to I<str_chomp(3)> except that C<str> is not write locked.
+Equivalent to I<str_chomp(3)> except that C<str> is not write-locked.
 
 =cut
 
@@ -6195,9 +6208,9 @@ int str_chomp_unlocked(String *str)
 
 =item C<int chomp(char *str)>
 
-Chops line ending characters (i.e. C<'\n'> and C<'\r'>) off the end of
-C<str>. On success, returns the number of characters chomped. On error,
-returns C<-1> with C<errno> set appropriately.
+Removes line ending characters (i.e. C<'\n'> and C<'\r'>) from the end of
+C<str>. On success, returns the number of characters that were removed. On
+error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -6226,8 +6239,8 @@ int chomp(char *str)
 
 =item C<int str_bin(const String *str)>
 
-Returns the integer specified by the binary string, C<str>. C<str> may
-either be a string of C<[0-1]> or C<"0b"> followed by a string of C<[0-1]>.
+Returns the integer specified by the binary string, C<str>. C<str> can
+either be a string of C<[0-1]>, or C<"0b"> followed by a string of C<[0-1]>.
 On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -6257,7 +6270,7 @@ int str_bin(const String *str)
 
 =item C<int str_bin_unlocked(const String *str)>
 
-Equivalent to I<str_bin(3)> except that C<str> is not read locked.
+Equivalent to I<str_bin(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -6275,8 +6288,8 @@ int str_bin_unlocked(const String *str)
 
 =item C<int bin(const char *str)>
 
-Returns the integer specified by the binary string, C<str>. C<str> may
-either be a string of C<[0-1]> or C<"0b"> followed by a string of C<[0-1]>.
+Returns the integer specified by the binary string, C<str>. C<str> can
+either be a string of C<[0-1]>, or C<"0b"> followed by a string of C<[0-1]>.
 On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -6312,8 +6325,8 @@ int bin(const char *str)
 
 =item C<int str_hex(const String *str)>
 
-Returns the integer specified by the hexadecimal string, C<str>. C<str> may
-either be a string of C<[0-9a-fA-F]> or C<"0x"> followed by a string of
+Returns the integer specified by the hexadecimal string, C<str>. C<str> can
+either be a string of C<[0-9a-fA-F]>, or C<"0x"> followed by a string of
 C<[0-9a-fA-f]>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -6343,7 +6356,7 @@ int str_hex(const String *str)
 
 =item C<int str_hex_unlocked(const String *str)>
 
-Equivalent to I<str_hex(3)> except that C<str> is not read locked.
+Equivalent to I<str_hex(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -6361,8 +6374,8 @@ int str_hex_unlocked(const String *str)
 
 =item C<int hex(const char *str)>
 
-Returns the integer specified by the hexadecimal string, C<str>. C<str> may
-either be a string of C<[0-9a-fA-F]> or C<"0x"> followed by a string of
+Returns the integer specified by the hexadecimal string, C<str>. C<str> can
+either be a string of C<[0-9a-fA-F]>, or C<"0x"> followed by a string of
 C<[0-9a-fA-f]>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -6408,9 +6421,9 @@ int hex(const char *str)
 =item C<int str_oct(const String *str)>
 
 Returns the integer specified by the binary, octal or hexadecimal string,
-C<str>. C<str> may either be C<"0x"> followed by a string of C<[0-9a-fA-F]>
-(hexadecimal), C<"0b"> followed by a string of C<[0-1]> (binary) or C<"0">
-followed by a a string of C<[0-7]> (octal). On error, returns C<-1> with
+C<str>. C<str> can either be C<"0x"> followed by a string of C<[0-9a-fA-F]>
+(hexadecimal), C<"0b"> followed by a string of C<[0-1]> (binary), or C<"0">
+followed by a string of C<[0-7]> (octal). On error, returns C<-1> with
 C<errno> set appropriately.
 
 =cut
@@ -6440,7 +6453,7 @@ int str_oct(const String *str)
 
 =item C<int str_oct_unlocked(const String *str)>
 
-Equivalent to I<str_oct(3)> except that C<str> is not read locked.
+Equivalent to I<str_oct(3)> except that C<str> is not read-locked.
 
 =cut
 
@@ -6459,9 +6472,9 @@ int str_oct_unlocked(const String *str)
 =item C<int oct(const char *str)>
 
 Returns the integer specified by the binary, octal or hexadecimal string,
-C<str>. C<str> may either be C<"0x"> followed by a string of C<[0-9a-fA-F]>
-(hexadecimal), C<"0b"> followed by a string of C<[0-1]> (binary) or C<"0">
-followed by a a string of C<[0-7]> (octal). On error, returns C<-1> with
+C<str>. C<str> can either be C<"0x"> followed by a string of C<[0-9a-fA-F]>
+(hexadecimal), C<"0b"> followed by a string of C<[0-1]> (binary), or C<"0">
+followed by a string of C<[0-7]> (octal). On error, returns C<-1> with
 C<errno> set appropriately.
 
 =cut
@@ -6565,9 +6578,9 @@ int strncasecmp(const char *s1, const char *s2, size_t n)
 =item I<size_t strlcpy(char *dst, const char *src, size_t size)>
 
 Copies C<src> into C<dst> (which is C<size> bytes long). The result, C<dst>,
-will be no longer than C<size - 1> bytes and will be C<nul> terminated
+will be no longer than C<size - 1> bytes, and will be C<nul>-terminated
 (unless C<size> is zero). This is similar to I<strncpy(3)> except that it
-always terminates the string with a C<nul> byte (so it's safer) and it
+always terminates the string with a C<nul> byte (so it's safer), and it
 doesn't fill the remainder of the buffer with C<nul> bytes (so it's faster).
 Returns the length of C<src> (If this is >= C<size>, truncation occurred).
 Use this rather than I<strcpy(3)> or I<strncpy(3)>.
@@ -6607,9 +6620,9 @@ size_t strlcpy(char *dst, const char *src, size_t size)
 =item I<size_t strlcat(char *dst, const char *src, size_t size)>
 
 Appends C<src> to C<dst> (which is C<size> bytes long). The result, C<dst>,
-will be no longer than C<size - 1> bytes and will be C<nul> terminated
+will be no longer than C<size - 1> bytes, and will be C<nul>-terminated
 (unless C<size> is zero). This is similar to I<strncat(3)> except that the
-last argument is the size of the buffer, not the amount of space available.
+last argument is the size of the buffer, not the amount of space available
 (so it's more intuitive and hence safer). Returns the sum of the lengths of
 C<src> and C<dst> (If this is >= C<size>, truncation occurred). Use this
 rather than I<strcat(3)> or I<strncat(3)>.
@@ -6654,10 +6667,10 @@ size_t strlcat(char *dst, const char *src, size_t size)
 =item C<char *cstrcpy(char *dst, const char *src)>
 
 Copies the string pointed to by C<src> (including the terminating C<nul>
-character) to the array pointed to by C<dst>. The memory areas may not
+character) to the array pointed to by C<dst>. The memory areas must not
 overlap. B<The array C<dst> must be large enough to store the copy. Unless
-you know that this is the case, use strlcpy() instead.> This is just like
-I<strcpy(3)> except that instead of returning C<dst> (which you already
+you know that this is the case, use I<strlcpy(3)> instead.> This is just
+like I<strcpy(3)> except that instead of returning C<dst> (which you already
 know), this function returns the address of the terminating C<nul> character
 (C<dst + strlen(src)>).
 
@@ -6677,12 +6690,12 @@ char *cstrcpy(char *dst, const char *src)
 
 =item C<char *cstrcat(char *dst, const char *src)>
 
-Appends the string C<src> to the string C<dst> The strings may not overlap.
-B<The string C<dst> must be large enough to store the appended copy of
-C<src>. Unless you know that this is the case, use strlcat() instead.> This
-is just like I<strcat(3)> except that instead of returning C<dst> (which you
-already know), this function returns the address of the terminating C<nul>
-character (C<dst + strlen(dst) + strlen(src)>).
+Appends the string C<src> to the string C<dst>. The strings must not
+overlap. B<The string C<dst> must be large enough to store the appended copy
+of C<src>. Unless you know that this is the case, use I<strlcat(3)>
+instead.> This is just like I<strcat(3)> except that, instead of returning
+C<dst> (which you already know), this function returns the address of the
+terminating C<nul> character (C<dst + strlen(dst) + strlen(src)>).
 
 =cut
 
@@ -6705,7 +6718,7 @@ char *cstrcat(char *dst, const char *src)
 
 Scans the string C<str> looking for the character C<c>. Returns a pointer to
 the first occurrence of the character C<c> in the string C<str>. This is
-just like I<strchr(3)> except that instead of returning C<null> when C<c>
+just like I<strchr(3)> except that, instead of returning C<null> when C<c>
 does not appear in C<str>, this function returns the address of the
 terminating C<nul> character (C<str + strlen(str)>).
 
@@ -6727,7 +6740,7 @@ char *cstrchr(const char *str, int c)
 
 Scans the string C<str> looking for any of the characters in C<brk>. Returns
 a pointer to the first occurrence of any character in C<brk> in the string
-C<str>. This is just like I<strpbrk(3)> except that instead of returning
+C<str>. This is just like I<strpbrk(3)> except that, instead of returning
 C<null> when no match is found in C<str>, this function returns the address
 of the terminating C<nul> character (C<str + strlen(str)>).
 
@@ -6753,7 +6766,7 @@ char *cstrpbrk(const char *str, const char *brk)
 
 Scans the string C<str> looking for the character C<c>. Returns a pointer to
 the last occurrence of the character C<c> in the string C<str>. This is just
-like I<strrchr(3)> except that instead of returning C<null> when C<c> does
+like I<strrchr(3)> except that, instead of returning C<null> when C<c> does
 not appear in C<str>, this function returns the address of the terminating
 C<nul> character (C<str + strlen(str)>).
 
@@ -6778,8 +6791,8 @@ char *cstrrchr(const char *str, int c)
 
 Scans the string C<str> looking for the string C<srch>. Returns a pointer to
 the first occurrence of the string C<srch> in the string C<str>. This is
-just like I<strstr(3)> except that instead of returning C<null> when C<srch>
-does not appear in C<str>, this function returns the address of the
+just like I<strstr(3)> except that, instead of returning C<null> when
+C<srch> does not appear in C<str>, this function returns the address of the
 terminating C<nul> character (C<str + strlen(str)>).
 
 =cut
@@ -6814,7 +6827,7 @@ char *cstrstr(const char *str, const char *srch)
 
 =item I<int asprintf(char **str, const char *format, ...)>
 
-Equivalent to I<sprintf(3)> except that instead of formatting C<format> and
+Equivalent to I<sprintf(3)> except that, instead of formatting C<format> and
 subsequent arguments into a buffer supplied by the caller, they are
 formatted into a buffer that is internally allocated and stored in C<*str>.
 On success, returns the number of bytes stored in C<*str> excluding the
@@ -6890,21 +6903,21 @@ When arguments to any of the functions are invalid.
 
 =head1 MT-Level
 
-MT-Disciplined
+I<MT-Disciplined>
 
-By default, I<String>s are not MT-Safe because most programs are single
-threaded and synchronisation doesn't come for free. Even in multi threaded
-programs, not all I<String>s are necessarily shared between multiple
-threads.
+By default, I<String>s are not I<MT-Safe> because most programs are
+single-threaded and synchronisation doesn't come for free. Even in
+multi-threaded programs, not all I<String>s are necessarily shared between
+multiple threads.
 
 When a I<String> is shared between multiple threads which need to be
 synchronised, the method of synchronisation must be carefully selected by
 the client code. There are tradeoffs between concurrency and overhead. The
 greater the concurrency, the greater the overhead. More locks give greater
-concurrency but have greater overhead. Readers/Writer locks can give greater
-concurrency than Mutex locks but have greater overhead. One lock for each
-I<String> may be required, or one lock for all (or a set of) I<String>s may
-be more appropriate.
+concurrency, but have greater overhead. Readers/Writer locks can give
+greater concurrency than Mutex locks, but have greater overhead. One lock
+for each I<String> might be required, or one lock for all (or a set of)
+I<String>s might be more appropriate.
 
 Generally, the best synchronisation strategy for a given application can
 only be determined by testing/benchmarking the written application. It is
@@ -6914,7 +6927,7 @@ stage of development without pain.
 To facilitate this, I<String>s can be created with
 I<string_create_with_locker(3)> which takes a I<Locker> argument. The
 I<Locker> specifies a lock and a set of functions for manipulating the lock.
-Each I<String> can have it's own lock by creating a separate I<Locker> for
+Each I<String> can have its own lock by creating a separate I<Locker> for
 each I<String>. Multiple I<String>s can share the same lock by sharing the
 same I<Locker>. Only the application developer can determine what is
 appropriate for each application on a string by string basis.
@@ -6922,11 +6935,11 @@ appropriate for each application on a string by string basis.
 I<MT-Disciplined> means that the application developer has a mechanism for
 specifying the synchronisation requirements to be applied to library code.
 
-MT-Safe - I<str_fgetline(3)>
+I<MT-Safe> - I<str_fgetline(3)>
 
-Mac OS X doesn't have I<flockfile(3)>, I<funlockfile(3)> or
-I<getc_unlocked(3)>. I<fgetline(3)> is not MT-Safe on such platforms. You
-must guard all stdio calls with explicit synchronisation variables.
+I<Mac OS X> doesn't have I<flockfile(3)>, I<funlockfile(3)> or
+I<getc_unlocked(3)>. I<fgetline(3)> is not I<MT-Safe> on such platforms. You
+must guard all I<stdio> calls with explicit synchronisation variables.
 
 =head1 EXAMPLES
 
@@ -7023,7 +7036,7 @@ to rot13 the input:
         return EXIT_SUCCESS;
     }
 
-The same as above but using ordinary C strings:
+The same as above but using ordinary I<C> strings:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7163,7 +7176,7 @@ Format some text in a I<String> object in several different ways:
         return EXIT_SUCCESS;
     }
 
-Perform the same formatting but on an ordinary C string:
+Perform the same formatting but on an ordinary I<C> string:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7224,7 +7237,7 @@ Split and join a I<String> object without using regular expressions:
         return EXIT_SUCCESS;
     }
 
-Split an ordinary C string without using regular expressions:
+Split an ordinary I<C> string without using regular expressions:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7261,7 +7274,7 @@ Split a I<String> object using regular expressions:
         return EXIT_SUCCESS;
     }
 
-Split an ordinary C string using regular expressions:
+Split an ordinary I<C> string using regular expressions:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7309,7 +7322,7 @@ Trim and squeeze I<String> objects:
         return EXIT_SUCCESS;
     }
 
-Trim and squeeze ordinary C strings:
+Trim and squeeze ordinary I<C> strings:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7361,7 +7374,7 @@ Quote whitespace in a I<String> object:
         return EXIT_SUCCESS;
     }
 
-Quote whitespace in an ordinary C string:
+Quote whitespace in an ordinary I<C> string:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7382,7 +7395,7 @@ Quote whitespace in an ordinary C string:
         return EXIT_SUCCESS;
     }
 
-Apply C string literal encoding and decoded to a I<String> object:
+Apply I<C> string literal encoding and decoded to a I<String> object:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7404,7 +7417,7 @@ Apply C string literal encoding and decoded to a I<String> object:
         return EXIT_SUCCESS;
     }
 
-Apply C string literal encoding and decoded to an ordinary C string:
+Apply I<C> string literal encoding and decoded to an ordinary I<C> string:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7441,7 +7454,7 @@ Get the soundex code of a I<String> object:
         return EXIT_SUCCESS;
     }
 
-Get the soundex code of an ordinary C string:
+Get the soundex code of an ordinary I<C> string:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7483,7 +7496,7 @@ Convert between upper and lower case in a I<String> object:
         return EXIT_SUCCESS;
     }
 
-Convert between upper and lower case in an ordinary C string:
+Convert between upper and lower case in an ordinary I<C> string:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7506,8 +7519,8 @@ Convert between upper and lower case in an ordinary C string:
         return EXIT_SUCCESS;
     }
 
-Chomp line ending characters off the end of a I<String> object and chop a
-character of a I<String> object:
+Chomp line ending characters off the end of a I<String> object, and chop a
+character off the end of a I<String> object:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7526,8 +7539,8 @@ character of a I<String> object:
         return EXIT_SUCCESS;
     }
 
-Chomp line ending characters off the end of an ordinary C string and chop a
-character of an ordinary C string:
+Chomp line ending characters off the end of an ordinary I<C> string, and
+chop a character off the end of an ordinary I<C> string:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7546,7 +7559,7 @@ character of an ordinary C string:
         return EXIT_SUCCESS;
     }
 
-Parse binary, octal and hexadecimal integers in I<String> objects:
+Parse binary, octal, and hexadecimal integers in I<String> objects:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7570,7 +7583,7 @@ Parse binary, octal and hexadecimal integers in I<String> objects:
         return EXIT_SUCCESS;
     }
 
-Parse binary, octal and hexadecimal integers in ordinary C strings:
+Parse binary, octal and hexadecimal integers in ordinary I<C> strings:
 
     #include <slack/std.h>
     #include <slack/str.h>
@@ -7625,7 +7638,7 @@ interfaces:
         return EXIT_SUCCESS;
     }
 
-Example of string functions that are supplied if they are not already
+Examples of string functions that are supplied if they are not already
 present on the local system.
 
     #include <slack/std.h>
@@ -7668,22 +7681,22 @@ present on the local system.
 =head1 CAVEAT
 
 The C<delim> parameter to the I<split(3)> and I<join(3)> functions is an
-ordinary C string so it can't contain C<nul> characters.
+ordinary I<C> string, so it can't contain C<nul> characters.
 
 The C<quotable> parameter to the I<quote(3)> and I<unquote(3)> functions is
-an ordinary C string so it can't contain C<nul> characters.
+an ordinary I<C> string, so it can't contain C<nul> characters.
 
 The C<uncoded> and C<coded> parameters to the I<str_encode(3)> and
-I<str_decode(3)> functions are ordinary C strings so they can't contain
+I<str_decode(3)> functions are ordinary I<C> strings, so they can't contain
 C<nul> characters.
 
 =head1 BUGS
 
-Doesn't support multibyte/widechar strings, UTF8, UNICODE or ISO 10646 but
+Doesn't support multi-byte/widechar strings, UTF8, UNICODE or ISO 10646 but
 support can probably be layered over the top of I<String>.
 
-Uses I<malloc(3)>. The type of memory used and the allocation strategy need
-to be decoupled from this code.
+Uses I<malloc(3)> directly. The type of memory used and the allocation
+strategy should be decoupled from this code.
 
 =head1 SEE ALSO
 
@@ -7699,7 +7712,7 @@ I<perlop(1)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

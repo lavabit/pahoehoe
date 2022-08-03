@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,9 @@
 * GNU General Public License for more details.
 *
 * You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-* or visit http://www.gnu.org/copyleft/gpl.html
+* along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -67,12 +65,12 @@ I<libslack(link)> - linked list module
 
 =head1 DESCRIPTION
 
-This module provides functions for manipulating singly and doubly linked
+This module provides functions for manipulating singly- and doubly-linked
 lists. Two abstract types are defined: I<slink_t>, containing a pointer to
 the next item, and I<dlink_t>, containing pointers to the next and previous
 items. These functions work with any struct whose first element is an
 I<slink_t> or a I<dlink_t> struct. There is support for optional growable
-free lists so items may be dynamically allocated individually or allocated
+free lists so items may be dynamically allocated individually, or allocated
 from a free list. Free lists can be arrays of structs or dynamically
 allocated. When a free list is exhausted, further memory may be attached to
 the free list to extend it.
@@ -211,7 +209,7 @@ void *dlink_prev(void *link)
 
 Inserts C<item> before C<link>. Returns C<item>. On error, returns C<null>
 with C<errno> set appropriately. Items may only be inserted at the beginning
-of a singly linked list.
+of a singly-linked list.
 
 =cut
 
@@ -235,8 +233,8 @@ void *slink_insert(void *link, void *item)
 =item C<void *dlink_insert(void *link, void *item)>
 
 Inserts C<item> before C<link>. Returns C<item>. On error, returns C<null>
-with C<errno> set appropriately. Items may be inserted anywhere in a doubly
-linked list.
+with C<errno> set appropriately. Items may be inserted anywhere in a
+doubly-linked list.
 
 =cut
 
@@ -324,7 +322,7 @@ void *dlink_remove(void *link)
 =item C<void *slink_freelist_init(void *freelist, size_t nelem, size_t size)>
 
 Initialises an array of C<nelem> elements each C<size> bytes for use as a
-singly linked free list. On success, returns C<freelist>. On error, returns
+singly-linked free list. On success, returns C<freelist>. On error, returns
 C<null> with C<errno> set appropriately.
 
 =cut
@@ -353,7 +351,7 @@ void *slink_freelist_init(void *freelist, size_t nelem, size_t size)
 =item C<void *dlink_freelist_init(void *freelist, size_t nelem, size_t size)>
 
 Initialises an array of C<nelem> elements each C<size> bytes for use as a
-doubly linked free list. On success, returns C<freelist>. On error, returns
+doubly-linked free list. On success, returns C<freelist>. On error, returns
 C<null> with C<errno> set appropriately.
 
 =cut
@@ -449,7 +447,7 @@ void *dlink_freelist_attach(void *freelist1, void *freelist2)
 =item C<void *slink_alloc(void **freelist)>
 
 Allocates an item from C<*freelist> and updates C<*freelist> to point to the
-next free item. C<*freelist> must be a singly linked freelist initialised
+next free item. C<*freelist> must be a singly-linked freelist initialised
 with I<slink_freelist_init(3)>. On success, returns the allocated item. On
 error, returns C<null> with C<errno> set appropriately.
 
@@ -478,7 +476,7 @@ void *slink_alloc(void **freelist)
 =item C<void *dlink_alloc(void **freelist)>
 
 Allocates an item from C<*freelist> and updates C<*freelist> to point to the
-next free item. C<*freelist> must be a doubly linked freelist initialised
+next free item. C<*freelist> must be a doubly-linked freelist initialised
 with I<dlink_freelist_init(3)>. On success, returns the allocated item. On
 error, returns C<null> with C<errno> set appropriately.
 
@@ -507,7 +505,7 @@ void *dlink_alloc(void **freelist)
 =item C<void *slink_free(void **freelist, void *item)>
 
 Inserts C<item> into C<*freelist> and updates C<*freelist> to point to
-I<item>. C<*freelist> must be a singly linked freelist initialised with
+I<item>. C<*freelist> must be a singly-linked freelist initialised with
 I<slink_freelist_init(3)>. On success, returns the resulting free list. On
 error, returns C<null> with C<errno> set appropriately.
 
@@ -528,7 +526,7 @@ void *slink_free(void **freelist, void *item)
 =item C<void *dlink_free(void **freelist, void *item)>
 
 Inserts C<item> into C<*freelist> and updates C<*freelist> to point to
-C<item>. C<*freelist> must be a doubly linked freelist initialised with
+C<item>. C<*freelist> must be a doubly-linked freelist initialised with
 I<dlink_freelist_init(3)>. On success, returns the resulting free list. On
 error, returns C<null> with C<errno> set appropriately.
 
@@ -550,7 +548,7 @@ void *dlink_free(void **freelist, void *item)
 
 =head1 ERRORS
 
-The following errors are returned by these functions.
+On error, these functions set C<errno> to the following:
 
 =over 4
 
@@ -567,7 +565,7 @@ exhausted.
 
 =head1 MT-Level
 
-Unsafe
+I<Unsafe>
 
 This module declares abstract types. They must be used as part of larger
 data structures. It is assumed that the surrounding data structure and its
@@ -575,7 +573,7 @@ functions will provide any locking that is required.
 
 =head1 EXAMPLES
 
-A singly linked example that reads pairs of numbers from stdin (attaching
+A singly-linked example that reads pairs of numbers from C<stdin> (attaching
 more space to the list as necessary), iterates over the items and then
 deletes them:
 
@@ -681,7 +679,7 @@ deletes them:
         return EXIT_SUCCESS;
     }
 
-A doubly linked example that reads pairs of numbers from stdin (attaching
+A doubly-linked example that reads pairs of numbers from C<stdin> (attaching
 more space to the list as necessary), iterates over the items and then
 deletes them:
 
@@ -825,7 +823,7 @@ I<locker(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 
@@ -875,7 +873,7 @@ int main(int ac, char **av)
 
 	printf("Testing: %s\n", "link");
 
-	/* Test singly linked lists */
+	/* Test singly-linked lists */
 
 	/* Test slink_freelist_init() */
 
@@ -999,7 +997,7 @@ int main(int ac, char **av)
 		}
 	}
 
-	/* Test doubly linked lists */
+	/* Test doubly-linked lists */
 
 	/* Test dlink_freelist_init() */
 

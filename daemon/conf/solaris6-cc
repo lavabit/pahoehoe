@@ -2,7 +2,7 @@
 #
 # daemon - http://libslack.org/daemon/
 #
-# Copyright (C) 1999-2004, 2010, 2020 raf <raf@raf.org>
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 # Modify the macros.mk make include files to compile on Solaris 6 with cc
 #
-# 20201111 raf <raf@raf.org>
+# 20210304 raf <raf@raf.org>
 
 perl -pi \
 	-e 's/^# (\S+ \+= xnet)$/$1/;' \
@@ -39,6 +39,7 @@ perl -pi \
 	-e 's/^# (\S+ \+= -DROOT_PID_DIR)=.*$/$1=\\"\/etc\\"/;' \
 	-e 's/^# (CC := cc)$/$1/;' \
 	-e 's/^(CC := gcc)$/# $1/;' \
+	-e 's/^(CC := .*other)$/# CC := other/;' \
 	-e 's/^(\S+ \+= -Wno-long-long)$/# $1/;' \
 	-e 's/^(\S+ \+= -Wno-overlength-strings)$/# $1/;' \
 	-e 's/^(\S+ \+= -Wno-address)$/# $1/;' \
@@ -48,6 +49,7 @@ perl -pi \
 	-e 's/^(\S+ \+= -Wno-comment)$/# $1/;' \
 	-e 's/^(\S+ \+= -Wno-pointer-bool-conversion)$/# $1/;' \
 	-e 's/^(\S+ \+= -Wno-deprecated-declarations)$/# $1/;' \
+	-e 's/^(\S+ \+= -Wno-gnu-folding-constant)$/# $1/;' \
 	-e 's/^(\w*CCFLAGS \+= -O3)$/# $1/;' \
 	-e 's/^(\w*CCFLAGS \+= -Wall -pedantic)$/# $1/;' \
 	-e 's/^(\w*(?:CC|LD)FLAGS \+= -m64)$/# $1/;' \
@@ -56,10 +58,11 @@ perl -pi \
 	-e 's/^(\w*LIBS \+= util)$/# $1/;' \
 	-e 's/^(\w*LDFLAGS \+= -pthread)$/# $1/;' \
 	-e 's/^MAN_GZIP := 1$/MAN_GZIP := 0/;' \
+	-e 's/^(MAN_SYSDIR\s*:=).*$/$1 \$(PREFIX)\/share\/man/;' \
 	-e 's/^(MAN_LOCDIR\s*:=).*$/$1 \$(PREFIX)\/share\/man/;' \
 	-e 's/^CONF_INSDIR := \$\(PREFIX\)\/etc$/CONF_INSDIR := \/etc/;' \
-	-e 's/^# (PREFIX := \$\(DESTDIR\)\/usr\/local)$/$1/;' \
-	-e 's/^(PREFIX := \$\(DESTDIR\)\/usr\/pkg)$/# $1/;' \
+	-e 's/^# (PREFIX := \/usr\/local)$/$1/;' \
+	-e 's/^(PREFIX := \/usr\/pkg)$/# $1/;' \
 	-e 's/^(DAEMON_DEFINES \+= -DCONFIG_PATH=\\"\$\(PREFIX\)\/etc\/daemon\.conf\\")$/# $1/;' \
 	`find . -name Makefile` \
 	`find . -name macros.mk`
@@ -141,3 +144,8 @@ perl -pi \
 	-e 's/^#define (HAVE_POLL_THAT_ABORTS_WHEN_POLLFDS_IS_NULL) 1$/\/* #undef $1 *\//;' \
 	`find . -name config.h`
 
+perl -pi \
+	-e 's/^#define (HAVE_SYS_TTYDEFAULTS_H) 1$/\/\* #undef $1 \*\//;' \
+	config.h
+
+# vi:set ts=4 sw=4:

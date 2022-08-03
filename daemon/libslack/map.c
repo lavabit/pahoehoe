@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -111,9 +111,9 @@ mappings from one object to another object, also known as hashes or
 associative arrays. I<Map>s may own their items. I<Map>s created with a
 non-C<null> destroy function use that function to destroy an item when it is
 removed from the map and to destroy each item when the map itself it
-destroyed. I<Map>s are hash tables with 11 buckets by default. They grow
+destroyed. I<Map>s are hash tables with C<11> buckets by default. They grow
 when necessary, approximately doubling in size each time up to a maximum
-size of 26,214,401 buckets.
+size of C<26,214,401> buckets.
 
 =over 4
 
@@ -280,8 +280,10 @@ static void mapping_release(Mapping *mapping)
 
 Creates a small I<Map> with string keys and C<destroy> as its item
 destructor. It is the caller's responsibility to deallocate the new map with
-I<map_release(3)> or I<map_destroy(3)>. On success, returns the new map. On
-error, returns C<null> with C<errno> set appropriately.
+I<map_release(3)> or I<map_destroy(3)>. It is strongly recommended to use
+I<map_destroy(3)>, because it also sets the pointer variable to C<null>. On
+success, returns the new map. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -298,8 +300,8 @@ Map *map_create(map_release_t *destroy)
 
 Equivalent to I<map_create(3)> except that the initial number of buckets is
 approximately C<size>. The actual size will be the first prime greater than
-or equal to C<size> in a prebuilt sequence of primes between 11 and
-26,214,401 that double at each step.
+or equal to C<size> in a prebuilt sequence of primes between C<11> and
+C<26,214,401> that double at each step.
 
 =cut
 
@@ -314,9 +316,9 @@ Map *map_create_sized(size_t size, map_release_t *destroy)
 
 =item C<Map *map_create_with_hash(map_hash_t *hash, map_release_t *destroy)>
 
-Equivalent to  I<map_create(3)> except that C<hash> is used as the hash
+Equivalent to I<map_create(3)> except that C<hash> is used as the hash
 function. The arguments to C<hash> are a I<size_t> specifying the number of
-buckets and a I<const void *> specifying the key to hash. It must return a
+buckets, and a I<const void *> specifying the key to hash. It must return a
 I<size_t> between zero and the table size - 1.
 
 =cut
@@ -334,7 +336,7 @@ Map *map_create_with_hash(map_hash_t *hash, map_release_t *destroy)
 
 Equivalent to I<map_create_sized(3)> except that C<hash> is used as the hash
 function. The arguments to C<hash> are a I<size_t> specifying the number of
-buckets and a I<const void *> specifying the key to hash. It must return a
+buckets, and a I<const void *> specifying the key to hash. It must return a
 I<size_t> between zero and the table size - 1.
 
 =cut
@@ -421,7 +423,7 @@ compare mapping keys. The arguments to C<cmp> are two keys to be compared.
 It must return < 0 if the first compares less than the second, 0 if they
 compare equal and > 0 if the first compares greater than the second. C<hash>
 is the hash function. The arguments to C<hash> are a I<size_t> specifying
-the number of buckets and a I<const void *> specifying the key to hash. It
+the number of buckets, and a I<const void *> specifying the key to hash. It
 must return a I<size_t> between zero and the table size - 1. C<key_destroy>
 is the destructor for mapping keys. C<value_destroy> is the destructor for
 mapping values. On success, returns the new map. On error, returns C<null>
@@ -442,8 +444,8 @@ Map *map_create_generic(map_copy_t *copy, map_cmp_t *cmp, map_hash_t *hash, map_
 
 Equivalent to I<map_create_generic(3)> except that the initial number of
 buckets is approximately C<size>. The actual size will be the first prime
-greater than or equal to C<size> in a prebuilt sequence of primes between 11
-and 26,214,401 that double at each step.
+greater than or equal to C<size> in a prebuilt sequence of primes between C<11>
+and C<26,214,401> that double at each step.
 
 =cut
 
@@ -526,11 +528,11 @@ Map *map_create_generic_with_locker_sized(Locker *locker, size_t size, map_copy_
 =item C<int map_rdlock(const Map *map)>
 
 Claims a read lock on C<map> (if C<map> was created with a I<Locker>). This
-is needed when multiple read only I<map(3)> module functions need to be
+is needed when multiple read-only I<map(3)> module functions need to be
 called atomically. It is the client's responsibility to call
 I<map_unlock(3)> after the atomic operation. The only functions that may be
 called on C<map> between calls to I<map_rdlock(3)> and I<map_unlock(3)> are
-any read only I<map(3)> module functions whose name ends with C<_unlocked>.
+any read-only I<map(3)> module functions whose name ends with C<_unlocked>.
 On success, returns C<0>. On error, returns an error code.
 
 =cut
@@ -668,7 +670,7 @@ int map_own(Map *map, map_release_t *destroy)
 
 =item C<int map_own_unlocked(Map *map, map_release_t *destroy)>
 
-Equivalent to I<map_own(3)> except that C<map> is not write locked.
+Equivalent to I<map_own(3)> except that C<map> is not write-locked.
 
 =cut
 
@@ -743,7 +745,7 @@ map_release_t *map_disown(Map *map)
 
 =item C<map_release_t *map_disown_unlocked(Map *map)>
 
-Equivalent to I<map_disown(3)> except that C<map> is not write locked.
+Equivalent to I<map_disown(3)> except that C<map> is not write-locked.
 
 =cut
 
@@ -788,9 +790,10 @@ map_release_t *map_disown_unlocked(Map *map)
 
 C<static int map_resize(Map *map)>
 
-Resizes C<map> to use the next prime in a built in sequence of primes
-between 11 and 26,214,401 that is greater than the current size. On success,
-returns C<0>. On error, returns C<-1> with C<errno> set appropriately.
+Resizes C<map> to use the next prime in a prebuilt sequence of primes
+between C<11> and C<26,214,401> that is greater than the current size. On
+success, returns C<0>. On error, returns C<-1> with C<errno> set
+appropriately.
 
 */
 
@@ -863,9 +866,9 @@ static int map_resize(Map *map)
 
 =item C<int map_add(Map *map, const void *key, void *value)>
 
-Adds the C<(key, value)> mapping to C<map> if C<key> is not already present.
-Note that C<key> is copied but C<value> is not. On success, returns C<0>. On
-error, returns C<-1> with C<errno> set appropriately.
+Adds the C<(key, value)> mapping to C<map>, if C<key> is not already
+present. Note that C<key> is copied but C<value> is not. On success, returns
+C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -880,7 +883,7 @@ int map_add(Map *map, const void *key, void *value)
 
 =item C<int map_add_unlocked(Map *map, const void *key, void *value)>
 
-Equivalent to I<map_add(3)> except that C<map> is not write locked.
+Equivalent to I<map_add(3)> except that C<map> is not write-locked.
 
 =cut
 
@@ -912,7 +915,7 @@ int map_put(Map *map, const void *key, void *value)
 
 =item C<int map_put_unlocked(Map *map, const void *key, void *value)>
 
-Equivalent to I<map_put(3)> except that C<map> is not write locked.
+Equivalent to I<map_put(3)> except that C<map> is not write-locked.
 
 =cut
 
@@ -928,7 +931,7 @@ int map_put_unlocked(Map *map, const void *key, void *value)
 =item C<int map_insert(Map *map, const void *key, void *value, int replace)>
 
 Adds the C<(key, value)> mapping to C<map>, replacing any existing C<(key,
-value)> mapping if C<replace> is non-zero. Note that C<key> is copied but
+value)> mapping, if C<replace> is non-zero. Note that C<key> is copied but
 C<value> is not. On success, returns C<0>. On error, or if C<key> is already
 present and C<replace> is zero, returns C<-1> with C<errno> set
 appropriately.
@@ -960,7 +963,7 @@ int map_insert(Map *map, const void *key, void *value, int replace)
 
 =item C<int map_insert_unlocked(Map *map, const void *key, void *value, int replace)>
 
-Equivalent to I<map_insert(3)> except that C<map> is not write locked.
+Equivalent to I<map_insert(3)> except that C<map> is not write-locked.
 
 =cut
 
@@ -1054,7 +1057,7 @@ int map_remove(Map *map, const void *key)
 
 =item C<int map_remove_unlocked(Map *map, const void *key)>
 
-Equivalent to I<map_remove(3)> except that C<map> is not write locked.
+Equivalent to I<map_remove(3)> except that C<map> is not write-locked.
 
 =cut
 
@@ -1130,7 +1133,7 @@ void *map_get(Map *map, const void *key)
 
 =item C<void *map_get_unlocked(const Map *map, const void *key)>
 
-Equivalent to I<map_get(3)> except that C<map> is not read locked.
+Equivalent to I<map_get(3)> except that C<map> is not read-locked.
 
 =cut
 
@@ -1169,9 +1172,9 @@ void *map_get_unlocked(const Map *map, const void *key)
 
 =item C<Mapper *mapper_create(Map *map)>
 
-Creates an iterator for C<map>. The iterator keeps C<map> write locked until
+Creates an iterator for C<map>. The iterator keeps C<map> write-locked until
 it is released with I<mapper_release(3)> or I<mapper_destroy(3)>. Note that
-the iterator itself is not locked so it must not be shared between threads.
+the iterator itself is not locked, so it must not be shared between threads.
 On success, returns the iterator. On error, returns C<null> with C<errno>
 set appropriately.
 
@@ -1188,8 +1191,8 @@ Mapper *mapper_create(Map *map)
 
 =item C<Mapper *mapper_create_rdlocked(Map *map)>
 
-Equivalent to I<mapper_create(3)> except that C<map> is read locked rather
-than write locked. Use this in preference to I<mapper_create(3)> when no
+Equivalent to I<mapper_create(3)> except that C<map> is read-locked rather
+than write-locked. Use this in preference to I<mapper_create(3)> when no
 calls to I<mapper_remove(3)> will be made during the iteration.
 
 =cut
@@ -1214,7 +1217,7 @@ Mapper *mapper_create_rdlocked(Map *map)
 =item C<Mapper *mapper_create_wrlocked(Map *map)>
 
 Equivalent to I<mapper_create(3)> except that this function name makes the
-fact that C<map> is write locked explicit.
+fact that C<map> is write-locked explicit.
 
 =cut
 
@@ -1237,7 +1240,7 @@ Mapper *mapper_create_wrlocked(Map *map)
 
 =item C<Mapper *mapper_create_unlocked(Map *map)>
 
-Equivalent to I<mapper_create(3)> except that C<map> is not write locked.
+Equivalent to I<mapper_create(3)> except that C<map> is not write-locked.
 
 =cut
 
@@ -1439,7 +1442,7 @@ void *mapper_next(Mapper *mapper)
 
 =item C<const Mapping *mapper_next_mapping(Mapper *mapper)>
 
-Returns the next mapping (key, value pair) in the map over which C<mapper>
+Returns the next mapping (key, value) pair in the map over which C<mapper>
 is iterating. On error, returns C<null> with C<errno> set appropriately.
 
 =cut
@@ -1493,31 +1496,31 @@ void mapper_remove(Mapper *mapper)
 
 Returns whether or not there is another item in C<map> using an internal
 iterator. The first time this is called, a new internal I<Mapper> will be
-created (Note: There can be only one). When there are no more items, returns
-C<0> and destroys the internal iterator. When it returns C<1>, use
-I<map_next(3)> to retrieve the next item. On error, returns C<-1> with
-C<errno> set appropriately.
+created (Note: There can be only one at any time for a given map). When
+there are no more items, returns C<0> and destroys the internal iterator.
+When it returns C<1>, use I<map_next(3)> to retrieve the next item. On
+error, returns C<-1> with C<errno> set appropriately.
 
 Note: If an iteration using an internal iterator terminates before the end
 of the map, it is the caller's responsibility to call I<map_break(3)>.
 Failure to do so will cause the internal iterator to leak. It will also
 break the next call to I<map_has_next(3)> which will continue where the
 current iteration stopped rather than starting at the beginning again.
-I<map_release(3)> assumes that there is no internal iterator so it is the
-caller's responsibility to complete the iteration or call I<map_break(3)>
+I<map_release(3)> assumes that there is no internal iterator, so it is the
+caller's responsibility to complete the iteration, or call I<map_break(3)>
 before releasing C<map> with I<map_release(3)> or I<map_destroy(3)>.
 
 Note: The internal I<Mapper> does not lock C<map> so this function is not
 threadsafe. It can only be used with maps created in the current function
 (to guarantee that no other thread can access it). This practice should be
-observed even in single threaded applications to avoid breaking iterator
+observed even in single-threaded applications to avoid breaking iterator
 semantics (possible with nested function calls). If C<map> is a parameter or
 a variable declared outside the function, it is best to create an explicit
 I<Mapper> instead. If this function is used on such maps instead, it is the
 caller's responsibility to explicitly lock C<map> first with
 I<map_wrlock(3)> and explicitly unlock it with I<map_unlock(3)>. Do this
-even if you are writing single threaded code in case your function may one
-day be used in a multi threaded application.
+even if you are writing single-threaded code, in case your function may one
+day be used in a multi-threaded application.
 
 =cut
 
@@ -1566,7 +1569,7 @@ void map_break(Map *map)
 
 =item C<void *map_next(Map *map)>
 
-Returns the next item in C<map> using it's internal iterator. On error,
+Returns the next item in C<map> using its internal iterator. On error,
 returns C<null> with C<errno> set appropriately.
 
 =cut
@@ -1585,7 +1588,7 @@ void *map_next(Map *map)
 
 =item C<const Mapping *map_next_mapping(Map *map)>
 
-Returns the next mapping (key, value pair) in C<map> using it's internal
+Returns the next mapping (key, value) pair in C<map> using its internal
 iterator. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
@@ -1604,7 +1607,7 @@ const Mapping *map_next_mapping(Map *map)
 
 =item C<void map_remove_current(Map *map)>
 
-Removes the current item in C<map> using it's internal iterator. The next
+Removes the current item in C<map> using its internal iterator. The next
 item in the iteration is the item following the removed item, if any. This
 must be called after I<map_next(3)>.
 
@@ -1667,9 +1670,10 @@ const void *mapping_value(const Mapping *mapping)
 
 Creates and returns a list of all of the keys contained in C<map>. It is the
 caller's responsibility to deallocate the new list with I<list_release(3)>
-or I<list_destroy(3)>. The keys in the new list are owned by C<map> so the
-list returned must not outlive C<map>. On error, returns C<null> with
-C<errno> set appropriately.
+or I<list_destroy(3)>. It is strongly recommended to use I<list_destroy(3)>,
+because it also sets the pointer variable to C<null>. The keys in the new
+list are owned by C<map>, so the list returned must not outlive C<map>. On
+error, returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -1684,7 +1688,7 @@ List *map_keys(Map *map)
 
 =item C<List *map_keys_unlocked(Map *map)>
 
-Equivalent to I<map_keys(3)> except that C<map> is not read locked.
+Equivalent to I<map_keys(3)> except that C<map> is not read-locked.
 
 =cut
 
@@ -1729,8 +1733,8 @@ List *map_keys_with_locker(Locker *locker, Map *map)
 
 =item C<List *map_keys_with_locker_unlocked(Locker *locker, Map *map)>
 
-Equivalent to I<map_keys_with_locker(3)> except that C<map> is not read
-locked.
+Equivalent to I<map_keys_with_locker(3)> except that C<map> is not
+read-locked.
 
 =cut
 
@@ -1775,9 +1779,11 @@ List *map_keys_with_locker_unlocked(Locker *locker, Map *map)
 
 Creates and returns a list of all of the values contained in C<map>. It is
 the caller's responsibility to deallocate the new list with
-I<list_release(3)> or I<list_destroy(3)>. The values in the list are not
-owned by the list so it must not outlive the owner of the items in C<map>.
-On error, returns C<null> with C<errno> set appropriately.
+I<list_release(3)> or I<list_destroy(3)>. It is strongly recommended to use
+I<list_destroy(3)>, because it also sets the pointer variable to C<null>.
+The values in the list are not owned by the list, so it must not outlive the
+owner of the items in C<map>. On error, returns C<null> with C<errno> set
+appropriately.
 
 =cut
 
@@ -1792,7 +1798,7 @@ List *map_values(Map *map)
 
 =item C<List *map_values_unlocked(Map *map)>
 
-Equivalent to I<map_values(3)> except that C<map> is not read locked.
+Equivalent to I<map_values(3)> except that C<map> is not read-locked.
 
 =cut
 
@@ -1837,8 +1843,8 @@ List *map_values_with_locker(Locker *locker, Map *map)
 
 =item C<List *map_values_with_locker_unlocked(Locker *locker, Map *map)>
 
-Equivalent to I<map_values_with_locker(3)> except that C<map> is not read
-locked.
+Equivalent to I<map_values_with_locker(3)> except that C<map> is not
+read-locked.
 
 =cut
 
@@ -1882,7 +1888,7 @@ List *map_values_with_locker_unlocked(Locker *locker, Map *map)
 =item C<void map_apply(Map *map, map_action_t *action, void *data)>
 
 Invokes C<action> for each of C<map>'s items. The arguments passed to
-C<action> are the key, the item and C<data>. On error, sets C<errno>
+C<action> are the key, the item, and C<data>. On error, sets C<errno>
 appropriately.
 
 =cut
@@ -1898,8 +1904,8 @@ void map_apply(Map *map, map_action_t *action, void *data)
 
 =item C<void map_apply_rdlocked(Map *map, map_action_t *action, void *data)>
 
-Equivalent to I<map_apply(3)> except that C<map> is read locked rather than
-write locked. Use this in preference to I<map_apply(3)> when C<map> and its
+Equivalent to I<map_apply(3)> except that C<map> is read-locked rather than
+write-locked. Use this in preference to I<map_apply(3)> when C<map> and its
 items will not be modified during the iteration.
 
 =cut
@@ -1936,7 +1942,7 @@ void map_apply_rdlocked(Map *map, map_action_t *action, void *data)
 =item C<void map_apply_wrlocked(Map *map, map_action_t *action, void *data)>
 
 Equivalent to I<map_apply(3)> except that this function name makes the fact
-that C<map> is write locked explicit.
+that C<map> is write-locked explicit.
 
 =cut
 
@@ -1971,7 +1977,7 @@ void map_apply_wrlocked(Map *map, map_action_t *action, void *data)
 
 =item C<void map_apply_unlocked(Map *map, map_action_t *action, void *data)>
 
-Equivalent to I<map_apply(3)> except that C<map> is not write locked.
+Equivalent to I<map_apply(3)> except that C<map> is not write-locked.
 
 =cut
 
@@ -2033,7 +2039,7 @@ ssize_t map_size(Map *map)
 
 =item C<ssize_t map_size_unlocked(const Map *map)>
 
-Equivalent to I<map_size(3)> except that C<map> is not read locked.
+Equivalent to I<map_size(3)> except that C<map> is not read-locked.
 
 =cut
 
@@ -2063,47 +2069,48 @@ When arguments are C<null> or out of range.
 
 =item C<ENOENT>
 
-When I<map_get(3)> tries to get or I<map_remove(3)> tries to remove a
+When I<map_get(3)> tries to get, or I<map_remove(3)> tries to remove, a
 non-existent mapping.
 
 =back
 
 =head1 MT-Level
 
-MT-Disciplined
+I<MT-Disciplined>
 
-By default, I<Map>s are not MT-Safe because most programs are single
-threaded and synchronisation doesn't come for free. Even in multi threaded
-programs, not all I<Map>s are necessarily shared between multiple threads.
+By default, I<Map>s are not I<MT-Safe> because most programs are
+single-threaded, and synchronisation doesn't come for free. Even in
+multi-threaded programs, not all I<Map>s are necessarily shared between
+multiple threads.
 
 When a I<Map> is shared between multiple threads which need to be
 synchronised, the method of synchronisation must be carefully selected by
 the client code. There are tradeoffs between concurrency and overhead. The
 greater the concurrency, the greater the overhead. More locks give greater
-concurrency but have greater overhead. Readers/Writer locks can give greater
-concurrency than Mutex locks but have greater overhead. One lock for each
-I<Map> may be required, or one lock for all (or a set of) I<Map>s may be
-more appropriate.
+concurrency, but have greater overhead. Readers/Writer locks can give
+greater concurrency than Mutex, locks but have greater overhead. One lock
+for each I<Map> may be required, or one lock for all (or a set of) I<Map>s
+may be more appropriate.
 
 Generally, the best synchronisation strategy for a given application can
 only be determined by testing/benchmarking the written application. It is
 important to be able to experiment with the synchronisation strategy at this
 stage of development without pain.
 
-To facilitate this, I<Map>s can be created with I<map_create_with_locker(3)>
-which takes a I<Locker> argument. The I<Locker> specifies a lock and a set
-of functions for manipulating the lock. Each I<Map> can have it's own lock
-by creating a separate I<Locker> for each I<Map>. Multiple I<Map>s can share
-the same lock by sharing the same I<Locker>. Only the application developer
-can determine what is appropriate for each application on a case by case
-basis.
+To facilitate this, I<Map>s can be created with
+I<map_create_with_locker(3)>, which takes a I<Locker> argument. The
+I<Locker> specifies a lock and a set of functions for manipulating the lock.
+Each I<Map> can have its own lock by creating a separate I<Locker> for each
+I<Map>. Multiple I<Map>s can share the same lock by sharing the same
+I<Locker>. Only the application developer can determine what is appropriate
+for each application on a case by case basis.
 
 I<MT-Disciplined> means that the application developer has a mechanism for
 specifying the synchronisation requirements to be applied to library code.
 
 =head1 EXAMPLES
 
-Create a map that doesn't own its items, populate it and then iterate over
+Create a map that doesn't own its items, populate it, and then iterate over
 its values with the internal iterator to print the values:
 
     #include <slack/std.h>
@@ -2128,8 +2135,8 @@ its values with the internal iterator to print the values:
         return EXIT_SUCCESS;
     }
 
-Create a map that does own its items, populate it and then iterate over
-its items with an external iterator to print its keys and values:
+Create a map that does own its items, populate it, and then iterate over its
+items with an external iterator to print its keys and values:
 
     #include <slack/std.h>
     #include <slack/map.h>
@@ -2165,7 +2172,7 @@ its items with an external iterator to print its keys and values:
         return EXIT_SUCCESS;
     }
 
-The same but with an apply function:
+The same, but with an apply function:
 
     #include <slack/std.h>
     #include <slack/map.h>
@@ -2191,7 +2198,7 @@ The same but with an apply function:
         return EXIT_SUCCESS;
     }
 
-The same but with integer keys:
+The same, but with integer keys:
 
     #include <slack/std.h>
     #include <slack/map.h>
@@ -2243,8 +2250,8 @@ the map, and fail to call I<map_break(3)>, the internal iterator will leak.
 
 =head1 BUGS
 
-Uses I<malloc(3)>. The type of memory used and the allocation strategy need
-to be decoupled from this code.
+Uses I<malloc(3)> directly. The type of memory used and the allocation
+strategy should be decoupled from this code.
 
 =head1 SEE ALSO
 
@@ -2255,7 +2262,7 @@ I<locker(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 

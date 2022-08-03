@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 #ifndef LIBSLACK_DAEMON_H
@@ -24,30 +24,37 @@
 
 #include <slack/hdr.h>
 
+/* Define the standard pidfile directory for the root user */
 #ifndef ROOT_PID_DIR
 #define ROOT_PID_DIR "/var/run"
 #endif
 
+/* Define the standard pidfile directory for normal users */
 #ifndef USER_PID_DIR
 #define USER_PID_DIR "/tmp"
 #endif
 
+/* Define the root directory */
 #ifndef ROOT_DIR
 #define ROOT_DIR "/"
 #endif
 
+/* Define the /etc directory */
 #ifndef ETC_DIR
 #define ETC_DIR "/etc"
 #endif
 
+/* Define the path directory separator as a character */
 #ifndef PATH_SEP
 #define PATH_SEP '/'
 #endif
 
+/* Define the path directory separator as a string */
 #ifndef PATH_SEP_STR
 #define PATH_SEP_STR "/"
 #endif
 
+/* Define the $PATH environment variable directory separator */
 #ifndef PATH_LIST_SEP
 #define PATH_LIST_SEP ':'
 #endif

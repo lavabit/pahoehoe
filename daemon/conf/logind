@@ -1,0 +1,97 @@
+#!/bin/sh
+#
+# daemon - http://libslack.org/daemon/
+#
+# Copyright (C) 1999-2004, 2010, 2020-2021 raf <raf@raf.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+#
+
+# Enable/disable support for systemd-logind or elogind (Linux only)
+#
+# 20210304 raf <raf@raf.org>
+
+if [ x"$1" = x--enable ]
+then
+	# Look for libsystemd (e.g. Debian)
+
+	src="conf/test_logind.c"
+	out="conf/test_logind"
+
+	${CC:-gcc} -o $out $src -lsystemd 2>/dev/null
+	rc=$?
+	rm -f $out
+
+	if [ $rc = 0 ]
+	then
+		echo Configuring libsystemd
+
+		perl -pi \
+			-e 's/^# (DAEMON_LIBS \+= systemd)/$1/;' \
+			macros.mk
+
+		perl -pi \
+			-e 's/^\/\* #undef (HAVE_LOGIND) \*\/$/#define $1 1/;' \
+			config.h
+
+		exit 0
+	fi
+
+	# Look for libelogind and /usr/include/elogind (e.g. Slackware)
+
+	${CC:-gcc} -I/usr/include/elogind -o $out $src -lelogind 2>/dev/null
+	rc=$?
+	rm -f $out
+
+	if [ $rc = 0 ]
+	then
+		echo Configuring libelogind
+
+		perl -pi \
+			-e 's{^# (DAEMON_INCDIRS \+= /usr/include/elogind)$}{$1};' \
+			Makefile
+
+		perl -pi \
+			-e 's/^# (DAEMON_LIBS \+= elogind)/$1/;' \
+			macros.mk
+
+		perl -pi \
+			-e 's/^\/\* #undef (HAVE_LOGIND) \*\/$/#define $1 1/;' \
+			config.h
+
+		exit 0
+	fi
+
+	echo "Failed to find libsystemd or libelogind and headers"
+fi
+
+if [ x"$1" = x--disable ]
+then
+	perl -pi \
+		-e 's{^(DAEMON_INCDIRS \+= /usr/include/elogind)$}{# $1};' \
+		Makefile
+
+	perl -pi \
+		-e 's/^(DAEMON_LIBS \+= systemd)/# $1/;' \
+		-e 's/^(DAEMON_LIBS \+= elogind)/# $1/;' \
+		macros.mk
+
+	perl -pi \
+		-e 's/^#define (HAVE_LOGIND) 1$/\/* #undef $1 *\//;' \
+		config.h
+
+	exit 0
+fi
+
+# vi:set ts=4 sw=4:

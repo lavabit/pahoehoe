@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -120,10 +120,11 @@ g =
 
 =item C<int daemon_started_by_init(void)>
 
-If this process was started by I<init(8)>, returns 1. If not, returns C<0>.
-If it was, we might be getting respawned so I<fork(2)> and I<exit(2)> would
-be a big mistake (and unnecessary anyway since there is no controlling
-terminal). On error, returns C<-1> with C<errno> set appropriately.
+If this process was started by I<init(8)> (i.e. if the parent process id is
+1), returns 1. If not, returns C<0>. If it was, we might be getting
+respawned so I<fork(2)> and I<exit(2)> would be a big mistake (and
+unnecessary anyway, since there is no controlling terminal). On error,
+returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -138,11 +139,11 @@ int daemon_started_by_init(void)
 
 =item C<int daemon_started_by_inetd(void)>
 
-If this process was started by I<inetd(8)>, returns C<1>. If not, returns
-C<0>. On error, returns C<-1> with C<errno> set appropriately. If it was,
-C<stdin>, C<stdout> and C<stderr> would be opened to a socket. Closing them
-would be a big mistake. We also would not need to I<fork(2)> and I<exit(2)>
-because there is no controlling terminal.
+If this process was started by I<inetd(8)> (i.e. if I<stdin> is a socket),
+returns C<1>. If not, returns C<0>. On error, returns C<-1> with C<errno>
+set appropriately. If it was, C<stdin>, C<stdout> and C<stderr> would be
+opened to a socket. Closing them would be a big mistake. We also would not
+need to I<fork(2)> and I<exit(2)> because there is no controlling terminal.
 
 =cut
 
@@ -161,8 +162,8 @@ int daemon_started_by_inetd(void)
 =item C<int daemon_prevent_core(void)>
 
 Prevents core files from being generated. This is used to prevent leaking
-sensitive information in daemons run by root. On success, returns C<0>. On
-error, returns C<-1> with C<errno> set appropriately.
+sensitive information in daemons run by I<root>. On success, returns C<0>.
+On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -185,15 +186,15 @@ int daemon_prevent_core(void)
 =item C<int daemon_revoke_privileges(void)>
 
 Revokes setuid and setgid privileges. Useful when your program does not
-require any special privileges and may become unsafe if incorrectly
+require any special privileges, and may become unsafe if incorrectly
 installed with special privileges. Also useful when your program only
-requires special privileges upon startup (e.g. binding to a privileged
-socket). Performs the following: Sets the effective gid to the real gid if
-they differ. Checks that they no longer differ. Sets the effective uid to
-the real uid if they differ. Checks that they no longer differ. Also closes
-/etc/passwd and /etc/group in case they were opened by root and give access
-to user and group passwords. On success, returns C<0>. On error, returns
-C<-1> with C<errno> set appropriately.
+requires special privileges initially upon startup (e.g. binding to a
+privileged socket). Performs the following tasks: Sets the effective gid to
+the real gid if they differ. Checks that they no longer differ. Sets the
+effective uid to the real uid if they differ. Checks that they no longer
+differ. Also closes /etc/passwd and /etc/group in case they were opened by
+I<root> and give access to user and group passwords. On success, returns
+C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -222,11 +223,11 @@ int daemon_revoke_privileges(void)
 
 =item C<int daemon_become_user(uid_t uid, gid_t gid, char *user)>
 
-Changes the owner and group of the process to C<uid> and C<gid>
+Changes the owner and group of the process to C<uid> and C<gid>,
 respectively. If C<user> is not null, the supplementary group list will be
 initialised with I<initgroups(3)>. Otherwise, the supplementary group list
-will be cleared of all groups. On success, returns 0. On error, returns -1.
-Only root can use this function.
+will be cleared of all groups. On success, returns C<0>. On error, returns
+C<-1> with C<errno> set appropriately. Only I<root> can use this function.
 
 =cut
 
@@ -263,10 +264,12 @@ int daemon_become_user(uid_t uid, gid_t gid, char *user)
 
 Returns C<path> converted into an absolute path. Cleans up any C<.> and
 C<..> and C<//> and trailing C</> found in the returned path. Note that the
-returned path looks canonical but isn't because symbolic links are not
+returned path looks canonical but isn't, because symbolic links are not
 followed and expanded. It is the caller's responsibility to deallocate the
-path returned with I<mem_release(3)> or I<free(3)>. On success, returns the
-absolute path. On error, returns C<null> with C<errno> set appropriately.
+path returned with I<free(3)> or I<mem_release(3)> or I<mem_destroy(3)>. It
+is strongly recommended to use I<mem_destroy(3)>, because it also sets the
+pointer variable to C<null>. On success, returns the absolute path. On
+error, returns C<null> with C<errno> set appropriately.
 
 =cut
 
@@ -379,16 +382,16 @@ char *daemon_absolute_path(const char *path)
 
 =item C<int daemon_path_is_safe(const char *path, char *explanation, size_t explanation_size)>
 
-Checks that the file referred to by C<path> is not group or world writable.
-Also checks that the containing directories are not group or world writable,
-following symbolic links. Useful when you need to know whether or not you
-can trust a user supplied configuration/command file before reading and
-acting upon its contents. On success, returns 1 if C<path> is safe or 0 if
-it is not. When the path is not safe, an explanation is written to the
-C<explanation> buffer (if it is not C<null>). No more than
-C<explanation_size> bytes including the terminating C<nul> byte will be
-written to the C<explanation> buffer. On error, returns C<-1> with C<errno>
-set appropriately.
+Checks that the file referred to by C<path> is not group- or world-writable.
+Also checks that the containing directories are not group- or
+world-writable, following symbolic links. Useful when you need to know
+whether or not you can trust a user supplied configuration/command file
+before reading and acting upon its contents. On success, returns C<1> if
+C<path> is safe or C<0> if it is not. When the path is not safe, an
+explanation is written to the C<explanation> buffer (if it is not C<null>).
+No more than C<explanation_size> bytes including the terminating C<nul> byte
+will be written to the C<explanation> buffer. On error, returns C<-1> with
+C<errno> set appropriately.
 
 =cut
 
@@ -472,10 +475,10 @@ static int daemon_check_path(char *path, char *explanation, size_t explanation_s
 		{
 			if (explanation)
 			{
-				snprintf(explanation, explanation_size, "%s is %s%s%s writable", path,
-					(status->st_mode & S_IWGRP) ? "group" : "",
+				snprintf(explanation, explanation_size, "%s is %s%s%swritable", path,
+					(status->st_mode & S_IWGRP) ? "group-" : "",
 					((status->st_mode & (S_IWGRP | S_IWOTH)) == (S_IWGRP | S_IWOTH)) ? " and " : "",
-					(status->st_mode & S_IWOTH) ? "world" : ""
+					(status->st_mode & S_IWOTH) ? "world-" : ""
 				);
 			}
 
@@ -513,12 +516,13 @@ int daemon_path_is_safe(const char *path, char *explanation, size_t explanation_
 
 Parses the text configuration file named C<path>. Blank lines are ignored.
 Comments (C<'#'> to end of line) are ignored. Lines that end with C<'\'> are
-joined with the following line. There may be whitespace and even a comment
-after the C<'\'> character but nothing else. The C<parser> function is
-called with the client supplied C<obj>, the file name, the line and the line
-number as arguments. On success, returns C<obj>. On error, returns C<null>
-(i.e. if the configuration file could not be read). Note: Don't parse config
-files unless they are "safe" as determined by I<daemon_path_is_safe(3)>.
+joined with the following line. There may be whitespace characters, and even
+a comment, after the C<'\'> character, but nothing else. The C<parser>
+function is called with the client supplied C<obj>, the file name, the line
+and the line number as arguments. On success, returns C<obj>. On error,
+returns C<null> (i.e. if the configuration file could not be read). Note:
+Don't parse config files unless they are "safe" as determined by
+I<daemon_path_is_safe(3)>.
 
 =cut
 
@@ -591,7 +595,7 @@ C<int daemon_construct_pidfile(const char *name, char **pidfile)>
 
 Constructs the pidfile for the given C<name> in C<pidfile>. If C<name> is
 already an absolute path, it is just copied into the new buffer directly. On
-success, returns C<0> and the resulting buffer in C<pidfile> must be
+success, returns C<0>, and the resulting buffer in C<pidfile> must be
 deallocated by the caller. On error, returns C<-1> with C<errno> set
 appropriately.
 
@@ -603,6 +607,8 @@ static int daemon_construct_pidfile(const char *name, char **pidfile)
 	const char *pid_dir;
 	char *suffix = ".pid";
 	size_t size;
+
+	/* Copnstruct the pidfile */
 
 	path_len = limit_path();
 	pid_dir = (getuid()) ? USER_PID_DIR : ROOT_PID_DIR;
@@ -779,14 +785,14 @@ static int daemon_pidfile_unlocked(const char *name)
 
 Creates a pid file for a daemon and locks it. The file has one line
 containing the process id of the daemon. The well-known locations for the
-file is defined in C<ROOT_PID_DIR> for root (C<"/var/run"> by default) and
-C<USER_PID_DIR> for all other users (C<"/tmp"> by default). The name of the
-file is the name of the daemon (given by the I<name> argument) followed by
-C<".pid"> (If I<name> is an absolute file path, it is used as is). The
+file is defined in C<ROOT_PID_DIR> for I<root> (C<"/var/run"> by default)
+and C<USER_PID_DIR> for all other users (C<"/tmp"> by default). The name of
+the file is the name of the daemon (given by the I<name> argument) followed
+by C<".pid"> (If I<name> is an absolute file path, it is used as is). The
 presence of this file will prevent two daemons with the same name from
 running at the same time. On success, returns C<0>. On error, returns C<-1>
 with C<errno> set appropriately. B<Note:> This is called by
-I<daemon_init(3)> so there is usually no need to call this function
+I<daemon_init(3)>, so there is usually no need to call this function
 directly.
 
 =cut
@@ -814,8 +820,8 @@ Initialises a daemon by performing the following tasks:
 
 =item *
 
-If the process was not invoked by I<init(8)> (i.e. pid 1) or I<inetd(8)>
-(i.e. C<stdin> is a socket):
+If the process was not invoked by I<init(8)> (i.e. parent process id is 1)
+or I<inetd(8)> (i.e. C<stdin> is a socket):
 
 =over 4
 
@@ -841,20 +847,21 @@ Start a new process session.
 =item *
 
 Background the process again to lose process session leadership. Under
-C<SVR4> this prevents the process from ever gaining a controlling terminal.
-This is only necessary under C<SVR4> but is always done for simplicity. Note
-that ignoring C<SIGHUP> signals earlier means that when the newly created
-process session leader terminates, then even if it has a controlling
+I<SVR4>, this prevents the process from ever gaining a controlling terminal.
+This is only necessary under I<SVR4>, but is always done for simplicity.
+Note that ignoring C<SIGHUP> signals earlier means that when the newly
+created process session leader terminates, then even if it has a controlling
 terminal open, the newly backgrounded process won't receive the
 corresponding C<SIGHUP> signal that is sent to all processes in the process
-session's foreground process group because it inherited signal dispositions
+session's foreground process group, because it inherited signal dispositions
 from the initial process.
 
 =back
 
 =item *
 
-Change directory to the root directory so as not to hamper umounts.
+Change the current directory to the root directory so as not to hamper
+umounts.
 
 =item *
 
@@ -863,7 +870,7 @@ Clear the umask to enable explicit file creation modes.
 =item *
 
 Close all open file descriptors. If the process was invoked by I<inetd(8)>,
-C<stdin>, C<stdout> and C<stderr> are left open since they are open to a
+C<stdin>, C<stdout> and C<stderr> are left open, because they are open to a
 socket.
 
 =item *
@@ -877,8 +884,9 @@ invoked by I<inetd(8)>.
 If C<name> is non-null, create and lock a file containing the process id of
 the process. The presence of this locked file prevents two instances of a
 daemon with the same name from running at the same time. The default
-location of the pidfile is C</var/run> for I<root> or C</tmp> for ordinary
-users.
+location of the pidfile is C</var/run> for I<root> (C</etc> on I<Solaris>,
+C</opt/local/var/run> on I<macOS> when installed via I<macports>), and
+C</tmp> for ordinary users.
 
 =back
 
@@ -1090,7 +1098,7 @@ int daemon_close(void)
 
 =item C<pid_t daemon_getpid(const char *name)>
 
-Return the process id of the daemon with the given C<name>. If the daemon in
+Returns the process id of the daemon with the given C<name>. If the daemon in
 question is owned by I<root>, then this function must be invoked by I<root>.
 Similarly, if the daemon in question is owned by an ordinary user, then this
 function must be invoked by an ordinary user. If C<name> is the absolute
@@ -1213,7 +1221,7 @@ int daemon_is_running(const char *name)
 
 =item C<int daemon_stop(const char *name)>
 
-Stop a daemon process with the given C<name> by sending it a C<SIGTERM>
+Stops a daemon process with the given C<name> by sending it a C<SIGTERM>
 signal. If the daemon in question is owned by I<root>, then this function
 must be invoked by I<root>. Similarly, if the daemon in question is owned by
 an ordinary user, then this function must be invoked by that user. Note that
@@ -1301,7 +1309,7 @@ int daemon_stop(const char *name)
 =head1 ERRORS
 
 Additional errors may be generated and returned from the underlying system
-calls. See their manual pages.
+calls. See their manual pages for details.
 
 =over 4
 
@@ -1327,7 +1335,7 @@ name.
 
 =head1 MT-Level
 
-MT-Safe
+I<MT-Safe>
 
 =head1 EXAMPLE
 
@@ -1407,7 +1415,7 @@ in C</tmp> by defining C<ROOT_PID_DIR> and C<USER_PID_DIR> to both be
 C</tmp>.
 
 The exclusive creation and locking of the pidfile doesn't work correctly
-over NFS on Linux so pidfiles must reside locally.
+over I<NFS> on I<Linux> so pidfiles must reside locally.
 
 I<daemon_path_is_safe(3)> ignores ACLs (so does I<sendmail(8)>). It should
 probably treat a path as unsafe if there are any ACLs (allowing extra
@@ -1419,10 +1427,11 @@ I<daemon_path_is_safe(3)> and I<daemon_parse_config(3)> should probably all
 have the I<daemon_> prefix removed from their names. Their use is more
 general than just in daemons.
 
-If you use "exec daemon" to run a KDE application you may find that the KDE
-application sometimes doesn't run. This problem has only been seen with I<konsole(1)>
-but it may happen with other KDE applications as well. Capturing the standard
-error of the KDE application might show something like:
+If you use "exec daemon" to run a I<KDE> application you may find that the
+I<KDE> application sometimes doesn't run. This problem has only been seen
+with I<konsole(1)> but it may happen with other I<KDE> applications as well.
+Capturing the standard error of the I<KDE> application might show something
+like:
 
   unnamed app(9697): KUniqueApplication: Registering failed!
   unnamed app(9697): Communication problem with  "konsole" , it probably crashed. 
@@ -1455,7 +1464,7 @@ I<kill(2))>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 
@@ -1776,11 +1785,11 @@ int main(int ac, char **av)
 	{ \
 		char *result = daemon_absolute_path(path); \
 		if (!result) \
-			++errors, printf("Test%d: absolute_path(%s) failed (%s)\n", (i), (path), strerror(errno)); \
+			++errors, printf("Test%d: daemon_absolute_path(%s) failed (%s)\n", (i), (path), strerror(errno)); \
 		else if (strcmp(result, (abs_path))) \
 		{ \
 			struct stat result_status[1], abs_status[1]; \
-			++errors, printf("Test%d: absolute_path(%s) failed (was %s, not %s)\n", (i), (path), result, (abs_path)); \
+			++errors, printf("Test%d: daemon_absolute_path(%s) failed (was %s, not %s)\n", (i), (path), result, (abs_path)); \
 			printf("\n"); \
 			if (stat(result, result_status) != -1 && stat(abs_path, abs_status) != -1 && result_status->st_ino == abs_status->st_ino) \
 				printf("        But they have the same inode (%d)\n", (int)abs_status->st_ino); \
@@ -1826,14 +1835,14 @@ int main(int ac, char **av)
 #define TEST_PATH_IS_SAFE(i, path, safe, err, explanation) \
 	{ \
 		int rc; \
-		char buf[128]; \
+		char buf[1024]; \
 		errno = 0; \
-		if ((rc = daemon_path_is_safe(path, buf, 128)) != (safe)) \
+		if ((rc = daemon_path_is_safe(path, buf, sizeof(buf))) != (safe)) \
 		{ \
 			struct stat status[1]; \
 			++errors, printf("Test%d: daemon_path_is_safe(%s) failed (ret %d, not %d) %s\n", (i), (path), rc, (safe), errno ? strerror(errno) : ""); \
 			if (stat(ROOT_DIR, status) != -1 && status->st_mode & (S_IWGRP | S_IWOTH)) \
-				printf("\n        No Wonder! Your %s directory is %s writable!!!\n\n", ROOT_DIR, (status->st_mode & S_IWOTH) ? "world" : "group"); \
+				printf("\n        No Wonder! Your %s directory is %s-writable!!!\n\n", ROOT_DIR, (status->st_mode & S_IWOTH) ? "world" : "group"); \
 		} \
 		else if (rc == -1 && errno != (err)) \
 			++errors, printf("Test%d: daemon_path_is_safe(%s) failed (errno was %d, not %d)\n", (i), (path), errno, (err)); \
@@ -1842,7 +1851,7 @@ int main(int ac, char **av)
 	}
 
 	TEST_PATH_IS_SAFE(25, "/etc/passwd", 1, 0, "")
-	TEST_PATH_IS_SAFE(26, "/tmp", 0, 0, "/tmp is group and world writable")
+	TEST_PATH_IS_SAFE(26, "/tmp", 0, 0, "/tmp is group- and world-writable")
 	TEST_PATH_IS_SAFE(27, "/nonexistent-path", -1, ENOENT, "")
 
 	if (daemon_path_is_safe(".", NULL, 0) != 1)
@@ -1861,13 +1870,13 @@ int main(int ac, char **av)
 		else
 		{
 			close(fd);
-			TEST_PATH_IS_SAFE(28, sym_linked, 0, 0, "/tmp is group and world writable")
+			TEST_PATH_IS_SAFE(28, sym_linked, 0, 0, "/tmp is group- and world-writable")
 
 			if (symlink(sym_linked, sym_link) == -1)
 				++errors, printf("Test28: Failed to run test: symlink(%s, %s) failed %s\n", sym_linked, sym_link, strerror(errno));
 			else
 			{
-				TEST_PATH_IS_SAFE(28, sym_link, 0, 0, "/tmp is group and world writable")
+				TEST_PATH_IS_SAFE(28, sym_link, 0, 0, "/tmp is group- and world-writable")
 
 				if (unlink(sym_link) == -1)
 					++errors, printf("Test28: Failed to unlink(%s): %s\n", sym_link, strerror(errno));
@@ -1913,7 +1922,7 @@ int main(int ac, char **av)
 					++errors, printf("Test30: symlink(../unsafedir, safedir/unsafelink) failed: %s\n", strerror(errno));
 				else
 				{
-					TEST_PATH_IS_SAFE(30, "safedir/unsafelink", 0, 0, "/unsafedir is group writable")
+					TEST_PATH_IS_SAFE(30, "safedir/unsafelink", 0, 0, "/unsafedir is group-writable")
 
 					if (unlink("safedir/unsafelink") == -1)
 						++errors, printf("Test30: Failed to unlink(safedir/unsafelink): %s\n", strerror(errno));
@@ -1945,7 +1954,7 @@ int main(int ac, char **av)
 					++errors, printf("Test31: Failed to run test: mkdir(unsafelink/unsafedir) failed: %s\n", strerror(errno));
 				else
 				{
-					TEST_PATH_IS_SAFE(31, "unsafelink/unsafedir", 0, 0, "/unsafedir is group writable")
+					TEST_PATH_IS_SAFE(31, "unsafelink/unsafedir", 0, 0, "/unsafedir is group-writable")
 
 					if (rmdir("unsafelink/unsafedir") == -1)
 						++errors, printf("Test31: Failed to rmdir(unsafelink/unsafedir): %s\n", strerror(errno));

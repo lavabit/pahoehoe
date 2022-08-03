@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2002, 2004, 2010, 2020 raf <raf@raf.org>
+* Copyright (C) 1999-2002, 2004, 2010, 2020-2021 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, see <https://www.gnu.org/licenses/>.
 *
-* 20201111 raf <raf@raf.org>
+* 20210220 raf <raf@raf.org>
 */
 
 /*
@@ -136,11 +136,13 @@ I<libslack(net)> - network module
 =head1 DESCRIPTION
 
 This module provides functions that create client and server sockets (IPv4,
-IPv6 and UNIX domain sockets, stream or datagram), that expect and send text
-dialogues, and that pack and unpack packets according to templates. IPv4 and
-IPv6 multicasting is supported. Reliability over UDP is provided. There are
-also a function to send mail and functions to send and receive open file
-descriptors via UNIX domain sockets from one process to another.
+IPv6, and UNIX domain sockets, stream or datagram), that expect and send
+text dialogues/protocols, and that pack and unpack packets according to
+templates. IPv4 and IPv6 multicasting is supported. Reliability over UDP is
+provided. There are also a function to send mail, and functions to send and
+receive open file descriptors via UNIX domain sockets from one process to
+another, and functions to send and receive user credentials via UNIX domain
+sockets (if supported by the operating system).
 
 =over 4
 
@@ -265,14 +267,14 @@ If C<interface> is C<null>, connections will be accepted on all local
 network interfaces. Otherwise, connections will only be accepted on the
 specified interface (as determined by I<gethostbyname(3)>).
 
-If C<service> is non-C<null> and is either numeric or is a service name (as
-determined by I<getservbyname(3)>), the specified port is used. Otherwise,
-C<port> (which must be in host byte order) is used.
+If C<service> is non-C<null>, and is either numeric, or is a service name
+(as determined by I<getservbyname(3)>), the specified port is used.
+Otherwise, C<port> (which must be in host byte order) is used.
 
 If C<interface> is equal to C<"/unix"> and C<service> is an absolute file
 system path, the server socket created will be a I<UNIX domain stream
 socket>. Otherwise, a TCP server socket is created. If the C<RES_OPTIONS>
-environment variable exists and contains the string C<"inet6"> or the
+environment variable exists and contains the string C<"inet6">, or the
 C</etc/resolv.conf> file contains the C<inet6> option, the TCP socket will
 be an IPv6 socket. Otherwise, it will be an IPv4 socket.
 
@@ -339,7 +341,7 @@ int net_server(const char *interface, const char *service, sockport_t port, int 
 
 Creates a TCP client socket and connects to the server listening at C<host>
 (as determined by I<gethostbyname(3)>) on the port number specified by
-C<service>. C<service> must either be numeric or a service name as
+C<service>. C<service> must either be numeric, or a service name as
 determined by I<getservbyname(3)>. Otherwise, the port number to connect to
 is given by C<port> (which must be in host byte order). If C<host> is
 C<null>, the client socket connects to the loopback address.
@@ -347,17 +349,17 @@ C<null>, the client socket connects to the loopback address.
 If C<host> is equal to C<"/unix"> and C<service> is an absolute file system
 path, the client socket created will be a I<UNIX domain stream socket>.
 Otherwise, a TCP client socket is created. If the C<RES_OPTIONS> environment
-variable exists and contains the string C<"inet6"> or the
+variable exists and contains the string C<"inet6">, or the
 C</etc/resolv.conf> file contains the C<inet6> option, the TCP socket will
 be an IPv6 socket. Otherwise, it will be an IPv4 socket.
 
 If C<timeout> is non-zero, it specifies the number of seconds after which to
 timeout the attempt to connect to the specified server. This can be useful
 if the client may attempt to connect to a service that is blocked by a
-firewall that drops its packets or if the host you are connecting to does
-not protect itself from SYN floods. The native TCP timeouts are very long
-(usually minutes) when faced with an unresponsive network and you may not
-want your programs or their users to wait that long.
+firewall that drops its packets or if the host that you are connecting to
+does not protect itself from SYN floods. The native TCP timeouts are very
+long (usually minutes) when faced with an unresponsive network and you may
+not want your programs or their users to wait that long.
 
 If C<rcvbufsz> is non-zero, the socket's receive buffer size is set to this
 size. Note that you may not get the size you request. If this is important,
@@ -371,7 +373,7 @@ If C<addr> and C<addrsize> are not C<null>, the address of the peer is
 stored in the buffer pointed to by C<addr>. C<*addrsize> specifies the size
 of the buffer pointed to by C<addr>. If there is insufficient space, the
 peer's address is not stored in C<addr>. If C<addrsize> is not C<null>, the
-size of the address is stored there.
+size of the peer's address is stored there.
 
 On success, returns the new socket descriptor. On error, returns C<-1> with
 C<errno> set appropriately.
@@ -688,7 +690,7 @@ int net_create_server(const char *interface, const char *service, sockport_t por
 	if (bind(sockfd, localaddr, localsize) == -1)
 		return close(sockfd), -1;
 
-	/* If connection oriented, listen */
+	/* If connection-oriented, listen */
 
 	if (type == SOCK_STREAM && listen(sockfd, 1024) == -1)
 		return close(sockfd), -1;
@@ -1098,7 +1100,7 @@ receive multicast packets. Otherwise, the kernel will choose the interface
 on which to receive multicast packets based on the routing table (which is
 the default behaviour). A multicast socket may join the same group on
 multiple interfaces by subsequent calls to I<net_multicast_join(3)>. Note
-that there is a system imposed limit on the number of times a socket may
+that there is a system-imposed limit on the number of times a socket may
 join a multicast group (this limit can be about 20). On success, returns
 C<0>. On error, returns C<-1> with C<errno> set appropriately.
 
@@ -1679,8 +1681,10 @@ int net_tos_lowdelay(int sockfd)
 
 Sets the TOS bits of packets sent on C<sockfd> to request maximum
 throughput. This is for bulk data transfers. Don't forget to also specify
-buffer sizes that are large enough to maximise throughput. On success,
-returns C<0>. On error, returns C<-1> with C<errno> set appropriately.
+buffer sizes that are large enough to maximise throughput. However, be
+warned that this might not be wise on asymmetric links, because large
+buffers can lead to bufferbloat. On success, returns C<0>. On error, returns
+C<-1> with C<errno> set appropriately.
 
 =cut
 
@@ -1758,15 +1762,15 @@ int net_tos_normal(int sockfd)
 
 =item C<struct hostent *net_gethostbyname(const char *name, struct hostent *hostbuf, void **buf, size_t *size, int *herrno)>
 
-A portable, reentrant I<gethostbyname(3)> that handles it's own memory
+A portable, reentrant I<gethostbyname(3)> that handles its own memory
 allocation requirements. Looks up I<name>. On success, returns C<hostbuf>
 with any extra data in C<*buf>. C<*size> is the length of C<*buf> on entry
 and is updated to reflect the length on exit if a larger buffer was required
 to perform the lookup. On error, returns C<null> with C<*herrno> set
 appropriately if there was a lookup failure or with C<errno> set
 appropriately if there was a memory allocation failure. It is the caller's
-responsibility to deallocate C<*buf> using I<free(3)> when the lookup failed
-or when the results of the name lookup are no longer required.
+responsibility to deallocate C<*buf> using I<free(3)> when the lookup
+failed, or when the results of the name lookup are no longer required.
 
 Note: If your system has any version of I<gethostbyname_r(3)>, it will be
 used. Otherwise, I<gethostbyname(3)> will be used. Even this might be
@@ -1878,13 +1882,13 @@ struct hostent *net_gethostbyname(const char *name, struct hostent *hostbuf, voi
 
 =item C<struct servent *net_getservbyname(const char *name, const char *proto, struct servent *servbuf, void **buf, size_t *size)>
 
-A portable, reentrant I<getservbyname(3)> that handles it's own memory
+A portable, reentrant I<getservbyname(3)> that handles its own memory
 allocation requirements. Looks up the service C<name> and C<proto>. On
 success, returns C<servbuf> with any extra data in C<*buf>. C<*size> is the
 length of C<*buf> on entry and is updated to reflect the length on exit if a
 larger buffer was required to perform the lookup. On error, returns C<null>
 with C<errno> set appropriately. It is the caller's responsibility to
-deallocate C<*buf> using I<free(3)> when the lookup failed or when the
+deallocate C<*buf> using I<free(3)> when the lookup failed, or when the
 results of the name lookup are no longer required.
 
 Note: If your system has any version of I<getservbyname_r(3)>, it will be
@@ -2040,7 +2044,7 @@ address, broadcast address if applicable, destination address if applicable,
 MTU and index. On success, returns a list of I<net_interface_t> objects. It
 is the caller's responsibility to deallocate the list with
 I<list_release(3)>. On error, returns C<null> with C<errno> set
-appropriately. Note that on Solaris, neither the hardware address nor the
+appropriately. Note that on I<Solaris>, neither the hardware address nor the
 index can be returned. This function guesses the index in this case which
 seems to work. If the C<RES_OPTIONS> environment variable contains the
 string C<"inet6">, then only IPv6 interfaces are returned. Otherwise, only
@@ -2328,13 +2332,15 @@ List *net_interfaces_by_family_with_locker(int family, Locker *locker)
 
 =item C<rudp_t *rudp_create(void)>
 
-Allocates and initialises a retransmission timeout estimator for providing
-reliability over UDP. It is the caller's responsibility to deallocate the
-estimator using I<rudp_release(3)> or I<rudp_destroy(3)>. Note that each
-retransmission timer may only be used for a single destination address. If a
-UDP socket communicates with multiple peers, a separate estimator must be
-used for each peer. On success, returns the RTO estimator. On error, returns
-C<null> with C<errno> set appropriately. See the EXAMPLES section.
+Allocates and initialises a retransmission timeout (RTO) estimator for
+providing reliability over UDP. It is the caller's responsibility to
+deallocate the estimator using I<rudp_release(3)> or I<rudp_destroy(3)>. It
+is strongly recommended to use I<rudp_destroy(3)>, because it also sets the
+pointer variable to C<null>. Note that each retransmission timer may only be
+used for a single destination address. If a UDP socket communicates with
+multiple peers, a separate estimator must be used for each peer. On success,
+returns the RTO estimator. On error, returns C<null> with C<errno> set
+appropriately. See the I<EXAMPLES> section.
 
 =cut
 
@@ -2395,7 +2401,8 @@ rudp_t *rudp_create(void)
 
 =item C<void rudp_release(rudp_t *rudp)>
 
-Releases (deallocates) the RTO estimator, C<rudp>. See the EXAMPLES section.
+Releases (deallocates) the RTO estimator, C<rudp>. See the I<EXAMPLES>
+section.
 
 =cut
 
@@ -2432,10 +2439,11 @@ void *rudp_destroy(rudp_t **rudp)
 
 C<uint32_t rudp_timestamp(rudp_t *rudp)>
 
-Returns the number of milliseconds since C<rudp> was created in a 32 bit
+Returns the number of milliseconds since C<rudp> was created in a 32-bit
 integer. This number needs to be stored in reliable UDP packet headers so
 that the round trip time can be calculated. On error, returns
-C<(uint32_t)-1> with C<errno> set appropriately. See the EXAMPLES section.
+C<(uint32_t)-1> with C<errno> set appropriately. See the I<EXAMPLES>
+section.
 
 */
 
@@ -2457,10 +2465,10 @@ static uint32_t rudp_timestamp(rudp_t *rudp)
 C<uint32_t rudp_newpack(rudp_t *rudp)>
 
 Prepares the RTO estimator, C<rudp>, for a new packet that is about to be
-sent and returns a 32 bit sequence number for this new packet. This number
+sent, and returns a 32-bit sequence number for this new packet. This number
 needs to be stored in reliable UDP packet headers so that the round trip
 time can be calculated. On error, returns C<(uint32_t)-1> with C<errno> set
-appropriately. See the EXAMPLES section.
+appropriately. See the I<EXAMPLES> section.
 
 */
 
@@ -2480,7 +2488,8 @@ static uint32_t rudp_newpack(rudp_t *rudp)
 C<double rudp_start(rudp_t *rudp)>
 
 Returns C<rudp>'s current retransmission timeout in seconds. On error,
-returns C<-1.0> with C<errno> set appropriately. See the EXAMPLES section.
+returns C<-1.0> with C<errno> set appropriately. See the I<EXAMPLES>
+section.
 
 */
 
@@ -2499,7 +2508,7 @@ C<int rudp_stop(rudp_t *rudp, uint32_t rtt)>
 Updates the RTO estimator C<rudp>. C<rtt> is the round trip time in
 milliseconds. Call this after successfully receiving a response to a
 reliable UDP packet. On success, returns C<0>. On error, returns C<-1> with
-C<errno> set appropriately. See the EXAMPLES section.
+C<errno> set appropriately. See the I<EXAMPLES> section.
 
 */
 
@@ -2524,10 +2533,10 @@ static int rudp_stop(rudp_t *rudp, uint32_t rtt)
 C<int rudp_timeout(rudp_t *rudp)>
 
 Informs C<rudp> that its retransmission timer has expired. This causes
-C<rudp>'s RTO to double until the retransmission limit (3) is reached at
+C<rudp>'s RTO to double until the retransmission limit (C<3>) is reached, at
 which point it returns C<-1> with C<errno> set to C<ETIMEDOUT>. On success,
 returns C<0>. On error, returns C<-1> with C<errno> set appropriately. See
-the EXAMPLES section.
+the I<EXAMPLES> section.
 
 */
 
@@ -2552,14 +2561,14 @@ Provides reliable (not infallible) UDP transactions over C<sockfd>, a socket
 created with I<net_udp_client(3)> or I<net_create_client>. Sends C<osize>
 bytes, starting at C<obuf>, to the address to which C<sockfd> is connected.
 C<rudp> is the retransmission timeout estimator as created by
-I<rudp_create(3)>. The message is prepended by an 8 byte header that
+I<rudp_create(3)>. The message is prepended by an C<8> byte header that
 contains a timestamp and a sequence number. This is required to enable
 calculation of the RTT. The peer must expect this header and include it
 verbatim in its response. Note that the same retransmission timeout
 estimator (C<rudp>) should be used for all transactions. Waits for a
 response. If the retransmission timer expires before a response is received,
-the retransmission timer is updated and the packet is retransmitted. This
-continues until either a response is received or the packet has been
+the retransmission timer is updated, and the packet is retransmitted. This
+continues until either a response is received, or the packet has been
 retransmitted three times with no response. If there is a response, at most
 I<isize> bytes are received in C<ibuf>. On success, returns the number of
 bytes received. On error, returns C<-1> with C<errno> set appropriately.
@@ -2586,7 +2595,7 @@ passed to I<recvmsg(2)> as the C<flags> argument. Note that each
 retransmission timer may only be used for a single destination address. If a
 UDP socket communicates with multiple peers, a separate estimator must be
 used for each peer. On success, returns the number of bytes received. On
-error, returns C<-1> with C<errno> set appropriately. The EXAMPLES section
+error, returns C<-1> with C<errno> set appropriately. The I<EXAMPLES> section
 below contains the code for this function.
 
 =cut
@@ -2697,13 +2706,13 @@ recvagain:
 =item C<ssize_t net_pack(int sockfd, long timeout, int flags, const char *format, ...)>
 
 Creates a packet containing data packed by I<pack(3)> as specified by
-C<format> and sends it on the connected socket, C<sockfd>, with I<send(2)>.
+C<format>, and sends it on the connected socket, C<sockfd>, with I<send(2)>.
 If C<timeout> is non-zero, it is the number of seconds to wait for the send
 buffer to have enough space for the new data before timing out (This only
 applies to TCP sockets since UDP has no send buffer). C<flags> is passed to
-I<send(2)>. This is intended for use with UDP. It can work reliably with TCP
-but only when the application protocol involves each peer packing and
-unpacking alternatively, each waiting for the other's response before making
+I<send(2)>. This is intended for use with UDP. It can work reliably with
+TCP, but only when the application protocol involves each peer packing and
+unpacking alternately, each waiting for the other's response before making
 their next response. On success, returns the number of bytes packed and
 sent. On error, returns C<-1> with C<errno> set appropriately.
 
@@ -2759,7 +2768,7 @@ ssize_t net_vpack(int sockfd, long timeout, int flags, const char *format, va_li
 =item C<ssize_t net_packto(int sockfd, long timeout, int flags, const sockaddr_t *to, size_t tosize, const char *format, ...)>
 
 Creates a packet containing data packed by I<pack(3)> as specified by
-C<format> and sends it on the unconnected socket, C<sockfd>, to the address
+C<format>, and sends it on the unconnected socket, C<sockfd>, to the address
 specified by C<to> with length C<tosize> with I<sendto(2)>. C<flags> is
 passed to I<sendto(2)>. If C<timeout> is non-zero, it is the number of
 seconds to wait for the send buffer to have enough space for the new data
@@ -2821,9 +2830,9 @@ unpacked. On error, returns C<-1> with C<errno> set appropriately.
 Note, the I<net_unpack(3)> functions can sometimes be inappropriate as they
 inherently involve reading data into a single buffer and then copying it
 into multiple target buffers. It is much faster to not copy the data at all.
-When possible (i.e. when the data is already in network byte order), use
-I<readv(2)> instead to read into multiple non-contiguous buffers in a single
-system call.
+When possible (i.e. when the data is already in network byte order and host
+byte order are the same), use I<readv(2)> instead to read into multiple
+non-contiguous buffers in a single system call.
 
 =cut
 
@@ -2933,18 +2942,18 @@ set appropriately.
 Note, this is based on the I<pack(3)> function in I<perl(1)> (in fact, the
 following documentation is from I<perlfunc(1)>) except that the C<*> count
 specifier has different semantics, the C<?> count specifier is new, there's
-no non C<nul>-terminated strings or machine dependant formats or uuencoding
+no non C<nul>-terminated strings or machine dependent formats or uuencoding
 or BER integer compression, everything is in network byte order, and floats
 are represented as strings so I<pack(3)> is suitable for serialising data to
 be written to disk or sent across a network to other hosts. OK, C<v> and
-C<w> specifically aren't in network order but sometimes that's needed too.
+C<w> specifically aren't in network order, but sometimes that's needed too.
 
 C<format> can contain the following type specifiers:
 
     a   A string with arbitrary binary data
-    z   A nul terminated string, will be nul padded
-    b   A bit string (rounded out to nearest byte boundary)
-    h   A hexadecimal string (rounded out to nearest byte boundary)
+    z   A nul-terminated string, will be nul-padded
+    b   A bit-string (rounded out to the nearest byte boundary)
+    h   A hexadecimal string (rounded out to the nearest byte boundary)
     c   A char (8 bits)
     s   A short (16 bits)
     i   An int (32 bits)
@@ -2965,7 +2974,7 @@ length, or by C<"*"> or C<"?">. A C<"*"> will obtain the repeat count or
 length from the next argument (like I<printf(3)>). The count argument must
 appear before the first corresponding data argument. When unpacking C<"a">,
 C<"z">, C<"b"> or C<"h">, a C<"?"> will obtain the repeat count or length
-from the I<size_t> object pointed to by the next argument and the size of
+from the I<size_t> object pointed to by the next argument, and the size of
 the target buffer in the argument after that. These two arguments must
 appear before the first corresponding target buffer argument. This enables
 unpacking packets that contain length fields without risking target buffer
@@ -2976,7 +2985,7 @@ function will gobble up that many arguments.
 
 The C<"a"> and C<"z"> types gobble just one value, but pack it as a string
 of length count (specified by the corresponding number), truncating or
-padding with C<nul>s as necessary. It is the caller's responsibility to
+padding with C<nul> bytes as necessary. It is the caller's responsibility to
 ensure that the data arguments point to sufficient memory. When unpacking,
 C<"z"> strips everything after the first C<nul>, and C<"a"> returns data
 verbatim.
@@ -2992,13 +3001,14 @@ unpacked if the corresponding packed value for C<"p"> is C<null>. Of course,
 C<"p"> is useless if the packed data is to be sent over a network to another
 process.
 
-The integer formats C<"c">, C<"s">, C<"i"> and C<"l"> are all on network
-byte order and so can safely be packed for sending over a network to another
-process. However, C<"l"> relies on a non-ISO C 89 language feature (namely,
-the I<long long int> type which is in ISO C 99) and so should not be used in
-portable code, even if it is supported on the local system. There is no
-guarantee that a long long packed on one system will be unpackable on
-another. At least not until C99 is more widespread.
+The integer formats C<"c">, C<"s">, C<"i"> and C<"l"> are all in network
+byte order, and so can safely be packed for sending over a network to
+another process. However, C<"l"> relies on a non-I<ISO C 89> language
+feature (namely, the I<long long int> type which is in I<ISO C 99>), and so
+should not be used in portable code, even if it is supported on the local
+system. There is no guarantee that a long long packed on one system will be
+unpackable on another. At least not until C99 is more widespread. It should
+be OK now.
 
 Real numbers (floats and doubles) are packed in text format. Due to the
 multiplicity of floating point formats around, this is done to safely
@@ -3078,7 +3088,7 @@ ssize_t vpack(void *buf, size_t size, const char *format, va_list args)
 				break;
 			}
 
-			case 'z': /* A nul terminated string, will be nul padded */
+			case 'z': /* A nul-terminated string, will be nul padded */
 			{
 				char *data;
 				size_t len;
@@ -3342,8 +3352,8 @@ Unpacks the data in C<buf> which was packed by I<pack(3)>. C<size> is the
 size of C<buf>. C<format> must be equivalent to the C<format> argument to
 the call to I<pack(3)> that packed the data. The remaining arguments must be
 pointers to variables that will hold the unpacked data or C<null>. If any
-are C<null> the corresponding data will be skipped (i.e. not unpacked).
-Unpacked C<"z">, C<"b"> and C<"h"> strings are always C<nul> terminated. It
+are C<null>, the corresponding data will be skipped (i.e. not unpacked).
+Unpacked C<"z">, C<"b"> and C<"h"> strings are always C<nul>-terminated. It
 is the caller's responsibility to ensure that the pointers into which these
 strings are unpacked contain enough memory (count + 1 bytes). It is the
 caller's responsibility to ensure that the non-C<null> pointers into which
@@ -3440,7 +3450,7 @@ ssize_t vunpack(void *buf, size_t size, const char *format, va_list args)
 				break;
 			}
 
-			case 'z': /* A nul terminated string, will be nul padded */
+			case 'z': /* A nul-terminated string, will be nul padded */
 			{
 				char *data;
 				size_t len;
@@ -3688,10 +3698,10 @@ ssize_t vunpack(void *buf, size_t size, const char *format, va_list args)
 
 =item C<ssize_t net_read(int sockfd, long timeout, char *buf, size_t count)>
 
-Repeatedly calls I<read(2)> on the connection oriented socket, C<sockfd>,
-until C<count> bytes have been read into C<buf> or until EOF is encountered
-or until it times out (after C<timeout> seconds). On success, returns the
-number of bytes read. On error, returns C<-1> with C<errno> set
+Repeatedly calls I<read(2)> on the connection-oriented socket, C<sockfd>,
+until C<count> bytes have been read into C<buf>, or until EOF is
+encountered, or until it times out (after C<timeout> seconds). On success,
+returns the number of bytes read. On error, returns C<-1> with C<errno> set
 appropriately.
 
 =cut
@@ -3722,8 +3732,8 @@ ssize_t net_read(int sockfd, long timeout, char *buf, size_t count)
 
 =item C<ssize_t net_write(int sockfd, long timeout, const char *buf, size_t count)>
 
-Repeatedly calls I<write(2)> on the connection oriented socket, C<sockfd>,
-until C<count> bytes from C<buf> have been written or until it times out
+Repeatedly calls I<write(2)> on the connection-oriented socket, C<sockfd>,
+until C<count> bytes from C<buf> have been written, or until it times out
 (after C<timeout> seconds). On success, returns the number of bytes written.
 On error, returns C<-1>.
 
@@ -3754,19 +3764,19 @@ ssize_t net_write(int sockfd, long timeout, const char *buf, size_t count)
 
 Expects and confirms a formatted text message from a remote connection on
 the socket, C<sockfd>. C<timeout> is the number of seconds to wait before
-timing out. If C<timeout> is 0, times out immediately. On success, returns
-the number of conversions performed (see I<scanf(3)>). When the connection
-closes, returns C<0>. On error, returns C<-1> with C<errno> set
+timing out. If C<timeout> is C<0>, times out immediately. On success,
+returns the number of conversions performed (see I<scanf(3)>). When the
+connection closes, returns C<0>. On error, returns C<-1> with C<errno> set
 appropriately.
 
 B<Note:> This is generally unreliable. When TCP segments get lost in
-transit, the resent bytes can form part of a larger segment so the
+transit, the re-sent bytes can form part of a larger segment so the
 "boundaries" that you may expect in your input can fail to appear. This can
 lead to lost data (read but not expected). This can only really be used
 safely when the application protocol involves each peer reading and writing
-alternatively, each waiting for the other's response before making their
-next response. In short, I<net_expect(3)> should only be used in concert
-with I<net_send(3)>.
+alternately, each waiting for the other's response before making their next
+response. In short, I<net_expect(3)> should only be used in concert with
+I<net_send(3)>.
 
 =cut
 
@@ -3867,17 +3877,18 @@ Sends the open file descriptor, C<fd>, to another process (related or
 unrelated) on the other end of the UNIX domain socket, C<sockfd>. Equivalent
 to I<send(2)> in all other respects. UNIX domain sockets can be created
 using I<net_client(3)> or I<net_server(3)> with a first argument of
-C<"/unix"> or using I<socketpair(2)> or I<pipe(2)> (under SVR4). It is safe
-to I<close(2)> (and even I<unlink(2)>) the file descriptor after sending it.
-The kernel won't really close it (or delete it) until the receiving process
-closes the descriptor. If the sender doesn't close C<fd>, both processes
-share the same file table entry in the kernel. This means sharing file
-position if the descriptor refers to a regular file. If the receiver doesn't
-receive the file descriptor with I<recvfd(3)> when it is sent, the
-descriptor will be closed. A file descriptor must always be passed along
-with some normal data. Linux doesn't support calling I<recv(2)> with a
-C<null> buffer or zero length. On success, returns C<0>. On error, returns
-C<-1> with C<errno> set appropriately.
+C<"/unix">, or using I<socketpair(2)> or I<pipe(2)> (under I<SVR4>). It is
+safe to I<close(2)> (and even I<unlink(2)>) the file descriptor after
+sending it. The kernel won't really close it (or delete it) until the
+receiving process closes the descriptor. If the sender doesn't close C<fd>,
+both processes share the same file table entry in the kernel. This means
+sharing file position if the descriptor refers to a regular file. If the
+receiver doesn't receive the file descriptor with I<recvfd(3)> when it is
+sent, the descriptor will be closed (in the receiving process). A file
+descriptor must always be passed along with some normal data. I<Linux>
+doesn't support calling I<recv(2)> with a C<null> buffer or zero length. On
+success, returns C<0>. On error, returns C<-1> with C<errno> set
+appropriately.
 
 =cut
 
@@ -3952,23 +3963,24 @@ ssize_t sendfd(int sockfd, const void *buf, size_t nbytes, int flags, int fd)
 
 =item C<ssize_t recvfd(int sockfd, void *buf, size_t nbytes, int flags, int *fd)>
 
-Receives an open file descriptor (which is stored in C<*fd>) from another
-process (related or unrelated) on the other end of the UNIX domain socket,
-C<sockfd>. Equivalent to I<recv(2)> in all other respects. UNIX domain
-sockets can be created using I<net_client(3)> or I<net_server(3)> with a
-first argument of C<"/unix"> or using I<socketpair(2)> or I<pipe(2)> (under
-SVR4). If the sender doesn't close the file descriptor, both processes share
-the same file table entry in the kernel. This means sharing file position if
-the descriptor refers to a regular file. If the sender sends the same file
-descriptor multiple times, all received file descriptors also share the same
-file table entry in the kernel. If the receiver doesn't receive the file
-descriptor with I<recvfd(3)> when it is sent with I<sendfd(3)>, the
-descriptor will be closed. A file descriptor must always be passed along
-with some normal data. Linux doesn't support calling I<recv(2)> with a
-C<null> buffer or zero length. Don't set C<MSG_PEEK> in C<flags> (the
-results are unpredictable). On success, returns C<0>. On error, returns
-C<-1> with C<errno> set appropriately. If the file descriptor was not
-passed, C<*fd> is set to C<-1>.
+Receives an open file descriptor (which will be stored in C<*fd>) from
+another process (related or unrelated) on the other end of the UNIX domain
+socket, C<sockfd>. Equivalent to I<recv(2)> in all other respects. UNIX
+domain sockets can be created using I<net_client(3)> or I<net_server(3)>
+with a first argument of C<"/unix">, or using I<socketpair(2)> or I<pipe(2)>
+(under I<SVR4>). If the sender doesn't close the file descriptor, both
+processes share the same file table entry in the kernel. This means sharing
+file position if the descriptor refers to a regular file. If the sender
+sends the same file descriptor multiple times, all received file descriptors
+also share the same file table entry in the kernel. If the receiver doesn't
+receive the file descriptor with I<recvfd(3)> when it is sent with
+I<sendfd(3)>, the descriptor will be closed (in the receiving process). A
+file descriptor must always be passed along with some normal data. I<Linux>
+doesn't support calling I<recv(2)> with a C<null> buffer or zero length.
+Don't set C<MSG_PEEK> in C<flags> (the results are unpredictable). On
+success, returns C<0>. On error, returns C<-1> with C<errno> set
+appropriately. If the file descriptor was not passed, C<*fd> is set to
+C<-1>.
 
 =cut
 
@@ -4050,16 +4062,16 @@ ssize_t recvfd(int sockfd, void *buf, size_t nbytes, int flags, int *fd)
 =item C<ssize_t recvcred(int sockfd, void *buf, size_t nbytes, int flags, struct ucred *cred)>
 
 Receives the user credentials of the process on the other end of the UNIX
-domain socket, C<sockfd> and stores them in C<*cred>. Equivalent to
+domain socket, C<sockfd>, and stores them in C<*cred>. Equivalent to
 I<recv(2)> in all other respects. Requires that the C<SO_PASSCRED> socket
 option has been set for C<sockfd> in advance. On datagram sockets, user
 credentials accompany every datagram. On stream sockets, user credentials
-are sent only once, the first time data is sent. On success, returns the number
-of bytes received. On error, returns C<-1> with C<errno> set appropriately.
-If the user credentials were not provided by the kernel, C<cred> is filled with
-zero bytes (so C<cred[0].pid == 0>).
+are sent only once, the first time data is sent. On success, returns the
+number of bytes received. On error, returns C<-1> with C<errno> set
+appropriately. If the user credentials were not provided by the kernel,
+C<cred> is filled with zero bytes (so C<cred[0].pid == 0>).
 
-This function is only available on Linux.
+This function is only available on I<Linux>.
 
 =cut
 
@@ -4075,16 +4087,16 @@ ssize_t recvcred(int sockfd, void *buf, size_t nbytes, int flags, struct ucred *
 =item C<ssize_t recvfromcred(int sockfd, void *buf, size_t nbytes, int flags, struct sockaddr *src_addr, socklen_t *src_addrlen, struct ucred *cred)>
 
 Receives the user credentials of the process on the other end of the UNIX
-domain socket, C<sockfd> and stores them in C<*cred>. Equivalent to
-I<recvfrom(2)> in all other respects. Requires that the C<SO_PASSCRED> socket
-option has been set for C<sockfd> in advance. On datagram sockets, user
-credentials accompany every datagram. On stream sockets, user credentials
-are sent only once, the first time data is sent. On success, returns the number
-of bytes received. On error, returns C<-1> with C<errno> set appropriately.
-If the user credentials were not provided by the kernel, C<cred> is filled with
-zero bytes (so C<cred[0].pid == 0>).
+domain socket, C<sockfd>, and stores them in C<*cred>. Equivalent to
+I<recvfrom(2)> in all other respects. Requires that the C<SO_PASSCRED>
+socket option has been set for C<sockfd> in advance. On datagram sockets,
+user credentials accompany every datagram. On stream sockets, user
+credentials are sent only once, the first time data is sent. On success,
+returns the number of bytes received. On error, returns C<-1> with C<errno>
+set appropriately. If the user credentials were not provided by the kernel,
+C<cred> is filled with zero bytes (so C<cred[0].pid == 0>).
 
-This function is only available on Linux.
+This function is only available on I<Linux>.
 
 =cut
 
@@ -4266,12 +4278,12 @@ The other reason is to know when the peer has received all sent data. This
 probably doesn't work the way you want. It can only tell you when the peer
 TCP has acknowledged the data. It cannot tell you when the peer application
 has read the data. To do this, use I<shutdown(2)> with a second argument of
-C<SHUT_WR> and then call I<read(2)> until it returns 0. This tells you that
-the peer application has read all sent data, knows that it has read all sent
-data (because it received your FIN) and has closed it's half of the
+C<SHUT_WR> and then call I<read(2)> until it returns C<0>. This tells you
+that the peer application has read all sent data, knows that it has read all
+sent data (because it received your FIN) and has closed its half of the
 connection with either I<close(2)> or I<shutdown(2)> with a second argument
 of C<SHUT_WR> (because you have received the peer's FIN). Then you can
-I<close(2)> the socket safe in the knowledge that no data has been lost.
+I<close(2)> the socket, safe in the knowledge that no data has been lost.
 
 If you set C<SO_LINGER> with a zero timeout, the peer will think your
 application has crashed or aborted the connection (because it receives an
@@ -4319,7 +4331,7 @@ each message and there can be no delay in sending the messages (e.g. real
 time monitoring systems) or when, even though the peer does respond to each
 message, the application can't hang around waiting for the response to the
 previous message before sending the next message (e.g. highly interactive
-applications like The X Window System).
+applications like I<The X Window System>).
 
 =item C<SO_SNDBUF>
 
@@ -4347,7 +4359,7 @@ smaller due to packet header overhead.
   (SONET OC-12)            |                |         |
 
 Of course, it's generally impossible to know in advance what the bandwidth
-or RTT will be and they can both change during the life of the connection.
+or RTT will be, and they can both change during the life of the connection.
 Ideally, the kernel would automatically adjust buffer sizes as needed, but
 don't hold your breath. Unless you know exactly what kind of network your
 application will be running on, it's best to set buffer sizes to values
@@ -4360,20 +4372,20 @@ Everything is fine provided that there's no congestion. However, if a single
 packet is lost, throughput will halve due to congestion avoidance, every
 segment sent since the lost packet will have to be retransmitted (that's
 38MB!) and it takes five minutes to reach maximum throughput again due to
-the long RTT. Selective ACKs are needed to TCP to fix this. Fortunately,
-Linux (and probably other) systems support selective ACKs.
+the long RTT. Selective ACKs are needed in TCP to fix this. Fortunately,
+I<Linux> (and probably other) systems support selective ACKs.
 
 This option can also be used to avoid the dreaded interaction between the
 Nagle Algorithm and Delayed ACK algorithm during bulk data transfer. This
 interaction cannot occur during bulk transfer if the send buffer size is at
 least 3 times the Maximum Segment Size (MSS). Having a send buffer this
-large means that the sender is always capable of sending 2 full segments. If
-the receiver's receive buffer size isn't large enough to accept both
+large means that the sender is always capable of sending two full segments.
+If the receiver's receive buffer size isn't large enough to accept both
 segments, it will ACK each segment without delay (to indicate that it is
 running out of buffer space). If the receiver's receive buffer size is large
 enough to accept both segments, it will ACK every second segment without
 delay (so as not to disrupt your TCP's RTT calculations). The buffer size
-should actually be an even multiple of the MSS (i.e. at least 4 times the
+should actually be an even multiple of the MSS (i.e. at least four times the
 MSS). Here are some examples.
 
     Link     | MTU(bytes) | MSS(bytes) | 4*MSS(bytes)
@@ -4411,7 +4423,7 @@ check that the connection is still alive. Many people think that two hours
 is too long to wait so they implement application level heartbeats instead
 (e.g. BGP routing daemons send keepalive packets every 30 seconds). Many
 people think that this functionality belongs in the application anyway. The
-POSIX.1g standard requires the C<TCP_KEEPALIVE> option which lets you
+I<POSIX.1g> standard requires the C<TCP_KEEPALIVE> option which lets you
 specify how many seconds to wait before sending the probe but this option
 isn't widely implemented yet. Until it is, the C<SO_KEEPALIVE> option is not
 very useful.
@@ -4471,15 +4483,15 @@ Does it matter?
 =item Operation above capacity
 
 If there are assumptions about the size of the problem, either make them
-impossibly huge or cope when the limit is exceeded.
+impossibly huge, or cope when the limit is exceeded.
 
 =item Compact IDs versus Object Identifiers
 
 Identifiers take two forms: (1) centrally administered numbers (e.g. port
-numbers) which are short, fixed size, fast and easy to locate but hard to
+numbers) which are short, fixed size, fast and easy to locate, but hard to
 obtain, and (2) hierarchical identifiers (e.g. MIB names) with decentralised
-administration. These are large, variable size, slow and hard to locate (no
-central authority) but easy to obtain.
+administration. These are large, variable size, slow, and hard to locate (no
+central authority), but easy to obtain.
 
 =item Optimising for the most common or important case
 
@@ -4509,16 +4521,16 @@ be ignored by earlier versions.
 =item Version Number Field
 
 Version numbers can be a simple number, or split into major and minor
-version components. Minor version increments indicate backwards compatible
+version components. Minor version increments indicate backwards-compatible
 changes. Major version increments indicate incompatible changes. If a node
 receives a packet with a version it doesn't know about, it should drop it or
 respond with the version it does understand. The other node can switch to
-the older protocol when it or receives this packet. However, nodes should
+the older protocol when it receives this packet. However, nodes should
 occasionally forget that the other node speaks an older version of the
 protocol to prevent two nodes from incorrectly thinking that the other can
 only speak an old version of the protocol.
 
-Avoid having version numbers wrap around by making it huge or by
+Avoid having version numbers wrap around, by making it huge, or by
 incrementing versions very rarely. If the version can wrap, make the highest
 possible version number indicate that the actual version follows in a larger
 field.
@@ -4526,21 +4538,22 @@ field.
 =item Options
 
 Another way to provide for future protocol evolutions is to allow options to
-be appended. Options should be encoded as <type, length, value> and the
-length must be interpreted in the same way for all options. This allows
-unknown options to be skipped. Some options should cause the packet to be
-dropped. The type field can be used to specify whether the node should skip
-the option or drop the packet: e.g. skip options with odd numbered types and
-drop packets when options with even numbered types are encountered.
+be appended. Options should be encoded as I<E<lt>type, length, valueE<gt>>,
+and the length must be interpreted in the same way for all options. This
+allows unknown options to be skipped. Some options should cause the packet
+to be dropped. The type field can be used to specify whether the node should
+skip the option or drop the packet: e.g. skip options with odd numbered
+types and drop packets when options with even numbered types are
+encountered.
 
 =back
 
 =item Migration
 
-When migrating from one protocol to another incompatible protocol, it's
-easiest to keep them separate (e.g. dual IPv4/IPv6 stacks) because migration
-can't be done atomically and it can be difficult to translate between two
-protocols.
+When migrating from one protocol to another, incompatible protocol, it's
+easiest to keep them separate (e.g. dual IPv4/IPv6 stacks), because
+migration can't be done atomically and it can be difficult to translate
+between two protocols.
 
 =item Parameters
 
@@ -4606,9 +4619,9 @@ Test connectivity, don't assume it.
 
 =item *
 
-Simple checksums can be tricked. Use MD5 or public key signatures when
-practical. Use encryption and authentication when possible (e.g. Secure
-Sockets Layer/Secure Shell tunnels).
+Simple checksums can be tricked. Use SHA-2/3 or public key signatures when
+practical. Use encryption and authentication when possible (e.g. Transport
+Layer Security/Secure Shell tunnels).
 
 =item *
 
@@ -4621,10 +4634,10 @@ Process packets quickly to avoid denial of service attacks.
 Elections can be deterministic (the same node wins every time it is up) or
 stable (once a node is elected, it stays elected until it goes down). If
 every node is configured with a priority, and the election winner increases
-its priority by N after winning an election, then you can achieve
+its priority by I<N> after winning an election, then you can achieve
 deterministic elections by configuring nodes with priorities that differ by
-more than N and you can achieve stable elections by configuring nodes with
-the same priority.
+more than I<N>, and you can achieve stable elections by configuring nodes
+with the same priority.
 
 =item Performance for Correctness
 
@@ -4636,7 +4649,7 @@ to avoid denials of service.
 
 =head1 ERRORS
 
-These are the errors generated by the functions that return -1 on error.
+These are the errors generated by the functions that return C<-1> on error.
 Additional errors may be generated and returned from the underlying system
 calls. See their manual pages.
 
@@ -4698,7 +4711,7 @@ I<net_expect(3)> or I<net_send(3)> timed out.
 
 =item C<EPROTO> (or C<EPROTOTYPE> on I<Mac OS X>)
 
-I<mail(3)> encountered an error in the dialogue with the SMTP server. This
+I<mail(3)> encountered an error in the dialogue with the SMTP server. The
 most likely cause of this is a missing or inadequate domain name for the
 sender address on systems where I<sendmail(8)> requires a real domain name.
 
@@ -4706,7 +4719,7 @@ sender address on systems where I<sendmail(8)> requires a real domain name.
 
 =head1 MT-Level
 
-MT-Safe
+I<MT-Safe>
 
 =head1 EXAMPLES
 
@@ -4958,49 +4971,50 @@ pointers can be stored in 4 bytes. Long long integers can be stored in 8
 bytes. If these datatypes are larger on your system, only the least
 significant byte(s) will be packed.
 
-Packing long long integers is not portable (in ISO C 89, anyway).
+Packing long long integers is not portable (in I<ISO C 89>, anyway).
 
 Every effort has been made to use threadsafe, reentrant host and service
 name lookups in the net client and server functions. If your system has any
 version of I<gethostbyname_r(3)> and I<getservbyname_r(3)>, they will be
-used. Some systems (e.g. Digital UNIX, HP-UX, Tru64 UNIX) have a threadsafe
-version of I<gethostbyname(3)> that uses thread specific data.
+used. Some systems (e.g. I<Digital UNIX>, I<HP-UX>, I<Tru64 UNIX>) have a
+threadsafe version of I<gethostbyname(3)> that uses thread specific data.
 Unfortunately, there's no way to determine whether or not your system's
-I<gethostbyname(3)> and I<getservbyname(3)> are threadsafe so it is possible
-(though unlikely) that the net client and servers functions are not
-reentrant on your system. This does not apply to Linux, Solaris, Digital
-UNIX, HP-UX or Tru64 UNIX (and others, no doubt) since these systems do have
-threadsafe versions of the host and service name lookup functions.
+I<gethostbyname(3)> and I<getservbyname(3)> are threadsafe, so it is
+possible (though unlikely) that the net client and servers functions are not
+reentrant on your system. This does not apply to I<Linux>, I<Solaris>,
+I<Digital UNIX>, I<HP-UX> or I<Tru64 UNIX> (and others, no doubt) since
+these systems do have threadsafe versions of the host and service name
+lookup functions.
 
 B<Note:> It's possible that the underlying DNS resolver functions on your
 system are not threadsafe. Versions of BIND's resolver library prior to BIND
 8.2 are not threadsafe. If your system uses such a version, then even
-I<gethostbyname_r(3)> isn't threadsafe. Fortunately, Solaris doesn't use
-libresolv by default and Linux uses the BIND 8.2 version of libresolv which
-has a new threadsafe API and thread specific data for the old API. It is
-unlikely that any system that provides I<gethostnyname_r(3)> would provide a
-non-threadsafe implementation.
+I<gethostbyname_r(3)> isn't threadsafe. Fortunately, I<Solaris> doesn't use
+I<libresolv> by default and I<Linux> uses the BIND 8.2 version of
+I<libresolv> which has a new threadsafe API and thread specific data for the
+old API. It is unlikely that any system that provides I<gethostnyname_r(3)>
+would provide a non-threadsafe implementation.
 
 There is a race condition that can cause a failure when creating a UNIX
-domain datagram client socket under Solaris and OpenBSD (but not under
-Linux). The problem is that UNIX domain datagram sockets must be bound to a
-path using I<bind(2)> otherwise they can't receive any replies from the
-server (since they have no address to send messages to). Linux lets us bind
-to C<""> which is the C<AF_LOCAL> equivalent of C<INADDR_ANY>. This is
+domain datagram client socket under I<Solaris> and I<OpenBSD> (but not under
+I<Linux>). The problem is that UNIX domain datagram sockets must be bound to
+a path using I<bind(2)> otherwise they can't receive any replies from the
+server (since they have no address to send messages to). I<Linux> lets us
+bind to C<""> which is the C<AF_LOCAL> equivalent of C<INADDR_ANY>. This is
 great. No actual path is created, each client gets its own address and the
 client doesn't need to unlink the path when it's finished. Unfortunately,
-systems like Solaris and OpenBSD (and probably many others) don't support
-this. You have to bind to an actual file system path and I<bind(2)> will
-create an inode for the socket (which the client must unlink when finished).
-This means there's a race condition between creating the unique path and
-creating the inode with bind(). Fortunately, this isn't a security bug
-(correct me if I'm wrong) because I<bind(2)> fails if the path already
-exists. Nor is it a denial of service, since it only affects clients. It's
-more of a denial of request. Also, the names used are not very predictable.
-The easy, elegant, portable solution is to never use UNIX domain datagram
-sockets. Always use UNIX domain stream sockets instead. They don't have this
-problem. If you must use UNIX domain datagram sockets under Solaris, you
-have to unlink the socket path when finished.
+systems like I<Solaris> and I<OpenBSD> (and probably many others) don't
+support this. You have to bind to an actual file system path and I<bind(2)>
+will create an inode for the socket (which the client must unlink when
+finished). This means there's a race condition between creating the unique
+path and creating the inode with I<bind(2)>. Fortunately, this isn't a
+security bug (correct me if I'm wrong) because I<bind(2)> fails if the path
+already exists. Nor is it a denial of service, since it only affects
+clients. It's more of a denial of request. Also, the names used are not very
+predictable. The easy, elegant, portable solution is to never use UNIX
+domain datagram sockets. Always use UNIX domain stream sockets instead. They
+don't have this problem. If you must use UNIX domain datagram sockets under
+I<Solaris>, you have to unlink the socket path when finished.
 
     sockaddr_any_t addr;
     size_t addrsize = sizeof addr;
@@ -5012,27 +5026,28 @@ have to unlink the socket path when finished.
 This module provides no support for multiple simultaneous TCP connects in a
 single thread. Use multiple threads or processes instead.
 
-Solaris (at least 2.6 and 2.7) return C<-1> as the index for all network
+I<Solaris> (at least 2.6 and 2.7) return C<-1> as the index for all network
 interfaces when I<ioctl(2)> is called with a command argument of
 C<SIOCGIFINDEX>. I<net_interfaces(3)> guesses the indexes when this happens.
-It starts at 1 for the first interface and increments by 1 for each
+It starts at 1 for the first interface, and increments by 1 for each
 subsequent interface which seems to work.
 
-Because I<net_interfaces(3)> under Solaris 2.6 and 2.7 has to guess the
-indexes of all interfaces and because it only returns IPv4 or IPv6
+Because I<net_interfaces(3)> under I<Solaris> 2.6 and 2.7 has to guess the
+indexes of all interfaces, and because it only returns IPv4 or IPv6
 interfaces (but not both), the indexes will probably be wrong on these
 systems when there is a mix of IPv4 and IPv6 interfaces. Presumably,
-versions of Solaris that actually support IPv6 will have the
+versions of I<Solaris> that actually support IPv6 will have the
 I<ioctl(SIOCGIFINDEX)> bug fixed.
 
-Solaris doesn't return hardware addresses when I<ioctl(2)> is called with a
-command argument of C<SIOCGIFHWADDR> so the I<net_interface_t> elements in
-the list returned by net_interfaces() always have C<null> hwaddr fields.
+I<Solaris> doesn't return hardware addresses when I<ioctl(2)> is called with
+a command argument of C<SIOCGIFHWADDR>, so the I<net_interface_t> elements
+in the list returned by net_interfaces() always have C<null> hwaddr fields.
 
-Linux 2.2 returns C<0.0.0.0> as the address of the outgoing IPv4 multicast
-interface when I<getsockopt(2)> is called with the C<IP_MULTICAST_IF>
-command. This means that I<net_multicast_get_interface(3)> always returns
-C<0> under Linux 2.2. Linux 2.4.9 does not have this bug.
+I<Linux 2.2> returns C<0.0.0.0> as the address of the outgoing IPv4
+multicast interface when I<getsockopt(2)> is called with the
+C<IP_MULTICAST_IF> command. This means that
+I<net_multicast_get_interface(3)> always returns C<0> under I<Linux 2.2>.
+I<Linux 2.4.9> does not have this bug.
 
 The TOS functions are inherently protocol specific. They only work with IPv4
 sockets.
@@ -5065,7 +5080,7 @@ I<printf(3)>
 
 =head1 AUTHOR
 
-20201111 raf <raf@raf.org>
+20210220 raf <raf@raf.org>
 
 =cut
 
