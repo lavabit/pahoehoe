@@ -61,12 +61,12 @@ printf "\nBox download complete.\n"
 
 # Create the virtual machines.
 vagrant up --provider=$PROVIDER &> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 || \
- { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Retrying. [ UP = $RESULT ]\n\n" ; tput sgr0 ; \
- vagrant destroy -f ; sleep 120 ; vagrant up --provider=$PROVIDER &>> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 ; } || \
- { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Retrying. [ UP = $RESULT ]\n\n" ; tput sgr0 ; \
- vagrant destroy -f ; sleep 120 ; vagrant up --provider=$PROVIDER &>> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 ; } || \
- { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Exiting. [ UP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
- 
+  { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Retrying. [ UP = $RESULT ]\n\n" ; tput sgr0 ; \
+vagrant destroy -f ; sleep 120 ; vagrant up --provider=$PROVIDER &>> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 ; } || \
+  { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Retrying. [ UP = $RESULT ]\n\n" ; tput sgr0 ; \
+vagrant destroy -f ; sleep 120 ; vagrant up --provider=$PROVIDER &>> "$BASE/build/logs/vagrant_up.txt" && BOOTED=1 ; } || \
+  { RESULT=$? ; tput setaf 1 ; printf "Box startup error. Exiting. [ UP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
 printf "Box startup complete.\n"
 
  # Any errors past this point would be critical failures.
@@ -99,20 +99,20 @@ vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < openvpn.sh" al
 printf "Alma VPN stage complete.\n"
 
 vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" debian_vpn &> "$BASE/build/logs/debian_vpn.txt" || \
- { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+  { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < openvpn.sh" debian_vpn &>> "$BASE/build/logs/debian_vpn.txt" || \
- { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ OPENVPN = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+  { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ OPENVPN = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
  
 printf "Debian VPN stage complete.\n"
 
 # Compile the Android client.
 vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM bash -ex setup.sh" debian_build &> "$BASE/build/logs/debian_build.txt" || \
- { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ SETUP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
- 
+  { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ SETUP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+
 printf "Android build setup complete.\n"
  
 vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM VERNUM=$VERNUM VERSTR=$VERSTR bash -ex build.sh" debian_build &>> "$BASE/build/logs/debian_build.txt" || \
- { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ BUILD = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+  { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ BUILD = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
 printf "Android build stage complete.\n"
 
@@ -184,7 +184,7 @@ vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && {
   printf "get /home/vagrant/android/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version\n" | sftp -F $BASE/build/config debian_build &>> "$BASE/build/logs/debian_build.txt" || \
   { RESULT=$? ; tput setaf 1 ; printf "Release download error. [ RELEASES = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
   
-  [ ! -f $BASE/build/releases/SHA256SUM ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = $BASE/build/releases/SHA256SUM ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/SHA256SUMS ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = $BASE/build/releases/SHA256SUMS ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
@@ -208,7 +208,7 @@ vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && {
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.versin ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.versin ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
 } 
 
 # Termux version 118 requires at least v24 of the Android SDK.
