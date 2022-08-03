@@ -73,22 +73,22 @@ printf "Box startup complete.\n"
  set -e
  
 # Upload the scripts.
-vagrant upload alma-9-vpnweb.sh vpnweb.sh alma_vpn &> /dev/null
-vagrant upload alma-9-openvpn.sh openvpn.sh alma_vpn &> /dev/null
-vagrant upload debian-10-vpnweb.sh vpnweb.sh debian_vpn &> /dev/null
-vagrant upload debian-10-openvpn.sh openvpn.sh debian_vpn &> /dev/null
+vagrant upload alma-9-vpnweb.sh vpnweb.sh alma_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
+vagrant upload alma-9-openvpn.sh openvpn.sh alma_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
+vagrant upload debian-10-vpnweb.sh vpnweb.sh debian_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
+vagrant upload debian-10-openvpn.sh openvpn.sh debian_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
 
-vagrant upload debian-10-build-setup.sh setup.sh debian_build &> /dev/null
-vagrant upload debian-10-rebuild.sh rebuild.sh debian_build &> /dev/null
-vagrant upload debian-10-build.sh build.sh debian_build &> /dev/null
+vagrant upload debian-10-build-setup.sh setup.sh debian_build &>> "$BASE/build/logs/vagrant_setup.txt"
+vagrant upload debian-10-rebuild.sh rebuild.sh debian_build &>> "$BASE/build/logs/vagrant_setup.txt"
+vagrant upload debian-10-build.sh build.sh debian_build &>> "$BASE/build/logs/vagrant_setup.txt"
 
-[ -f debian-10-build-key.sh ] && vagrant upload debian-10-build-key.sh key.sh debian_build &> /dev/null
+[ -f debian-10-build-key.sh ] && vagrant upload debian-10-build-key.sh key.sh debian_build &>> "$BASE/build/logs/vagrant_setup.txt"
 
-vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' alma_vpn &> /dev/null
-vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' debian_vpn &> /dev/null
-vagrant ssh -c 'chmod +x setup.sh build.sh rebuild.sh' debian_build &> /dev/null
+vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' alma_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
+vagrant ssh -c 'chmod +x vpnweb.sh openvpn.sh' debian_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
+vagrant ssh -c 'chmod +x setup.sh build.sh rebuild.sh' debian_build &>> "$BASE/build/logs/vagrant_setup.txt"
 
-[ -f debian-10-build-key.sh ] && vagrant ssh -c 'chmod +x key.sh' debian_build &> /dev/null
+[ -f debian-10-build-key.sh ] && vagrant ssh -c 'chmod +x key.sh' debian_build &>> "$BASE/build/logs/vagrant_setup.txt"
 
 # Provision the VPN service.
 vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" alma_vpn &> "$BASE/build/logs/alma_vpn.txt" || \
