@@ -56,7 +56,7 @@ while [ "`${ADB} shell getprop init.svc.bootanim | tr -d '\r' `" != "stopped" ] 
 [ -f $BASE/build/connectbot/org.connectbot_10908000.apk ] && ${ADB} install --no-streaming $BASE/build/connectbot/org.connectbot_10908000.apk
 
 # OpenVPN client install
-[ -f $BASE/build/openvpn/de.blinkt.openvpn_189.apk ] && ${ADB} install --no-streaming $BASE/build/openvpn/de.blinkt.openvpn_189.apk
+[ -f $BASE/build/openvpn/de.blinkt.openvpn_194.apk ] && ${ADB} install --no-streaming $BASE/build/openvpn/de.blinkt.openvpn_194.apk
 
 # CPU Info Install
 [ -f $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk ] && ${ADB} install --no-streaming $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk

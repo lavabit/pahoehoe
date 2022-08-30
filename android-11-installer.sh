@@ -35,7 +35,7 @@ while [ "`${ADB} shell getprop init.svc.bootanim | tr -d '\r' `" != "stopped" ] 
 [ -f $BASE/build/connectbot/org.connectbot_10908000.apk ] && ${ADB} install --no-streaming $BASE/build/connectbot/org.connectbot_10908000.apk
 
 # OpenVPN client install
-[ -f $BASE/build/openvpn/de.blinkt.openvpn_189.apk ] && ${ADB} install --no-streaming $BASE/build/openvpn/de.blinkt.openvpn_189.apk
+[ -f $BASE/build/openvpn/de.blinkt.openvpn_194.apk ] && ${ADB} install --no-streaming $BASE/build/openvpn/de.blinkt.openvpn_194.apk
 
 # CPU Info Install
 [ -f $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk ] && ${ADB} install --no-streaming $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk
@@ -56,7 +56,7 @@ adb install build/termux/com.termux.api_51.apk
 adb install build/termux/com.termux.boot_7.apk
 adb install build/termux/com.termux.widget_13.apk
 adb install build/termux/com.termux.styling_29.apk
-adb install build/openvpn/de.blinkt.openvpn_189.apk
+adb install build/openvpn/de.blinkt.openvpn_194.apk
 adb install build/connectbot/org.connectbot_10908000.apk
 adb install build/cpuinfo/com.kgurgul.cpuinfo_40500.apk
 

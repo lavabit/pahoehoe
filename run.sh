@@ -239,8 +239,8 @@ printf "fa9bda5d707ace0b3fdbf4a66d2a3e2b4ada147f261ed2fcce000e7180426044  $BASE/
 
 # Download the OpenVPN Android GUI
 [ -d $BASE/build/openvpn/ ] && rm --force --recursive $BASE/build/openvpn/ ; mkdir --parents $BASE/build/openvpn/
-curl --silent --show-error --location --output $BASE/build/openvpn/de.blinkt.openvpn_189.apk https://f-droid.org/repo/de.blinkt.openvpn_189.apk
-printf "a67fbbb73f1a0bcacc5dd51f8aaf8ee52454094a86b019a93bf0f44c44202d5a  $BASE/build/openvpn/de.blinkt.openvpn_189.apk" | sha256sum -c --quiet || exit 1
+curl --silent --show-error --location --output $BASE/build/openvpn/de.blinkt.openvpn_194.apk https://f-droid.org/repo/de.blinkt.openvpn_194.apk
+printf "57aeb35f4a48f06234609b9cb4f23d299016f6ea0fd458c71bd9f8d5704b3aa1  $BASE/build/openvpn/de.blinkt.openvpn_194.apk" | sha256sum -c --quiet || exit 1
 
 # Download the currently released Lavabit App
 [ -d $BASE/build/lavabit/ ] && rm --force --recursive $BASE/build/lavabit/ ; mkdir --parents $BASE/build/lavabit/

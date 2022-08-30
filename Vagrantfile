@@ -52,6 +52,7 @@ Vagrant.configure("2") do |config|
       export DEBIAN_FRONTEND=noninteractive
       export DEBCONF_NONINTERACTIVE_SEEN=true
       apt-get -qq update && apt-get -qq -y upgrade < /dev/null > /dev/null
+      apt-get -qq -y install xauth dbus-x11 < /dev/null > /dev/null
       echo "* * * * * root command bash -c '/etc/cron.daily/mlocate'" > /etc/cron.d/updatedb
       sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
@@ -156,6 +157,7 @@ Vagrant.configure("2") do |config|
       export DEBIAN_FRONTEND=noninteractive
       export DEBCONF_NONINTERACTIVE_SEEN=true
       apt-get -qq update &> /dev/null && apt-get -qq -y upgrade < /dev/null > /dev/null
+      apt-get -qq -y install xauth dbus-x11 < /dev/null > /dev/null
       echo "* * * * * root command bash -c '/etc/cron.daily/mlocate'" > /etc/cron.d/updatedb
       sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
@@ -209,6 +211,7 @@ Vagrant.configure("2") do |config|
     alma_vpn.vm.provision "shell", inline: <<-SHELL
       # set -x
       dnf -q -y update 2> /dev/null
+      dnf -q -y install xauth dbus-x11 2> /dev/null
       echo "* * * * * root command bash -c '/usr/bin/updatedb'" > /etc/cron.d/updatedb
       sudo sed -i 's/.*X11Forwarding.*/X11Forwarding yes/g' /etc/ssh/sshd_config
       sudo sed -i 's/.*X11UseLocalhost.*/X11UseLocalhost no/g' /etc/ssh/sshd_config
