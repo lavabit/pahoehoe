@@ -10,6 +10,15 @@
 [ ! -n "$VERNUM" ] && export VERNUM="203"
 [ ! -n "$VERSTR" ] && export VERSTR="1.0.3-RC"
 
+# Set DEBUG to "yes" to increase the script output verbosity.
+[ ! -n "$DEBUG" ] || [ "$DEBUG" != "yes" ] && export DEBUG="no"
+
+# Set KEEPGOING to "yes" to continue running the shell scripts even if one fails.
+[ ! -n "$KEEPGOING" ] || [ "$KEEPGOING" != "yes" ] && export KEEPGOING="no"
+
+# Set libvirt as the default provider, but allow an environment variable to override it.
+[ ! -n "$PROVIDER" ] && export PROVIDER="libvirt"
+
 # Handle self referencing, sourcing etc.
 if [[ $0 != $BASH_SOURCE ]]; then
   export CMD=$BASH_SOURCE
@@ -23,19 +32,34 @@ BASE=`pwd -P`
 popd > /dev/null
 cd $BASE
 
-# Ignore errors during the init phase.
-set -
+# By default we abort if an error occurs, but enabling debug will output each command, making 
+# it easier to see where the failure occurred.
+if [ "$DEBUG" == "yes" ] && [ "$KEEPGOING" == "no" ]; then
+  PAHOEHOE_SHELL_OPTS=" -ex "
+  set -x
+elif [ "$DEBUG" == "yes" ] && [ "$KEEPGOING" == "yes" ]; then
+  PAHOEHOE_SHELL_OPTS=" -x "
+  set -x
+elif [ "$DEBUG" == "no" ] && [ "$KEEPGOING" == "no" ]; then
+  PAHOEHOE_SHELL_OPTS=" -e "
+  set -
+elif [ "$DEBUG" == "no" ] && [ "$KEEPGOING" == "yes" ]; then
+  PAHOEHOE_SHELL_OPTS=" - "
+  set -
 
-# Set libvirt as the default provider, but allow an environment variable to override it.
-[ ! -n "$PROVIDER" ] && export PROVIDER="libvirt"
+# All the possible combos should be handled above, but just 
+fi
+
+# Unset the DEBUG/KEEPGOING variables to avoid issues with others scripts/tools.
+unset DEBUG ; unset KEEPGOING
 
 # Cleanup.
-[ -d $BASE/build/source/ ] && sudo umount --force $BASE/build/source/ &>/dev/null
-[ -d $BASE/build/source/ ] && rmdir $BASE/build/source/ &>/dev/null
-[ -d $BASE/build/ ] && rm --force --recursive $BASE/build/
-vagrant destroy -f &>/dev/null
+[ -d $BASE/build/source/ ] && sudo umount --force $BASE/build/source/ &>/dev/null || true
+[ -d $BASE/build/source/ ] && rmdir $BASE/build/source/ &>/dev/null || true
+[ -d $BASE/build/ ] && rm --force --recursive $BASE/build/ || true
+vagrant destroy -f &>/dev/null || true
 
-# Create a build directory, and a log subdirectory.
+# Create a build directory, and a log sub-directory.
 [ ! -d $BASE/build/ ] && mkdir $BASE/build/
 [ ! -d $BASE/build/logs/ ] && mkdir $BASE/build/logs/
 
@@ -70,7 +94,7 @@ vagrant destroy -f ; sleep 120 ; vagrant up --provider=$PROVIDER &>> "$BASE/buil
 printf "Box startup complete.\n"
 
  # Any errors past this point would be critical failures.
- set -e
+ set ${PAHOEHOE_SHELL_OPTS}
  
 # Upload the scripts.
 vagrant upload alma-9-vpnweb.sh vpnweb.sh alma_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
@@ -91,27 +115,27 @@ vagrant ssh -c 'chmod +x setup.sh build.sh rebuild.sh' debian_build &>> "$BASE/b
 [ -f debian-10-build-key.sh ] && vagrant ssh -c 'chmod +x key.sh' debian_build &>> "$BASE/build/logs/vagrant_setup.txt"
 
 # Provision the VPN service.
-vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" alma_vpn &> "$BASE/build/logs/alma_vpn.txt" || \
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash ${PAHOEHOE_SHELL_OPTS} < vpnweb.sh" alma_vpn &> "$BASE/build/logs/alma_vpn.txt" || \
  { RESULT=$? ; tput setaf 1 ; printf "Alma VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
-vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < openvpn.sh" alma_vpn &>> "$BASE/build/logs/alma_vpn.txt" || \
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash ${PAHOEHOE_SHELL_OPTS} < openvpn.sh" alma_vpn &>> "$BASE/build/logs/alma_vpn.txt" || \
  { RESULT=$? ; tput setaf 1 ; printf "Alma VPN error. [ OPENVPN = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
 printf "Alma VPN stage complete.\n"
 
-vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < vpnweb.sh" debian_vpn &> "$BASE/build/logs/debian_vpn.txt" || \
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash ${PAHOEHOE_SHELL_OPTS} < vpnweb.sh" debian_vpn &> "$BASE/build/logs/debian_vpn.txt" || \
   { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ VPNWEB = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
-vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash -e < openvpn.sh" debian_vpn &>> "$BASE/build/logs/debian_vpn.txt" || \
+vagrant ssh --no-tty -c "sudo --login TZ=$TZ TERM=$TERM bash ${PAHOEHOE_SHELL_OPTS} < openvpn.sh" debian_vpn &>> "$BASE/build/logs/debian_vpn.txt" || \
   { RESULT=$? ; tput setaf 1 ; printf "Debian VPN error. [ OPENVPN = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
  
 printf "Debian VPN stage complete.\n"
 
 # Compile the Android client.
-vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM bash -ex setup.sh" debian_build &> "$BASE/build/logs/debian_build.txt" || \
+vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM bash ${PAHOEHOE_SHELL_OPTS} setup.sh" debian_build &> "$BASE/build/logs/debian_build.txt" || \
   { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ SETUP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
 printf "Android build setup complete.\n"
  
-vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM VERNUM=$VERNUM VERSTR=$VERSTR bash -ex build.sh" debian_build &>> "$BASE/build/logs/debian_build.txt" || \
+vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM VERNUM=$VERNUM VERSTR=$VERSTR bash ${PAHOEHOE_SHELL_OPTS} build.sh" debian_build &>> "$BASE/build/logs/debian_build.txt" || \
   { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ BUILD = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
 printf "Android build stage complete.\n"
