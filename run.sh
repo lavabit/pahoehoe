@@ -162,20 +162,20 @@ vagrant ssh -c "test -d \$HOME/android/app/build/outputs/" debian_build &> /dev/
   printf "get /home/vagrant/android/app/build/outputs/apk/lavabitProductionFatweb/release/Lavabit_Proxy_web_release_$VERSTR.apk $BASE/build/outputs/Lavabit_Proxy_web_release_$VERSTR.apk\n" | sftp -F $BASE/build/config debian_build &>> "$BASE/build/logs/debian_build.txt" || \
   { RESULT=$? ; tput setaf 1 ; printf "Build output download error. [ OUTPUTS = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
   
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_insecure_debug_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_insecure_debug_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_debug_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_debug_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_web_debug_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_web_debug_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_64_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_64_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_armeabi-v7a_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_arm64-v8a_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_beta_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_64_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/outputs/Lavabit_Proxy_web_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }  
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_insecure_debug_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_insecure_debug_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_debug_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_debug_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_web_debug_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_web_debug_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_beta_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_64_beta_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_64_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_armeabi-v7a_beta_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_arm64-v8a_beta_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_beta_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_beta_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_x86_64_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/outputs/Lavabit_Proxy_web_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A build output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }  
 }
 
 # If there is a releases folder, extract the signed release APKs files from the build environment.
@@ -208,72 +208,82 @@ vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && {
   printf "get /home/vagrant/android/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version\n" | sftp -F $BASE/build/config debian_build &>> "$BASE/build/logs/debian_build.txt" || \
   { RESULT=$? ; tput setaf 1 ; printf "Release download error. [ RELEASES = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
   
-  [ ! -f $BASE/build/releases/SHA256SUMS ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = $BASE/build/releases/SHA256SUMS ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.version ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.version ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.version ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.version ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.version ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
-  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version ] && {  tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/SHA256SUMS ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = $BASE/build/releases/SHA256SUMS ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.sig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.idsig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_release_$VERSTR.apk.version ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.sig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.idsig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_web_release_$VERSTR.apk.version ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_web_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.sig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.idsig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_release_$VERSTR.apk.version ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.sig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.idsig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_x86_64_release_$VERSTR.apk.version ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_x86_64_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.sig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.idsig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.version ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_armeabi-v7a_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
+  [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
 } 
 
 # Termux version 118 requires at least v24 of the Android SDK.
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/
-curl --silent --show-error --location --output $BASE/build/termux/com.termux_118.apk https://f-droid.org/repo/com.termux_118.apk
+curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux_118.apk https://f-droid.org/repo/com.termux_118.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux_118.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "822ac152bd7c2d9770b87c1feea03f22f2349a91b94481b268c739493a260f0b  $BASE/build/termux/com.termux_118.apk" | sha256sum -c --quiet || exit 1
 
-curl --silent --show-error --location --output $BASE/build/termux/com.termux.api_51.apk https://f-droid.org/repo/com.termux.api_51.apk
+curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux.api_51.apk https://f-droid.org/repo/com.termux.api_51.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux.api_51.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "781ff805619b104115fbf15499414715b4ea6ceb93c4935086a7e35966024f20  $BASE/build/termux/com.termux.api_51.apk" | sha256sum -c --quiet || exit 1
 
-curl --silent --show-error --location --output $BASE/build/termux/com.termux.boot_7.apk https://f-droid.org/repo/com.termux.boot_7.apk
+curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux.boot_7.apk https://f-droid.org/repo/com.termux.boot_7.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux.boot_7.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "35cae49192d073151e3177956ea4f1d6309c2330fed42ec046cbb44cee072a32  $BASE/build/termux/com.termux.boot_7.apk" | sha256sum -c --quiet || exit 1
 
-curl --silent --show-error --location --output $BASE/build/termux/com.termux.widget_13.apk https://f-droid.org/repo/com.termux.widget_13.apk
+curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux.widget_13.apk https://f-droid.org/repo/com.termux.widget_13.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux.widget_13.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "7ec99c3bd53e1fb8737f688bc26fdd0ae931f1f2f7eb9c855de1a0e4eb6147ae  $BASE/build/termux/com.termux.widget_13.apk" | sha256sum -c --quiet || exit 1
 
-curl --silent --show-error --location --output $BASE/build/termux/com.termux.styling_29.apk https://f-droid.org/repo/com.termux.styling_29.apk
+curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux.styling_29.apk https://f-droid.org/repo/com.termux.styling_29.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux.styling_29.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "77bafdb6c4374de0cdabe68f103aca37ef7b81e18272ea663bb9842c82920bec  $BASE/build/termux/com.termux.styling_29.apk" | sha256sum -c --quiet || exit 1
 
 # Termux version 75 requires at least v21 of the Android SDK.
-curl --silent --show-error --location --output $BASE/build/termux/com.termux_75.apk https://f-droid.org/archive/com.termux_75.apk
+curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux_75.apk https://f-droid.org/archive/com.termux_75.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux_75.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "d88444d9df4049c47f12678feb9579aaf2814a89e411d52653dc0a2509f883b5  $BASE/build/termux/com.termux_75.apk" | sha256sum -c --quiet || exit 1
 
 # Download ConnectBot, which will work on devices with Android SDK v14 and higher..
 [ -d $BASE/build/connectbot/ ] && rm --force --recursive $BASE/build/connectbot/ ; mkdir --parents $BASE/build/connectbot/
-curl --silent --show-error --location --output $BASE/build/connectbot/org.connectbot_10908000.apk https://f-droid.org/repo/org.connectbot_10908000.apk
+curl --fail --silent --show-error --location --output $BASE/build/connectbot/org.connectbot_10908000.apk https://f-droid.org/repo/org.connectbot_10908000.apk || 
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = org.connectbot_10908000.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "fa9bda5d707ace0b3fdbf4a66d2a3e2b4ada147f261ed2fcce000e7180426044  $BASE/build/connectbot/org.connectbot_10908000.apk" | sha256sum -c --quiet || exit 1
 
 # Download the OpenVPN Android GUI
 [ -d $BASE/build/openvpn/ ] && rm --force --recursive $BASE/build/openvpn/ ; mkdir --parents $BASE/build/openvpn/
-curl --silent --show-error --location --output $BASE/build/openvpn/de.blinkt.openvpn_194.apk https://f-droid.org/repo/de.blinkt.openvpn_194.apk
+curl --fail --silent --show-error --location --output $BASE/build/openvpn/de.blinkt.openvpn_194.apk https://f-droid.org/repo/de.blinkt.openvpn_194.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = de.blinkt.openvpn_194.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "57aeb35f4a48f06234609b9cb4f23d299016f6ea0fd458c71bd9f8d5704b3aa1  $BASE/build/openvpn/de.blinkt.openvpn_194.apk" | sha256sum -c --quiet || exit 1
 
 # Download the currently released Lavabit App
 [ -d $BASE/build/lavabit/ ] && rm --force --recursive $BASE/build/lavabit/ ; mkdir --parents $BASE/build/lavabit/
-curl --silent --show-error --location --output $BASE/build/lavabit/com.lavabit.pahoehoe_202.apk https://f-droid.org/repo/com.lavabit.pahoehoe_202.apk
+curl --fail --silent --show-error --location --output $BASE/build/lavabit/com.lavabit.pahoehoe_202.apk https://f-droid.org/repo/com.lavabit.pahoehoe_202.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.lavabit.pahoehoe_202.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "700d0cdc53eea321cfb2da25ca01707ba9a508d35419ea0877d520148a6fb906  $BASE/build/lavabit/com.lavabit.pahoehoe_202.apk" | sha256sum -c --quiet || exit 1
 
 # Download CPU Info App
 [ -d $BASE/build/cpuinfo/ ] && rm --force --recursive $BASE/build/cpuinfo/ ; mkdir --parents $BASE/build/cpuinfo/
-curl --silent --show-error --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40500.apk
+curl --fail --silent --show-error --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40500.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.kgurgul.cpuinfo_40500.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "3f70b2cccf987f91e1e6887f66781040e00e76ea6a11cd9024b9b4573cd26855  $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk" | sha256sum -c --quiet || exit 1
 
 # [ ! -d $BASE/build/source/ ] && mkdir $BASE/build/source/
