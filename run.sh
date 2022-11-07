@@ -270,9 +270,9 @@ printf "fa9bda5d707ace0b3fdbf4a66d2a3e2b4ada147f261ed2fcce000e7180426044  $BASE/
 
 # Download the OpenVPN Android GUI
 [ -d $BASE/build/openvpn/ ] && rm --force --recursive $BASE/build/openvpn/ ; mkdir --parents $BASE/build/openvpn/
-curl --fail --silent --show-error --location --output $BASE/build/openvpn/de.blinkt.openvpn_194.apk https://f-droid.org/repo/de.blinkt.openvpn_194.apk || \
-{ tput setaf 1 ; printf "An APK download failed. [ FILE = de.blinkt.openvpn_194.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-printf "57aeb35f4a48f06234609b9cb4f23d299016f6ea0fd458c71bd9f8d5704b3aa1  $BASE/build/openvpn/de.blinkt.openvpn_194.apk" | sha256sum -c --quiet || exit 1
+curl --fail --silent --show-error --location --output $BASE/build/openvpn/de.blinkt.openvpn_197.apk https://f-droid.org/repo/de.blinkt.openvpn_197.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = de.blinkt.openvpn_197.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+printf "5a9809ceeb5b82b8fe8f383f83f98b73e5881c3f6701911b67594c99c3c0363d  $BASE/build/openvpn/de.blinkt.openvpn_197.apk" | sha256sum -c --quiet || exit 1
 
 # Download the currently released Lavabit App
 [ -d $BASE/build/lavabit/ ] && rm --force --recursive $BASE/build/lavabit/ ; mkdir --parents $BASE/build/lavabit/
