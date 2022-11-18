@@ -449,25 +449,26 @@ cat <<-EOF > /etc/systemd/system/openvpn-server@.service.d/override.conf
 LimitNOFILE=65535
 EOF
 
-cat <<-EOF > $HOME/my-openvpn.te
-
-module my-openvpn 1.0;
-
-require {
-        type openvpn_t;
-        type dns_port_t;
-        class udp_socket name_bind;
-}
-
-#============= openvpn_t ==============
-
-allow openvpn_t dns_port_t:udp_socket name_bind;
-EOF
-
-checkmodule -M -m -o $HOME/my-openvpn.mod $HOME/my-openvpn.te
-semodule_package -o $HOME/my-openvpn.pp -m $HOME/my-openvpn.mod
-semodule -X 300 -i $HOME/my-openvpn.pp
-rm --force $HOME/my-openvpn.mod $HOME/my-openvpn.pp $HOME/my-openvpn.te
+# Might not be required with Alma 9.1+.
+# cat <<-EOF > $HOME/my-openvpn.te
+#
+# module my-openvpn 1.0;
+#
+# require {
+#         type openvpn_t;
+#         type dns_port_t;
+#         class udp_socket name_bind;
+# }
+#
+# #============= openvpn_t ==============
+#
+# allow openvpn_t dns_port_t:udp_socket name_bind;
+# EOF
+#
+# checkmodule -M -m -o $HOME/my-openvpn.mod $HOME/my-openvpn.te
+# semodule_package -o $HOME/my-openvpn.pp -m $HOME/my-openvpn.mod
+# semodule -X 300 -i $HOME/my-openvpn.pp
+# rm --force $HOME/my-openvpn.mod $HOME/my-openvpn.pp $HOME/my-openvpn.te
 
 systemctl --quiet daemon-reload
 systemctl --quiet enable openvpn-server@tcp.242.service && systemctl start openvpn-server@tcp.242.service
