@@ -97,7 +97,7 @@ verify-x509-name "CN=BAZINGA"
 EOF
 
 cat <<-EOF > /etc/openvpn/server/udp.142.conf
-port 53
+port 554
 proto udp
 explicit-exit-notify 1
 tls-server
@@ -183,7 +183,7 @@ verify-x509-name "CN=BAZINGA"
 EOF
 
 cat <<-EOF > /etc/openvpn/server/udp.143.conf
-port 53
+port 554
 proto udp
 explicit-exit-notify 1
 tls-server
@@ -269,7 +269,7 @@ verify-x509-name "CN=BAZINGA"
 EOF
 
 cat <<-EOF > /etc/openvpn/server/udp.144.conf
-port 53
+port 554
 proto udp
 explicit-exit-notify 1
 tls-server
@@ -355,7 +355,7 @@ verify-x509-name "CN=BAZINGA"
 EOF
 
 cat <<-EOF > /etc/openvpn/server/udp.145.conf
-port 53
+port 554
 proto udp
 explicit-exit-notify 1
 tls-server
@@ -475,6 +475,8 @@ iptables --append INPUT --in-interface lo --jump ACCEPT
 iptables --append INPUT --match state --state RELATED,ESTABLISHED --jump ACCEPT
 iptables --append INPUT --proto tcp --match state --state NEW -m tcp --dport 22 --jump ACCEPT
 iptables --append INPUT --proto udp --match state --state NEW -m udp --dport 53 --jump ACCEPT
+iptables --append INPUT --proto tcp --match state --state NEW -m tcp --dport 53 --jump ACCEPT
+iptables --append INPUT --proto udp --match state --state NEW -m udp --dport 554 --jump ACCEPT
 iptables --append INPUT --proto tcp --match state --state NEW -m tcp --dport 443 --jump ACCEPT
 iptables --append INPUT -j REJECT --reject-with icmp-host-prohibited
 

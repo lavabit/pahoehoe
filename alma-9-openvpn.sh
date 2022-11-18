@@ -102,7 +102,7 @@ verify-x509-name "CN=BAZINGA"
 EOF
 
 cat <<-EOF > /etc/openvpn/server/udp.242.conf
-port 53
+port 554
 proto udp
 explicit-exit-notify 1
 tls-server
@@ -192,7 +192,7 @@ verify-x509-name "CN=BAZINGA"
 EOF
 
 cat <<-EOF > /etc/openvpn/server/udp.243.conf
-port 53
+port 554
 proto udp
 explicit-exit-notify 1
 tls-server
@@ -282,7 +282,7 @@ verify-x509-name "CN=BAZINGA"
 EOF
 
 cat <<-EOF > /etc/openvpn/server/udp.244.conf
-port 53
+port 554
 proto udp
 explicit-exit-notify 1
 tls-server
@@ -372,7 +372,7 @@ verify-x509-name "CN=BAZINGA"
 EOF
 
 cat <<-EOF > /etc/openvpn/server/udp.245.conf
-port 53
+port 554
 proto udp
 explicit-exit-notify 1
 tls-server
@@ -449,27 +449,6 @@ cat <<-EOF > /etc/systemd/system/openvpn-server@.service.d/override.conf
 LimitNOFILE=65535
 EOF
 
-# Might not be required with Alma 9.1+.
-# cat <<-EOF > $HOME/my-openvpn.te
-#
-# module my-openvpn 1.0;
-#
-# require {
-#         type openvpn_t;
-#         type dns_port_t;
-#         class udp_socket name_bind;
-# }
-#
-# #============= openvpn_t ==============
-#
-# allow openvpn_t dns_port_t:udp_socket name_bind;
-# EOF
-#
-# checkmodule -M -m -o $HOME/my-openvpn.mod $HOME/my-openvpn.te
-# semodule_package -o $HOME/my-openvpn.pp -m $HOME/my-openvpn.mod
-# semodule -X 300 -i $HOME/my-openvpn.pp
-# rm --force $HOME/my-openvpn.mod $HOME/my-openvpn.pp $HOME/my-openvpn.te
-
 systemctl --quiet daemon-reload
 systemctl --quiet enable openvpn-server@tcp.242.service && systemctl start openvpn-server@tcp.242.service
 systemctl --quiet enable openvpn-server@tcp.243.service && systemctl start openvpn-server@tcp.243.service
@@ -503,7 +482,9 @@ chcon "system_u:object_r:net_conf_t:s0" /etc/sysconfig/network-scripts/ifcfg-*
 # Firewall rules.
 DEVICE=$(ip route | awk '/^default via/ {print $5}')
 firewall-cmd --add-port=53/udp 1>/dev/null && firewall-cmd --add-port=53/udp --permanent 1>/dev/null
+firewall-cmd --add-port=53/tcp 1>/dev/null && firewall-cmd --add-port=53/tcp --permanent 1>/dev/null
 firewall-cmd --add-port=443/tcp 1>/dev/null && firewall-cmd --add-port=443/tcp --permanent 1>/dev/null
+firewall-cmd --add-port=554/udp 1>/dev/null && firewall-cmd --add-port=554/udp --permanent 1>/dev/null
 
 firewall-cmd --zone=trusted --add-interface=tun0 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun0 1>/dev/null
 firewall-cmd --zone=trusted --add-interface=tun1 1>/dev/null && firewall-cmd --permanent --zone=trusted --add-interface=tun1 1>/dev/null

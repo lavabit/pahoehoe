@@ -93,9 +93,9 @@ vagrant destroy -f ; sleep 120 ; vagrant up --provider=$PROVIDER &>> "$BASE/buil
 
 printf "Box startup complete.\n"
 
- # Any errors past this point would be critical failures.
- set ${PAHOEHOE_SHELL_OPTS}
- 
+# Any errors past this point would be critical failures.
+set ${PAHOEHOE_SHELL_OPTS}
+
 # Upload the scripts.
 vagrant upload alma-9-vpnweb.sh vpnweb.sh alma_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
 vagrant upload alma-9-openvpn.sh openvpn.sh alma_vpn &>> "$BASE/build/logs/vagrant_setup.txt"
