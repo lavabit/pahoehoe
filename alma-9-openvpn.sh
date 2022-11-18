@@ -449,7 +449,6 @@ cat <<-EOF > /etc/systemd/system/openvpn-server@.service.d/override.conf
 LimitNOFILE=65535
 EOF
 
-# Might not be required with Alma 9.1+.
 cat <<-EOF > $HOME/my-openvpn.te
 
 module my-openvpn 1.0;
