@@ -51,6 +51,10 @@ Vagrant.configure("2") do |config|
       # set -x
       export DEBIAN_FRONTEND=noninteractive
       export DEBCONF_NONINTERACTIVE_SEEN=true
+cat <<-EOF | sudo debconf-set-selections
+grub-pc grub-pc/install_devices_disks_changed string $(grub-probe --target=disk /boot)
+grub-pc grub-pc/install_devices string $(grub-probe --target=disk /boot)
+EOF
       apt-get -qq update && apt-get -qq -y upgrade < /dev/null > /dev/null
       apt-get -qq -y install xauth dbus-x11 < /dev/null > /dev/null
       echo "* * * * * root command bash -c '/etc/cron.daily/mlocate'" > /etc/cron.d/updatedb
@@ -156,6 +160,10 @@ Vagrant.configure("2") do |config|
       # set -x
       export DEBIAN_FRONTEND=noninteractive
       export DEBCONF_NONINTERACTIVE_SEEN=true
+cat <<-EOF | sudo debconf-set-selections
+grub-pc grub-pc/install_devices_disks_changed string $(grub-probe --target=disk /boot)
+grub-pc grub-pc/install_devices string $(grub-probe --target=disk /boot)
+EOF
       apt-get -qq update &> /dev/null && apt-get -qq -y upgrade < /dev/null > /dev/null
       apt-get -qq -y install xauth dbus-x11 < /dev/null > /dev/null
       echo "* * * * * root command bash -c '/etc/cron.daily/mlocate'" > /etc/cron.d/updatedb
