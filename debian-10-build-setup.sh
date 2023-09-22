@@ -125,15 +125,15 @@ echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sou
 sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install sublime-text < /dev/null > /dev/null
 
 # Install JDK v8
-# bash -c 'curl --location --silent https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -'
-# export GNUPGHOME=$(mktemp -d /tmp/gnupg-XXXXXX)
-# [ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 8ED17AF5D7E675EB3EE3BCE98AC3B29174885C03 | wc -l`" != "5" ] && exit 1
-# rm --force --recursive $GNUPGHOME
-# sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-repository --yes 'deb [arch=amd64] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main'
-# sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install adoptopenjdk-8-hotspot < /dev/null > /dev/null
+bash -c 'curl --location --silent https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -'
+export GNUPGHOME=$(mktemp -d /tmp/gnupg-XXXXXX)
+[ "`gpg --quiet --no-options --keyring /etc/apt/trusted.gpg --list-keys 8ED17AF5D7E675EB3EE3BCE98AC3B29174885C03 | wc -l`" != "5" ] && exit 1
+rm --force --recursive $GNUPGHOME
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-repository --yes 'deb [arch=amd64] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main'
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install adoptopenjdk-8-hotspot < /dev/null > /dev/null
 
-# sudo update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/java
-# sudo update-alternatives --set javac /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/javac
+sudo update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/java
+sudo update-alternatives --set javac /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/javac
 
 # Update the apt-file cache.
 sudo apt-file update &> /dev/null || echo 'apt-file update failed ... non-critical ... continuing.'

@@ -36,10 +36,12 @@ cd $BASE
 # it easier to see where the failure occurred.
 if [ "$DEBUG" == "yes" ] && [ "$KEEPGOING" == "no" ]; then
   PAHOEHOE_SHELL_OPTS=" -ex "
-  set -x
+  # set -x
+  set -
 elif [ "$DEBUG" == "yes" ] && [ "$KEEPGOING" == "yes" ]; then
   PAHOEHOE_SHELL_OPTS=" -x "
-  set -x
+  # set -x
+  set -
 elif [ "$DEBUG" == "no" ] && [ "$KEEPGOING" == "no" ]; then
   PAHOEHOE_SHELL_OPTS=" -e "
   set -
@@ -131,12 +133,12 @@ printf "Debian VPN stage complete.\n"
 
 # Compile the Android client.
 vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM bash ${PAHOEHOE_SHELL_OPTS} setup.sh" debian_build &> "$BASE/build/logs/debian_build.txt" || \
-  { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ SETUP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+  { RESULT=$? ; tput setaf 1 ; printf "Android build setup error. [ SETUP = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
 printf "Android build setup complete.\n"
  
 vagrant ssh --no-tty -c "TZ=$TZ TERM=$TERM VERNUM=$VERNUM VERSTR=$VERSTR bash ${PAHOEHOE_SHELL_OPTS} build.sh" debian_build &>> "$BASE/build/logs/debian_build.txt" || \
-  { RESULT=$? ; tput setaf 1 ; printf "Android build error. [ BUILD = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
+  { RESULT=$? ; tput setaf 1 ; printf "Android build stage error. [ BUILD = $RESULT ]\n\n" ; tput sgr0 ; exit 1 ; }
 
 printf "Android build stage complete.\n"
 
