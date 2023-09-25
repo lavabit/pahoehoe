@@ -121,14 +121,14 @@ EOF
 
 # Install a text editor.
 curl -Lso $HOME/sublimehq-pub.gpg https://download.sublimetext.com/sublimehq-pub.gpg || { echo 'Sublime key download failed.' ; exit 1 ; }
-cat $HOME/sublimehq-pub.gpg | sudo apt-key add -
+cat $HOME/sublimehq-pub.gpg | gpg --dearmor | sudo apt-key add -
 echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list > /dev/null
 sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install sublime-text < /dev/null > /dev/null || \
 { echo 'Sublime install failed ... non-critical ... continuing.' ; }
 
 # Install JDK v8
-curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/deb/dists/buster/Release.gpg || { echo 'Adoptium key download failed.' ; exit 1 ; }
-cat $HOME/adoptopenjdk-pub.gpg | sudo apt-key add -
+curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public || { echo 'Adoptium key download failed.' ; exit 1 ; }
+cat $HOME/adoptopenjdk-pub.gpg | gpg --dearmor | sudo apt-key add -
 sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-repository --yes 'deb [arch=amd64] https://packages.adoptium.net/artifactory/deb/ buster main'
 sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null || \
 { echo 'JDK 8 install failed.' ; exit 1 ; }
