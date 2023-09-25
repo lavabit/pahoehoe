@@ -133,8 +133,8 @@ sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-rep
 sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null || \
 { echo 'JDK 8 install failed.' ; exit 1 ; }
 
-sudo update-alternatives --set java /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/java
-sudo update-alternatives --set javac /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin/javac
+sudo update-alternatives --set java /usr/lib/jvm/temurin-8-jdk-amd64/bin/java
+sudo update-alternatives --set javac /usr/lib/jvm/temurin-8-jdk-amd64/bin/javac
 
 # Update the apt-file cache.
 sudo apt-file update &> /dev/null || echo 'apt-file update failed ... non-critical ... continuing.'
