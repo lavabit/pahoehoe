@@ -235,7 +235,24 @@ vagrant ssh -c "test -d \$HOME/android/releases/" debian_build &> /dev/null && {
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.sig ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.idsig ]\n\n" ; tput sgr0 ; exit 1 ; }
   [ ! -f $BASE/build/releases/Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version ] && { tput setaf 1 ; printf "A release output is missing. [ FILE = Lavabit_Proxy_arm64-v8a_release_$VERSTR.apk.version ]\n\n" ; tput sgr0 ; exit 1 ; }
-} 
+}
+
+
+# Download the various F-Droid packages we use during testing/development. Use the f-droid-packages.sh script to generate an updated
+# list package files/hashes. 
+
+# To download the F-Droid index and lookup package metadata manually use the following commands:
+# curl -Lfso index-v1.jar https://f-droid.org/repo/index-v1.jar
+# unzip -qq -c "$INDEX_JAR" index-v1.json | jq -r '[ .packages[] | .[] | select( .packageName == "%%%PACKAGENAME%%%" )] ' \
+# ' | sort_by(.versionCode) | reverse[0] | [ .apkName, .hash ] | @tsv'
+
+# To update the section below:
+# bash f-droid-packages.sh | ( copyq copy - | clipit | gpaste )
+
+# To sanity check the package script output run (it counts the f-droid.org download URLs to ensure nothing was skipped):
+# [ "$(bash f-droid-packages.sh | grep -E "^curl .* https:\/\/f\-droid.org\/" | wc -l)" == "10" ] && echo "F-Droid package script sanity check passed." || echo "F-Droid package script sanity check failed."
+
+### BEGIN F-DROID-PACKAGES.SH
 
 # Termux version 118 requires at least v24 of the Android SDK.
 [ -d $BASE/build/termux/ ] && rm --force --recursive $BASE/build/termux/ ; mkdir --parents $BASE/build/termux/
@@ -255,20 +272,15 @@ curl --fail --silent --show-error --location --output $BASE/build/termux/com.ter
 { tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux.widget_13.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "7ec99c3bd53e1fb8737f688bc26fdd0ae931f1f2f7eb9c855de1a0e4eb6147ae  $BASE/build/termux/com.termux.widget_13.apk" | sha256sum -c --quiet || exit 1
 
-curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux.styling_29.apk https://f-droid.org/repo/com.termux.styling_29.apk || \
-{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux.styling_29.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-printf "77bafdb6c4374de0cdabe68f103aca37ef7b81e18272ea663bb9842c82920bec  $BASE/build/termux/com.termux.styling_29.apk" | sha256sum -c --quiet || exit 1
-
-# Termux version 75 requires at least v21 of the Android SDK.
-curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux_75.apk https://f-droid.org/archive/com.termux_75.apk || \
-{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux_75.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-printf "d88444d9df4049c47f12678feb9579aaf2814a89e411d52653dc0a2509f883b5  $BASE/build/termux/com.termux_75.apk" | sha256sum -c --quiet || exit 1
+curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux.styling_31.apk https://f-droid.org/repo/com.termux.styling_31.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux.styling_31.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+printf "66abbb79fbffb5dfc38d9db3da88b8a0d31a9e6f7ffe8c68b5b448cda2db3b59  $BASE/build/termux/com.termux.styling_31.apk" | sha256sum -c --quiet || exit 1
 
 # Download ConnectBot, which will work on devices with Android SDK v14 and higher..
 [ -d $BASE/build/connectbot/ ] && rm --force --recursive $BASE/build/connectbot/ ; mkdir --parents $BASE/build/connectbot/
-curl --fail --silent --show-error --location --output $BASE/build/connectbot/org.connectbot_10908000.apk https://f-droid.org/repo/org.connectbot_10908000.apk || 
-{ tput setaf 1 ; printf "An APK download failed. [ FILE = org.connectbot_10908000.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-printf "fa9bda5d707ace0b3fdbf4a66d2a3e2b4ada147f261ed2fcce000e7180426044  $BASE/build/connectbot/org.connectbot_10908000.apk" | sha256sum -c --quiet || exit 1
+curl --fail --silent --show-error --location --output $BASE/build/connectbot/org.connectbot_10909000.apk https://f-droid.org/repo/org.connectbot_10909000.apk || 
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = org.connectbot_10909000.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+printf "d5e0bc3f3be1702eb5822abc3d62469c0440cddc6366126b6cc1cfbaf8b0814f  $BASE/build/connectbot/org.connectbot_10909000.apk" | sha256sum -c --quiet || exit 1
 
 # Download the OpenVPN Android GUI
 [ -d $BASE/build/openvpn/ ] && rm --force --recursive $BASE/build/openvpn/ ; mkdir --parents $BASE/build/openvpn/
@@ -284,9 +296,16 @@ printf "700d0cdc53eea321cfb2da25ca01707ba9a508d35419ea0877d520148a6fb906  $BASE/
 
 # Download CPU Info App
 [ -d $BASE/build/cpuinfo/ ] && rm --force --recursive $BASE/build/cpuinfo/ ; mkdir --parents $BASE/build/cpuinfo/
-curl --fail --silent --show-error --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40500.apk || \
-{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.kgurgul.cpuinfo_40500.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
-printf "3f70b2cccf987f91e1e6887f66781040e00e76ea6a11cd9024b9b4573cd26855  $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40500.apk" | sha256sum -c --quiet || exit 1
+curl --fail --silent --show-error --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40700.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40700.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.kgurgul.cpuinfo_40700.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+printf "cc826cc5f9284caf338f211788f55914bcb4f64c82f8bc4911275d5ed962d17b  $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40700.apk" | sha256sum -c --quiet || exit 1
+
+# Termux version 75 requires at least v21 of the Android SDK.
+curl --fail --silent --show-error --location --output $BASE/build/termux/com.termux_75.apk https://f-droid.org/archive/com.termux_75.apk || \
+{ tput setaf 1 ; printf "An APK download failed. [ FILE = com.termux_75.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
+printf "d88444d9df4049c47f12678feb9579aaf2814a89e411d52653dc0a2509f883b5  $BASE/build/termux/com.termux_75.apk" | sha256sum -c --quiet || exit 1
+
+### END F-DROID-PACKAGES.SH
 
 # [ ! -d $BASE/build/source/ ] && mkdir $BASE/build/source/
 # sshfs vagrant@192.168.221.50:/home/vagrant/android $BASE/build/source -o uidfile=1000 -o gidfile=1000 \
