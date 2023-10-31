@@ -126,11 +126,31 @@ echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sou
 sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install sublime-text < /dev/null > /dev/null || \
 { echo 'Sublime install failed ... non-critical ... continuing.' ; }
 
-# Install JDK v8
-curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public || { echo 'Adoptium key download failed.' ; exit 1 ; }
+# Install JDK v8. The Adoptium repos/servers frequently fail. which generates
+# non-useful errors during CI builds. To reduce the number of failures, we retry 
+# the setup/update/install commands several times, after a delay, before giving up  
+# and triggering a fatal setup error.
+{ curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public ; } || \
+{ sleep 120 ; curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public ; } || \
+{ sleep 120 ; curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public ; } || \
+{ sleep 180 ; curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public ; } || \
+{ sleep 300 ; curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public ; } || \
+{ sleep 300 ; curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public ; } || \
+{ sleep 300 ; curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public ; } || \
+{ sleep 300 ; curl -Lso $HOME/adoptopenjdk-pub.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public ; } || \
+{ echo 'Adoptium key download failed.' ; exit 1 ; }
+
 cat $HOME/adoptopenjdk-pub.gpg | gpg --dearmor | sudo apt-key add -
 sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true add-apt-repository --yes 'deb [arch=amd64] https://packages.adoptium.net/artifactory/deb/ buster main'
-sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null || \
+
+{ sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null ; } || \
+{ sleep 120 ; sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null ; } || \
+{ sleep 120 ; sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null ; } || \
+{ sleep 180 ; sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null ; } || \
+{ sleep 300 ; sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null ; } || \
+{ sleep 300 ; sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null ; } || \
+{ sleep 300 ; sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null ; } || \
+{ sleep 300 ; sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install temurin-8-jdk < /dev/null > /dev/null ; } || \
 { echo 'JDK 8 install failed.' ; exit 1 ; }
 
 sudo update-alternatives --set java /usr/lib/jvm/temurin-8-jdk-amd64/bin/java
