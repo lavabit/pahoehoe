@@ -39,7 +39,7 @@ before_script:
   - sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
   - swig -version
   # Annoying workarounds #2
-  #- curl -L https://dl.google.com/android/repository/android-ndk-r19b-linux-x86_64.zip
+  #- curl -L https://redirector.gvt1.com/edgedl/android/repository/android-ndk-r19b-linux-x86_64.zip
   #- unzip -q android-ndk-r19b-linux-x86_64.zip
   #- rm android-ndk-r19b-linux-x86_64.zip
   #- export ANDROID_NDK_HOME=`pwd`/android-ndk-r16b

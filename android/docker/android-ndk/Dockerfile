@@ -26,7 +26,7 @@ RUN apt-get update -qq && \
 
 ENV ANDROID_NDK_VERSION "r20"
 ENV ANDROID_NDK_HOME ${ANDROID_HOME}/android-ndk-${ANDROID_NDK_VERSION}
-ENV ANDROID_NDK_URL http://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip
+ENV ANDROID_NDK_URL https://redirector.gvt1.com/edgedl/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip
 
 RUN curl -L $ANDROID_NDK_URL -o ndk.zip  \
     && unzip ndk.zip -d $ANDROID_HOME  \

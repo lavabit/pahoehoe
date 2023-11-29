@@ -95,7 +95,7 @@ Once you've got it installed, use the `SDK Manager` tool (Android figure Icon wi
 Alternatively (eg: for build machines), you may download and unzip the `android-sdk` bundle from Google as follows (assuming an install location of `/opt/android-sdk-linux`:
 
 ```
-curl -L https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -o sdk-tools.zip  \
+curl -L https://redirector.gvt1.com/edgedl/android/repository/sdk-tools-linux-3859397.zip -o sdk-tools.zip  \
     && unzip -q sdk-tools.zip -d /opt/android-sdk-linux \
     && rm -f sdk-tools.zip
 ```
@@ -103,7 +103,7 @@ curl -L https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -o 
 To download the NDK (for cross-compiling and running the C code used in `ics-openvpn`), use:
 
 ```
-curl -L http://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip -o ndk.zip  \
+curl -L https://redirector.gvt1.com/edgedl/android/repository/android-ndk-r16b-linux-x86_64.zip -o ndk.zip  \
     && unzip ndk.zip -d /opt/android-sdk-linux/android-ndk-r16b \
     && rm -rf ndk.zip
 ```

@@ -163,7 +163,7 @@ sudo apt-file update &> /dev/null || echo 'apt-file update failed ... non-critic
 rm -f $HOME/adoptopenjdk-pub.gpg $HOME/sublimehq-pub.gpg
 
 # Install the Android command line tools.
-curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip
+curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://redirector.gvt1.com/edgedl/android/repository/commandlinetools-linux-8092744_latest.zip
 printf "d71f75333d79c9c6ef5c39d3456c6c58c613de30e6a751ea0dbd433e8f8b9cbf  $HOME/commandlinetools-linux-8092744_latest.zip" | sha256sum -c || \
 ( rm -f $HOME/commandlinetools-linux-8092744_latest.zip ; curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://dl-ssl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip )
 printf "d71f75333d79c9c6ef5c39d3456c6c58c613de30e6a751ea0dbd433e8f8b9cbf  $HOME/commandlinetools-linux-8092744_latest.zip" | sha256sum -c || exit 1
@@ -232,7 +232,7 @@ sudo chmod 755 /opt/android-sdk-linux/platform-tools/bundletool
 sudo chmod 644 /opt/android-sdk-linux/platform-tools/bundletool.jar
 
 # Setup aapt2.
-sudo curl --silent --location --output /opt/android-sdk-linux/platform-tools/aapt2.jar https://dl.google.com/android/maven2/com/android/tools/build/aapt2/4.1.3-6503028/aapt2-4.1.3-6503028-linux.jar
+sudo curl --silent --location --output /opt/android-sdk-linux/platform-tools/aapt2.jar https://redirector.gvt1.com/edgedl/android/maven2/com/android/tools/build/aapt2/4.1.3-6503028/aapt2-4.1.3-6503028-linux.jar
 printf "023326dc41058a283c3092f95f894ca024199579627f85118a39843591ed4196  /opt/android-sdk-linux/platform-tools/aapt2.jar" | sha256sum -c || exit 1
 sudo unzip -q -d /opt/android-sdk-linux/platform-tools/ /opt/android-sdk-linux/platform-tools/aapt2.jar aapt2
 sudo rm --force /opt/android-sdk-linux/platform-tools/aapt2.jar

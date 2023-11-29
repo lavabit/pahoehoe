@@ -21,7 +21,7 @@ sudo update-alternatives --set javac /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/b
 [ -d /opt/android-sdk-linux/ ] && sudo rm --force --recursive /opt/android-sdk-linux/
 
 # Install the Command Line Tools
-curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip
+curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://redirector.gvt1.com/edgedl/android/repository/commandlinetools-linux-8092744_latest.zip
 printf "d71f75333d79c9c6ef5c39d3456c6c58c613de30e6a751ea0dbd433e8f8b9cbf  $HOME/commandlinetools-linux-8092744_latest.zip" | sha256sum -c || exit 1
 sudo unzip -qq $HOME/commandlinetools-linux-8092744_latest.zip -d /opt/ && sudo mv /opt/cmdline-tools/ /opt/android-cmdline-tools/ && rm --force $HOME/commandlinetools-linux-8092744_latest.zip
 yes | sudo sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --licenses > /dev/null
@@ -65,7 +65,7 @@ sudo update-alternatives --install /usr/bin/avdmanager avdmanager /opt/android-s
 
 ## Install the Android integrated development studio.
 # [ ! -d /opt/android-sdk-linux/studio/ ] && sudo mkdir /opt/android-sdk-linux/studio/
-# curl --silent --show-error --location --output $HOME/android-studio-ide-201.7042882-linux.tar.gz https://dl.google.com/android/studio/ide-zips/4.1.2.0/android-studio-ide-201.7042882-linux.tar.gz
+# curl --silent --show-error --location --output $HOME/android-studio-ide-201.7042882-linux.tar.gz https://redirector.gvt1.com/edgedl/android/studio/ide-zips/4.1.2.0/android-studio-ide-201.7042882-linux.tar.gz
 # printf "89f7c3a03ed928edeb7bbb1971284bcb72891a77b4f363557a7ad4ed37652bb9  $HOME/android-studio-ide-201.7042882-linux.tar.gz" | sha256sum -c || exit 1
 # sudo tar --extract --ungzip --strip-components=1 --directory=/opt/android-sdk-linux/studio/ --file=$HOME/android-studio-ide-201.7042882-linux.tar.gz && rm --force $HOME/android-studio-ide-201.7042882-linux.tar.gz
 #

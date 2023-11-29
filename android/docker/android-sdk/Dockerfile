@@ -39,7 +39,7 @@ ENV LANG en_US.UTF-8
 # --- Install Android SDK Tools
 
 ENV ANDROID_HOME /opt/android-sdk-linux
-ENV ANDROID_SDK_URL https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip
+ENV ANDROID_SDK_URL https://redirector.gvt1.com/edgedl/android/repository/sdk-tools-linux-3859397.zip
 
 # Install SDK Tools
 RUN curl -L $ANDROID_SDK_URL -o sdk-tools.zip  \
