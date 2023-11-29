@@ -65,6 +65,31 @@ vagrant destroy -f &>/dev/null || true
 [ ! -d $BASE/build/ ] && mkdir $BASE/build/
 [ ! -d $BASE/build/logs/ ] && mkdir $BASE/build/logs/
 
+# Try and catch any problems with the download URLs early, so we don't waste time.
+if [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/archive/com.termux_75.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.kgurgul.cpuinfo_40700.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.lavabit.pahoehoe_202.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux.api_51.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux.boot_7.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux.styling_31.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux.widget_13.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux_118.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/de.blinkt.openvpn_204.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/org.connectbot_10909000.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://github.com/google/bundletool/releases/download/1.5.0/bundletool-all-1.5.0.jar)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/maven2/com/android/tools/build/aapt2/4.1.3-6503028/aapt2-4.1.3-6503028-linux.jar)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/repository/android-ndk-r16b-linux-x86_64.zip)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/repository/commandlinetools-linux-8092744_latest.zip)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/repository/sdk-tools-linux-3859397.zip)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/studio/ide-zips/4.1.2.0/android-studio-ide-201.7042882-linux.tar.gz)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/go/getgo/installer.exe)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/go/getgo/installer_darwin)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/go/getgo/installer_linux)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/go/go1.14.2.linux-amd64.tar.gz)" != "200" ]; then
+printf "\n\e[1;91m# One of the download URLs this build relies upon is invalid.\e[0;0m\n\n" ;
+exit 1
+fi
+
 # Try and update the box. If we already have the current version, proceed. Otherwise
 # download the latest box file. If the box is missing, or the download fails, we 
 # use the add command to download it, and we try that three times, which will hopefully
