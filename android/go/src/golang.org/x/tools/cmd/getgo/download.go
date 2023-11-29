@@ -22,7 +22,7 @@ import (
 
 const (
 	currentVersionURL = "https://golang.org/VERSION?m=text"
-	downloadURLPrefix = "https://dl.google.com/go"
+	downloadURLPrefix = "https://redirector.gvt1.com/edgedl/go"
 )
 
 // downloadGoVersion downloads and upacks the specific go version to dest/go.

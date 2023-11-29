@@ -21,7 +21,7 @@ import (
 var debug = log.New(ioutil.Discard, "gl: ", log.LstdFlags)
 
 func downloadDLLs() (path string, err error) {
-	url := "https://dl.google.com/go/mobile/angle-bd3f8780b-" + runtime.GOARCH + ".tgz"
+	url := "https://redirector.gvt1.com/edgedl/go/mobile/angle-bd3f8780b-" + runtime.GOARCH + ".tgz"
 	debug.Printf("downloading %s", url)
 	resp, err := http.Get(url)
 	if err != nil {

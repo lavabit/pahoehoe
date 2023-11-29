@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	base             = "https://dl.google.com/go/getgo/"
+	base             = "https://redirector.gvt1.com/edgedl/go/getgo/"
 	windowsInstaller = base + "installer.exe"
 	linuxInstaller   = base + "installer_linux"
 	macInstaller     = base + "installer_darwin"
