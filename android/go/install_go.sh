@@ -8,7 +8,8 @@ then
     echo "reusing downloaded golang bundle"
 else
     echo "installing go lang bundle ${GO_VERSION}.tar.gz"
-    curl -o $GO_VERSION.tar.gz https://redirector.gvt1.com/edgedl/go/$GO_VERSION.tar.gz
+    curl --location -o $GO_VERSION.tar.gz https://redirector.gvt1.com/edgedl/go/$GO_VERSION.tar.gz
+
     ACTUAL_FP=`sha256sum $GO_VERSION.tar.gz | cut -d " " -f1`
     if [[ ! $ACTUAL_FP == $EXPECTED_FP ]]
     then
