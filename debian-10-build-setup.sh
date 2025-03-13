@@ -15,19 +15,11 @@ sudo systemctl --quiet restart haveged && sudo systemctl --quiet restart sysstat
 
 # Point us at the development environment.
 sudo tee --append /etc/hosts <<-EOF > /dev/null
-192.168.221.146 api.debian.local
-192.168.221.142 vpn.debian.local
-192.168.221.142 142.vpn.debian.local
-192.168.221.143 143.vpn.debian.local
-192.168.221.144 144.vpn.debian.local
-192.168.221.145 145.vpn.debian.local
+192.168.221.145 api.debian.local
+192.168.221.146 vpn.debian.local
 
-192.168.221.246 api.alma.local
-192.168.221.242 vpn.alma.local
-192.168.221.242 242.vpn.alma.local
-192.168.221.243 243.vpn.alma.local
-192.168.221.244 244.vpn.alma.local
-192.168.221.245 245.vpn.alma.local
+192.168.221.245 api.alma.local
+192.168.221.246 vpn.alma.local
 EOF
 
 # Create a swap file.
@@ -57,7 +49,7 @@ sudo sed -i "s/AccuracySec.*/AccuracySec=5m/g" /lib/systemd/system/fstrim.timer
 sudo systemctl --quiet daemon-reload && sudo systemctl --quiet enable fstrim.timer
 
 # Prevent an error.
-#sudo mkdir --parents /etc/ssl/certs/java/cacerts
+sudo mkdir --parents /etc/ssl/certs/java/
 
 # swap swap defaults
 sudo tee /etc/apt/apt.conf.d/99options <<-EOF > /dev/null
@@ -68,7 +60,8 @@ APT::Get::Assume-Yes "true";
 Dpkg::Use-Pty "0";
 EOF
 
-sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl diffoscope dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null
+{ sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y upgrade && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl diffoscope dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl openjdk-11-jdk packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null ; } || \
+{ echo 'Apt update/upgrade/install failed.' ; exit 1 ; }
 
 # Android client build.
 cd $HOME
@@ -177,7 +170,7 @@ sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux
 "extras;google;m2repository" "extras;android;m2repository" 
 
 sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --install \
-"cmdline-tools;latest" \
+"cmdline-tools;latest" "emulator" "platform-tools" \
 "ndk;21.4.7075529" "cmake;3.10.2.4988404" \
 "build-tools;30.0.3" "platforms;android-30" \
 "build-tools;29.0.3" "platforms;android-29"
@@ -252,7 +245,7 @@ sudo update-alternatives --install /usr/bin/aidl aidl /opt/android-sdk-linux/bui
 sudo update-alternatives --install /usr/bin/dexdump dexdump /opt/android-sdk-linux/build-tools/30.0.3/dexdump 20
 sudo update-alternatives --install /usr/bin/zipalign zipalign /opt/android-sdk-linux/build-tools/30.0.3/zipalign 20
 sudo update-alternatives --install /usr/bin/apksigner apksigner /opt/android-sdk-linux/build-tools/30.0.3/apksigner 20
-sudo update-alternatives --install /usr/bin/apkanalyzer apkanalyzer /opt/android-sdk-linux/tools/bin/apkanalyzer 20
+sudo update-alternatives --install /usr/bin/apkanalyzer apkanalyzer /opt/android-sdk-linux/cmdline-tools/latest/bin/apkanalyzer 20
 
 # Emulator
 sudo update-alternatives --install /usr/bin/emulator emulator /opt/android-sdk-linux/emulator/emulator 20

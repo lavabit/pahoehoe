@@ -14,10 +14,6 @@ serial = 003
 activation_date = "2021-01-01 12:00:00"
 expiration_date = "2031-12-31 12:00:00"
 dns_name = "vpn.debian.local"
-dns_name = "142.vpn.debian.local"
-dns_name = "143.vpn.debian.local"
-dns_name = "144.vpn.debian.local"
-dns_name = "145.vpn.debian.local"
 signing_key
 encryption_key
 tls_www_server
@@ -52,8 +48,8 @@ EOF
 # Uncomment this for production deployments to generate new/unique Diffie-Hellman parameters.
 # openssl dhparam -5 -outform PEM -out /etc/openvpn/dh.pem 4096
 
-cat <<-EOF > /etc/openvpn/server/tcp.142.conf
-port 443
+cat <<-EOF > /etc/openvpn/server/tcp.146.conf
+port 554
 proto tcp
 explicit-exit-notify 0
 tls-server
@@ -70,17 +66,17 @@ tls-version-min 1.2
 dev tun
 duplicate-cn
 keepalive 10 30
-local 192.168.221.142
+local 192.168.221.146
 mute-replay-warnings
-# push "dhcp-option DNS 10.82.0.1"
+# push "dhcp-option DNS 10.86.0.1"
 push "dhcp-option DNS 1.1.1.1"
 push "dhcp-option DNS 4.2.2.1"
 push "dhcp-option DNS 4.2.2.2"
 push "redirect-gateway def1 bypass-dhcp"
 push "route-ipv6 2000::/3"
 script-security 1
-server-ipv6 2001:db8:123::/64
-server 10.82.0.0 255.255.248.0
+server-ipv6 2001:db8:86::/64
+server 10.86.0.0 255.255.248.0
 tcp-nodelay
 topology subnet
 max-clients 2048
@@ -96,7 +92,7 @@ verb 1
 verify-x509-name "CN=BAZINGA"
 EOF
 
-cat <<-EOF > /etc/openvpn/server/udp.142.conf
+cat <<-EOF > /etc/openvpn/server/udp.146.conf
 port 554
 proto udp
 explicit-exit-notify 1
@@ -114,275 +110,17 @@ tls-version-min 1.2
 dev tun
 duplicate-cn
 keepalive 10 30
-local 192.168.221.142
+local 192.168.221.146
 mute-replay-warnings
-# push "dhcp-option DNS 10.42.0.1"
+# push "dhcp-option DNS 10.46.0.1"
 push "dhcp-option DNS 1.1.1.1"
 push "dhcp-option DNS 4.2.2.1"
 push "dhcp-option DNS 4.2.2.2"
 push "redirect-gateway def1 bypass-dhcp"
 push "route-ipv6 2000::/3"
 script-security 1
-server-ipv6 2001:db8:123::/64
-server 10.42.0.0 255.255.248.0
-topology subnet
-max-clients 2048
-max-routes-per-client 2048
-txqueuelen 4096
-bcast-buffers 8192
-rcvbuf 2097152
-sndbuf 2097152
-verb 1
-# log-append /var/log/openvpn/server.log
-# push "block-outside-dns"
-verify-x509-name "CN=BAZINGA"
-EOF
-
-cat <<-EOF > /etc/openvpn/server/tcp.143.conf
-port 443
-proto tcp
-explicit-exit-notify 0
-tls-server
-mode server
-ca /etc/vpnweb/ca-cert.pem
-cert /etc/openvpn/vpn-cert.pem
-key /etc/openvpn/vpn-key.pem
-dh /etc/openvpn/dh.pem
-auth SHA256
-cipher AES-256-GCM
-ncp-ciphers AES-256-GCM:AES-256-CBC
-tls-cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384
-tls-version-min 1.2
-dev tun
-duplicate-cn
-keepalive 10 30
-local 192.168.221.143
-mute-replay-warnings
-# push "dhcp-option DNS 10.83.0.1"
-push "dhcp-option DNS 1.1.1.1"
-push "dhcp-option DNS 4.2.2.1"
-push "dhcp-option DNS 4.2.2.2"
-push "redirect-gateway def1 bypass-dhcp"
-push "route-ipv6 2000::/3"
-script-security 1
-server-ipv6 2001:db8:123::/64
-server 10.83.0.0 255.255.248.0
-tcp-nodelay
-topology subnet
-max-clients 2048
-max-routes-per-client 2048
-tcp-queue-limit 8192
-txqueuelen 4096
-bcast-buffers 8192
-rcvbuf 2097152
-sndbuf 2097152
-verb 1
-# log-append /var/log/openvpn/server.log
-# push "block-outside-dns"
-verify-x509-name "CN=BAZINGA"
-EOF
-
-cat <<-EOF > /etc/openvpn/server/udp.143.conf
-port 554
-proto udp
-explicit-exit-notify 1
-tls-server
-mode server
-ca /etc/vpnweb/ca-cert.pem
-cert /etc/openvpn/vpn-cert.pem
-key /etc/openvpn/vpn-key.pem
-dh /etc/openvpn/dh.pem
-auth SHA256
-cipher AES-256-GCM
-ncp-ciphers AES-256-GCM:AES-256-CBC
-tls-cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384
-tls-version-min 1.2
-dev tun
-duplicate-cn
-keepalive 10 30
-local 192.168.221.143
-mute-replay-warnings
-# push "dhcp-option DNS 10.43.0.1"
-push "dhcp-option DNS 1.1.1.1"
-push "dhcp-option DNS 4.2.2.1"
-push "dhcp-option DNS 4.2.2.2"
-push "redirect-gateway def1 bypass-dhcp"
-push "route-ipv6 2000::/3"
-script-security 1
-server-ipv6 2001:db8:123::/64
-server 10.43.0.0 255.255.248.0
-topology subnet
-max-clients 2048
-max-routes-per-client 2048
-txqueuelen 4096
-bcast-buffers 8192
-rcvbuf 2097152
-sndbuf 2097152
-verb 1
-# log-append /var/log/openvpn/server.log
-# push "block-outside-dns"
-verify-x509-name "CN=BAZINGA"
-EOF
-
-cat <<-EOF > /etc/openvpn/server/tcp.144.conf
-port 443
-proto tcp
-explicit-exit-notify 0
-tls-server
-mode server
-ca /etc/vpnweb/ca-cert.pem
-cert /etc/openvpn/vpn-cert.pem
-key /etc/openvpn/vpn-key.pem
-dh /etc/openvpn/dh.pem
-auth SHA256
-cipher AES-256-GCM
-ncp-ciphers AES-256-GCM:AES-256-CBC
-tls-cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384
-tls-version-min 1.2
-dev tun
-duplicate-cn
-keepalive 10 30
-local 192.168.221.144
-mute-replay-warnings
-# push "dhcp-option DNS 10.84.0.1"
-push "dhcp-option DNS 1.1.1.1"
-push "dhcp-option DNS 4.2.2.1"
-push "dhcp-option DNS 4.2.2.2"
-push "redirect-gateway def1 bypass-dhcp"
-push "route-ipv6 2000::/3"
-script-security 1
-server-ipv6 2001:db8:123::/64
-server 10.84.0.0 255.255.248.0
-tcp-nodelay
-topology subnet
-max-clients 2048
-max-routes-per-client 2048
-tcp-queue-limit 8192
-txqueuelen 4096
-bcast-buffers 8192
-rcvbuf 2097152
-sndbuf 2097152
-verb 1
-# log-append /var/log/openvpn/server.log
-# push "block-outside-dns"
-verify-x509-name "CN=BAZINGA"
-EOF
-
-cat <<-EOF > /etc/openvpn/server/udp.144.conf
-port 554
-proto udp
-explicit-exit-notify 1
-tls-server
-mode server
-ca /etc/vpnweb/ca-cert.pem
-cert /etc/openvpn/vpn-cert.pem
-key /etc/openvpn/vpn-key.pem
-dh /etc/openvpn/dh.pem
-auth SHA256
-cipher AES-256-GCM
-ncp-ciphers AES-256-GCM:AES-256-CBC
-tls-cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384
-tls-version-min 1.2
-dev tun
-duplicate-cn
-keepalive 10 30
-local 192.168.221.144
-mute-replay-warnings
-# push "dhcp-option DNS 10.44.0.1"
-push "dhcp-option DNS 1.1.1.1"
-push "dhcp-option DNS 4.2.2.1"
-push "dhcp-option DNS 4.2.2.2"
-push "redirect-gateway def1 bypass-dhcp"
-push "route-ipv6 2000::/3"
-script-security 1
-server-ipv6 2001:db8:123::/64
-server 10.44.0.0 255.255.248.0
-topology subnet
-max-clients 2048
-max-routes-per-client 2048
-txqueuelen 4096
-bcast-buffers 8192
-rcvbuf 2097152
-sndbuf 2097152
-verb 1
-# log-append /var/log/openvpn/server.log
-# push "block-outside-dns"
-verify-x509-name "CN=BAZINGA"
-EOF
-
-cat <<-EOF > /etc/openvpn/server/tcp.145.conf
-port 443
-proto tcp
-explicit-exit-notify 0
-tls-server
-mode server
-ca /etc/vpnweb/ca-cert.pem
-cert /etc/openvpn/vpn-cert.pem
-key /etc/openvpn/vpn-key.pem
-dh /etc/openvpn/dh.pem
-auth SHA256
-cipher AES-256-GCM
-ncp-ciphers AES-256-GCM:AES-256-CBC
-tls-cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384
-tls-version-min 1.2
-dev tun
-duplicate-cn
-keepalive 10 30
-local 192.168.221.145
-mute-replay-warnings
-# push "dhcp-option DNS 10.85.0.1"
-push "dhcp-option DNS 1.1.1.1"
-push "dhcp-option DNS 4.2.2.1"
-push "dhcp-option DNS 4.2.2.2"
-push "redirect-gateway def1 bypass-dhcp"
-push "route-ipv6 2000::/3"
-script-security 1
-server-ipv6 2001:db8:123::/64
-server 10.85.0.0 255.255.248.0
-tcp-nodelay
-topology subnet
-max-clients 2048
-max-routes-per-client 2048
-tcp-queue-limit 8192
-txqueuelen 4096
-bcast-buffers 8192
-rcvbuf 2097152
-sndbuf 2097152
-verb 1
-# log-append /var/log/openvpn/server.log
-# push "block-outside-dns"
-verify-x509-name "CN=BAZINGA"
-EOF
-
-cat <<-EOF > /etc/openvpn/server/udp.145.conf
-port 554
-proto udp
-explicit-exit-notify 1
-tls-server
-mode server
-ca /etc/vpnweb/ca-cert.pem
-cert /etc/openvpn/vpn-cert.pem
-key /etc/openvpn/vpn-key.pem
-dh /etc/openvpn/dh.pem
-auth SHA256
-cipher AES-256-GCM
-ncp-ciphers AES-256-GCM:AES-256-CBC
-tls-cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384
-tls-version-min 1.2
-dev tun
-duplicate-cn
-keepalive 10 30
-local 192.168.221.145
-mute-replay-warnings
-# push "dhcp-option DNS 10.45.0.1"
-push "dhcp-option DNS 1.1.1.1"
-push "dhcp-option DNS 4.2.2.1"
-push "dhcp-option DNS 4.2.2.2"
-push "redirect-gateway def1 bypass-dhcp"
-push "route-ipv6 2000::/3"
-script-security 1
-server-ipv6 2001:db8:123::/64
-server 10.45.0.0 255.255.248.0
+server-ipv6 2001:db8:46::/64
+server 10.46.0.0 255.255.248.0
 topology subnet
 max-clients 2048
 max-routes-per-client 2048
@@ -433,14 +171,8 @@ LimitNOFILE=65535
 EOF
 
 systemctl --quiet daemon-reload
-systemctl --quiet enable openvpn-server@tcp.142.service && systemctl --quiet start openvpn-server@tcp.142.service
-systemctl --quiet enable openvpn-server@tcp.143.service && systemctl --quiet start openvpn-server@tcp.143.service
-systemctl --quiet enable openvpn-server@tcp.144.service && systemctl --quiet start openvpn-server@tcp.144.service
-systemctl --quiet enable openvpn-server@tcp.145.service && systemctl --quiet start openvpn-server@tcp.145.service
-systemctl --quiet enable openvpn-server@udp.142.service && systemctl --quiet start openvpn-server@udp.142.service
-systemctl --quiet enable openvpn-server@udp.143.service && systemctl --quiet start openvpn-server@udp.143.service
-systemctl --quiet enable openvpn-server@udp.144.service && systemctl --quiet start openvpn-server@udp.144.service
-systemctl --quiet enable openvpn-server@udp.145.service && systemctl --quiet start openvpn-server@udp.145.service
+systemctl --quiet enable openvpn-server@tcp.146.service && systemctl --quiet start openvpn-server@tcp.146.service
+systemctl --quiet enable openvpn-server@udp.146.service && systemctl --quiet start openvpn-server@udp.146.service
 
 
 # env DEBCONF_NONINTERACTIVE_SEEN=true DEBIAN_FRONTEND=noninteractive apt-get -qq -y install dnsmasq < /dev/null > /dev/null
@@ -462,13 +194,6 @@ systemctl --quiet enable openvpn-server@udp.145.service && systemctl --quiet sta
 
 iptables --append FORWARD -i tun0 -j ACCEPT
 iptables --append FORWARD -i tun1 -j ACCEPT
-iptables --append FORWARD -i tun2 -j ACCEPT
-iptables --append FORWARD -i tun3 -j ACCEPT
-iptables --append FORWARD -i tun4 -j ACCEPT
-iptables --append FORWARD -i tun5 -j ACCEPT
-iptables --append FORWARD -i tun6 -j ACCEPT
-iptables --append FORWARD -i tun7 -j ACCEPT
-
 # Open up port 443 for TCP and UDP connections.
 iptables --append INPUT --proto icmp --jump ACCEPT
 iptables --append INPUT --in-interface lo --jump ACCEPT
@@ -476,8 +201,9 @@ iptables --append INPUT --match state --state RELATED,ESTABLISHED --jump ACCEPT
 iptables --append INPUT --proto tcp --match state --state NEW -m tcp --dport 22 --jump ACCEPT
 iptables --append INPUT --proto udp --match state --state NEW -m udp --dport 53 --jump ACCEPT
 iptables --append INPUT --proto tcp --match state --state NEW -m tcp --dport 53 --jump ACCEPT
-iptables --append INPUT --proto udp --match state --state NEW -m udp --dport 554 --jump ACCEPT
 iptables --append INPUT --proto tcp --match state --state NEW -m tcp --dport 443 --jump ACCEPT
+iptables --append INPUT --proto udp --match state --state NEW -m udp --dport 554 --jump ACCEPT
+iptables --append INPUT --proto tcp --match state --state NEW -m tcp --dport 554 --jump ACCEPT
 iptables --append INPUT -j REJECT --reject-with icmp-host-prohibited
 
 ip6tables --append INPUT --in-interface lo --jump ACCEPT
@@ -487,22 +213,10 @@ ip6tables --append INPUT --proto tcp --match state --state NEW -m tcp --dport 22
 ip6tables --append INPUT -j REJECT --reject-with icmp6-adm-prohibited
 
 # Add iptables-rule to forward packets from our OpenVPN subnets.
-iptables --table nat --append POSTROUTING -s 10.42.0.0/24 -o eth0 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.42.0.0/24 -o eth1 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.43.0.0/24 -o eth0 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.43.0.0/24 -o eth1 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.44.0.0/24 -o eth0 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.44.0.0/24 -o eth1 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.45.0.0/24 -o eth0 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.45.0.0/24 -o eth1 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.82.0.0/24 -o eth0 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.82.0.0/24 -o eth1 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.83.0.0/24 -o eth0 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.83.0.0/24 -o eth1 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.84.0.0/24 -o eth0 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.84.0.0/24 -o eth1 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.85.0.0/24 -o eth0 -j MASQUERADE
-iptables --table nat --append POSTROUTING -s 10.85.0.0/24 -o eth1 -j MASQUERADE
+iptables --table nat --append POSTROUTING -s 10.46.0.0/24 -o eth0 -j MASQUERADE
+iptables --table nat --append POSTROUTING -s 10.46.0.0/24 -o eth1 -j MASQUERADE
+iptables --table nat --append POSTROUTING -s 10.86.0.0/24 -o eth0 -j MASQUERADE
+iptables --table nat --append POSTROUTING -s 10.86.0.0/24 -o eth1 -j MASQUERADE
 
 iptables-save > /etc/iptables/rules.v4
 ip6tables-save > /etc/iptables/rules.v6

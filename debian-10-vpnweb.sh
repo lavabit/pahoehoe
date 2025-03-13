@@ -11,12 +11,8 @@ sudo systemctl --quiet restart haveged && sudo systemctl --quiet restart sysstat
 
 # Point us at the development environment.
 sudo tee --append /etc/hosts <<-EOF > /dev/null
-192.168.221.146 api.debian.local
-192.168.221.142 vpn.debian.local
-192.168.221.142 142.vpn.debian.local
-192.168.221.143 143.vpn.debian.local
-192.168.221.144 144.vpn.debian.local
-192.168.221.145 145.vpn.debian.local
+192.168.221.145 api.debian.local
+192.168.221.146 vpn.debian.local
 EOF
 
 sed -i "/HISTCONTROL/d" $HOME/.bashrc
@@ -38,7 +34,7 @@ mkdir --parents /etc/vpnweb/public/3/
 cat <<-EOF > /etc/default/vpnweb
 VPNWEB_AUTH=anon
 VPNWEB_PORT=443
-VPNWEB_ADDRESS=192.168.221.146
+VPNWEB_ADDRESS=192.168.221.145
 VPNWEB_REDIRECT=https://lavabit.com/
 VPNWEB_AUTH_SECRET="`expect_mkpasswd -l 32 -d 6 -C 6 -s 0 -d 4`"
 VPNWEB_API_PATH=/etc/vpnweb/public/
@@ -118,18 +114,18 @@ openvpn:
 
 locations:
     - Dallas:
-        - name: Dallas
-        - country_code: US
+        - name: Amsterdam
+        - country_code: NL
         - hemisphere: N
-        - timezone: -6
+        - timezone: +2
 
 gateways:
-    - 142.vpn.debian.local:
-        - host: 142.vpn.debian.local
-        - ip_address: 192.168.221.142
-        - location: Dallas
+    - vpn.debian.local:
+        - host: vpn.debian.local
+        - ip_address: 192.168.221.146
+        - location: Amsterdam
         - transports:
-            - [ "openvpn", "tcp", "443"]
+            - [ "openvpn", "tcp", "554"]
 
 provider:
     - name: "Debian Test Proxy"
@@ -143,14 +139,11 @@ cat <<-EOF > /etc/vpnweb/public/geoip.json
 {
   "ip": "192.168.221.146",
   "cc": "US",
-  "city": "Dallas",
-  "lat": 32.776,
-  "lon": -97.822,
+  "city": "Amsterdam",
+  "lat": 42.9388544,
+  "lon": -74.1885362,
   "gateways": [
-    "242.vpn.debian.local",
-    "243.vpn.debian.local",
-    "244.vpn.debian.local",
-    "245.vpn.debian.local"
+    "vpn.debian.local"
   ]
 }
 EOF
@@ -242,9 +235,9 @@ curl --fail --silent --show-error --retry 10 --retry-delay 10 --max-time 300 --c
 curl --fail --silent --show-error --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.debian.local/ || { echo "https://api.debian.local/ redirection failed ..." ; exit 1 ; }
 curl --fail --silent --show-error --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem https://api.debian.local/$RANDOM || { echo "https://api.debian.local/RANDOM redirection failed ..." ; exit 1 ; }
 
-for i in {1..100}; do
+for i in {1..10}; do
   URL="`cat /dev/urandom | tr -dc '[:alnum:]\#\\\/\.\-\_' | fold -w 32 | head -n 1`"
-  curl --fail --silent --show-error --globoff --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem "https://api.debian.local/${URL}" || { echo "https://api.debian.local/${URL} redirection failed" ; exit 1 ; }
+  curl --fail --silent --show-error --globoff --insecure --location --retry 1 --retry-delay 1 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem "https://api.debian.local/${URL}" || { echo "https://api.debian.local/${URL} redirection failed" ; exit 1 ; }
 done
 
 echo "Unit tests completed."

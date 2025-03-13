@@ -1,5 +1,5 @@
 {
   "main_url" : "https://alma.local",
-  "provider_ip" : "192.168.221.242",
-  "provider_api_ip" : "192.168.221.246"
+  "provider_ip" : "192.168.221.246",
+  "provider_api_ip" : "192.168.221.245"
 }

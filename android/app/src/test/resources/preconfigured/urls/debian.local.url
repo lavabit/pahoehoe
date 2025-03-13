@@ -1,5 +1,5 @@
 {
   "main_url" : "https://debian.local",
-  "provider_ip" : "192.168.221.142",
-  "provider_api_ip" : "192.168.221.146"
+  "provider_ip" : "192.168.221.146",
+  "provider_api_ip" : "192.168.221.145"
 }

@@ -182,11 +182,11 @@ android {
       buildConfigField "String", "customProviderUrl", customProviderUrl
 
       //Static ip address of provider, using a commercially validated CA certificate to serve the provider.json.
-      def customProviderIp = '"38.147.122.246"'
+      def customProviderIp = '"46.23.82.245"'
       buildConfigField "String", "customProviderIp", customProviderIp
 
       //Static ip address of the provider api, using a self signed certificate to serve provider.json, eip-service.json etc.
-      def customProviderApiIp = '"38.147.122.246"'
+      def customProviderApiIp = '"46.23.82.245"'
       buildConfigField "String", "customProviderApiIp", customProviderApiIp
 
       //Where to look for location data.

@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# git clone https://github.com/vagrant-libvirt/vagrant-libvirt.git && \
+# cd vagrant-libvirt && \
+# git checkout 0.12.2 && \
+# sed -i "s/'fog-libvirt', '>= 0.6.0'/'fog-libvirt', '<= 0.12.2'/g" vagrant-libvirt.gemspec && \
+# /opt/vagrant/embedded/bin/gem build vagrant-libvirt.gemspec && \
+# vagrant plugin install vagrant-libvirt-0.12.2.gem && \
+# cd ..
+
 # If the version string/numbers aren't setup already, we declare them here. The version 
 # string is what defines this build. The version number will be used as the version code
 # for F-Droid builds. The APK files uploaded to Google Play will use the build.gradle
@@ -67,14 +75,14 @@ vagrant destroy -f &>/dev/null || true
 
 # Try and catch any problems with the download URLs early, so we don't waste time.
 if [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/archive/com.termux_75.apk)" != "200" ] || \
-[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.kgurgul.cpuinfo_40700.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.kgurgul.cpuinfo_60300.apk)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.lavabit.pahoehoe_202.apk)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux.api_51.apk)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux.boot_7.apk)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux.styling_31.apk)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux.widget_13.apk)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/com.termux_118.apk)" != "200" ] || \
-[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/de.blinkt.openvpn_204.apk)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/de.blinkt.openvpn_210.apk)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://f-droid.org/repo/org.connectbot_10909000.apk)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://github.com/google/bundletool/releases/download/1.5.0/bundletool-all-1.5.0.jar)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/maven2/com/android/tools/build/aapt2/4.1.3-6503028/aapt2-4.1.3-6503028-linux.jar)" != "200" ] || \
@@ -309,7 +317,7 @@ printf "d5e0bc3f3be1702eb5822abc3d62469c0440cddc6366126b6cc1cfbaf8b0814f  $BASE/
 
 # Download the OpenVPN Android GUI
 [ -d $BASE/build/openvpn/ ] && rm --force --recursive $BASE/build/openvpn/ ; mkdir --parents $BASE/build/openvpn/
-curl --fail --silent --show-error --location --output $BASE/build/openvpn/de.blinkt.openvpn_204.apk https://f-droid.org/repo/de.blinkt.openvpn_204.apk || \
+curl --fail --silent --show-error --location --output $BASE/build/openvpn/de.blinkt.openvpn_204.apk https://f-droid.org/repo/de.blinkt.openvpn_210.apk || \
 { tput setaf 1 ; printf "An APK download failed. [ FILE = de.blinkt.openvpn_204.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "2d68d0dcb3de86d9bdb56349331b1fa2e8d7a647a160578444f901da69a74ba9  $BASE/build/openvpn/de.blinkt.openvpn_204.apk" | sha256sum -c --quiet || exit 1
 
@@ -321,7 +329,7 @@ printf "700d0cdc53eea321cfb2da25ca01707ba9a508d35419ea0877d520148a6fb906  $BASE/
 
 # Download CPU Info App
 [ -d $BASE/build/cpuinfo/ ] && rm --force --recursive $BASE/build/cpuinfo/ ; mkdir --parents $BASE/build/cpuinfo/
-curl --fail --silent --show-error --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40700.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_40700.apk || \
+curl --fail --silent --show-error --location --output $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40700.apk https://f-droid.org/repo/com.kgurgul.cpuinfo_60300.apk || \
 { tput setaf 1 ; printf "An APK download failed. [ FILE = com.kgurgul.cpuinfo_40700.apk ]\n\n" ; tput sgr0 ; exit 1 ; }
 printf "cc826cc5f9284caf338f211788f55914bcb4f64c82f8bc4911275d5ed962d17b  $BASE/build/cpuinfo/com.kgurgul.cpuinfo_40700.apk" | sha256sum -c --quiet || exit 1
 

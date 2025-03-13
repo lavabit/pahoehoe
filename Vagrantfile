@@ -122,9 +122,6 @@ EOF
     debian_vpn.vm.base_mac = "08002727B0B0"
     debian_vpn.vm.synced_folder ".", "/vagrant", disabled: true
     debian_vpn.vm.network "forwarded_port", guest: 22, host: 31000, id: "ssh", auto_correct: true
-    debian_vpn.vm.network :private_network, :ip => "192.168.221.142", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
-    debian_vpn.vm.network :private_network, :ip => "192.168.221.143", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
-    debian_vpn.vm.network :private_network, :ip => "192.168.221.144", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     debian_vpn.vm.network :private_network, :ip => "192.168.221.145", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     debian_vpn.vm.network :private_network, :ip => "192.168.221.146", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
 
@@ -182,9 +179,6 @@ EOF
     alma_vpn.vm.base_mac = "08002727C0C0"
     alma_vpn.vm.synced_folder ".", "/vagrant", disabled: true
     alma_vpn.vm.network "forwarded_port", guest: 22, host: 30000, id: "ssh", auto_correct: true
-    alma_vpn.vm.network :private_network, :ip => "192.168.221.242", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
-    alma_vpn.vm.network :private_network, :ip => "192.168.221.243", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
-    alma_vpn.vm.network :private_network, :ip => "192.168.221.244", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     alma_vpn.vm.network :private_network, :ip => "192.168.221.245", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
     alma_vpn.vm.network :private_network, :ip => "192.168.221.246", :libvirt__network_name => pahoehoe_network_name, :virtualbox__intnet => pahoehoe_network_name
 
