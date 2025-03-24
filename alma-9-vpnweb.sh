@@ -256,7 +256,7 @@ curl --fail --silent --show-error --insecure --location --retry 10 --retry-delay
 
 for i in {1..10}; do
   URL="`cat /dev/urandom | tr -dc '[:alnum:]\#\\\/\.\-\_' | fold -w 32 | head -n 1`"
-  curl --fail --silent --show-error --globoff --insecure --location --retry 1 --retry-delay 1 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem "https://api.alma.local/${URL}" || { echo "https://api.alma.local/${URL} redirection failed" ; exit 1 ; }
+  curl --fail --silent --show-error --globoff --insecure --location --retry 10 --retry-delay 10 --max-time 300 --connect-timeout 300 --output /dev/null --cacert /etc/vpnweb/ca-cert.pem "https://api.alma.local/${URL}" || { echo "https://api.alma.local/${URL} redirection failed [LOOP = $i]" ; exit 1 ; }
 done
 
 echo "Unit tests completed."

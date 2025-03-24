@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# clear; vagrant destroy -f ; time ./run.sh ; for i in {1..10}; do printf  "\a" ; sleep 1 ; done
+
+
 # git clone https://github.com/vagrant-libvirt/vagrant-libvirt.git && \
 # cd vagrant-libvirt && \
 # git checkout 0.12.2 && \
@@ -88,8 +91,13 @@ if [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null 
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/maven2/com/android/tools/build/aapt2/4.1.3-6503028/aapt2-4.1.3-6503028-linux.jar)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/repository/android-ndk-r16b-linux-x86_64.zip)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/repository/commandlinetools-linux-8092744_latest.zip)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://dl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/repository/commandlinetools-linux-11076708_latest.zip)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/repository/sdk-tools-linux-3859397.zip)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/studio/ide-zips/4.1.2.0/android-studio-ide-201.7042882-linux.tar.gz)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-linux.tar.gz)" != "200" ] || \
+[ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://dl.google.com/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-linux.tar.gz)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/go/getgo/installer.exe)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/go/getgo/installer_darwin)" != "200" ] || \
 [ "$(curl --fail --head --silent --location --max-time 60 --output /dev/null --write-out '%{http_code}' https://redirector.gvt1.com/edgedl/go/getgo/installer_linux)" != "200" ] || \

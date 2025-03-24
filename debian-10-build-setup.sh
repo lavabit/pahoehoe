@@ -60,7 +60,7 @@ APT::Get::Assume-Yes "true";
 Dpkg::Use-Pty "0";
 EOF
 
-{ sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y upgrade && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl diffoscope dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl openjdk-11-jdk packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev < /dev/null > /dev/null ; } || \
+{ sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y update && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y upgrade && sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get -qq -y install androguard apt-file bash-builtins bash-completion bzip2 curl diffoscope dnsutils file gcc git gnupg gnutls-bin haveged lib32stdc++6 lib32z1 libcanberra-gtk-module libcanberra-gtk3-module libffi-dev libjpeg-dev libssl-dev make meld net-tools nload openssh-client openssl openjdk-11-jdk packagekit-gtk3-module python3-asn1crypto python3-babel python3-clint python3-defusedxml python3-dev python3-git python3-libcloud python3-mwclient python3-paramiko python3-pil python3-pip python3-pyasn1 python3-pyasn1-modules python3-qrcode python3-requests python3-ruamel.yaml python3-setuptools python3-vagrant python3-venv python3-yaml qemu qemu-kvm qemu-user-static rake rsync ruby ruby-bundler ruby-dev software-properties-common swig sysfsutils unzip vm wget zlib1g-dev libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386 < /dev/null > /dev/null ; } || \
 { echo 'Apt update/upgrade/install failed.' ; exit 1 ; }
 
 # Android client build.
@@ -156,11 +156,11 @@ sudo apt-file update &> /dev/null || echo 'apt-file update failed ... non-critic
 rm -f $HOME/adoptopenjdk-pub.gpg $HOME/sublimehq-pub.gpg
 
 # Install the Android command line tools.
-curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://redirector.gvt1.com/edgedl/android/repository/commandlinetools-linux-8092744_latest.zip
-printf "d71f75333d79c9c6ef5c39d3456c6c58c613de30e6a751ea0dbd433e8f8b9cbf  $HOME/commandlinetools-linux-8092744_latest.zip" | sha256sum -c || \
-( rm -f $HOME/commandlinetools-linux-8092744_latest.zip ; curl --silent --show-error --location --output $HOME/commandlinetools-linux-8092744_latest.zip https://dl-ssl.google.com/android/repository/commandlinetools-linux-8092744_latest.zip )
-printf "d71f75333d79c9c6ef5c39d3456c6c58c613de30e6a751ea0dbd433e8f8b9cbf  $HOME/commandlinetools-linux-8092744_latest.zip" | sha256sum -c || exit 1
-sudo unzip -qq $HOME/commandlinetools-linux-8092744_latest.zip -d /opt/ && sudo mv /opt/cmdline-tools/ /opt/android-cmdline-tools/ && rm --force $HOME/commandlinetools-linux-8092744_latest.zip
+curl --silent --show-error --location --output $HOME/commandlinetools-linux-11076708_latest.zip https://redirector.gvt1.com/edgedl/android/repository/commandlinetools-linux-11076708_latest.zip
+printf "2d2d50857e4eb553af5a6dc3ad507a17adf43d115264b1afc116f95c92e5e258  $HOME/commandlinetools-linux-11076708_latest.zip" | sha256sum -c || \
+( rm -f $HOME/commandlinetools-linux-11076708_latest.zip ; curl --silent --show-error --location --output $HOME/commandlinetools-linux-11076708_latest.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip )
+printf "2d2d50857e4eb553af5a6dc3ad507a17adf43d115264b1afc116f95c92e5e258  $HOME/commandlinetools-linux-11076708_latest.zip" | sha256sum -c || exit 1
+sudo unzip -qq $HOME/commandlinetools-linux-11076708_latest.zip -d /opt/ && sudo mv /opt/cmdline-tools/ /opt/android-cmdline-tools/ && rm --force $HOME/commandlinetools-linux-11076708_latest.zip
 
 [ -d /opt/android-sdk-linux/ ] && sudo rm --force --recursive /opt/android-sdk-linux/
 yes | sudo /opt/android-cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux/ --licenses > /dev/null
@@ -261,6 +261,15 @@ EOF
 sudo chmod 664 /opt/android-sdk-linux/analytics.settings
 HUMAN=$USER sudo --preserve-env=HUMAN sh -c 'chown $HUMAN:$HUMAN /opt/android-sdk-linux/analytics.settings'
 # HUMAN=$USER sudo --preserve-env=HUMAN sh -c 'chown --recursive $HUMAN:$HUMAN /opt/android-sdk-linux/'
+
+# Android Studio Setup
+curl --silent --location --output $HOME/android-studio-2024.3.1.13-linux.tar.gz https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-linux.tar.gz
+printf "e3325ea03e457782a00adfe8373c6107061e1ee1c18269807854c87d90849510  $HOME/android-studio-2024.3.1.13-linux.tar.gz" | sha256sum -c || ( rm -f $HOME/android-studio-2024.3.1.13-linux.tar.gz ; curl --silent --show-error --location --output $HOME/android-studio-2024.3.1.13-linux.tar.gz https://dl.google.com/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-linux.tar.gz )
+printf "e3325ea03e457782a00adfe8373c6107061e1ee1c18269807854c87d90849510  $HOME/android-studio-2024.3.1.13-linux.tar.gz" | sha256sum -c || exit 1
+
+tar xzf android-studio-2024.3.1.13-linux.tar.gz || exit 1
+( cd $HOME/bin ; ln -s $HOME/android-studio/bin/studio.sh studio ) || exit 1
+rm -f android-studio-2024.3.1.13-linux.tar.gz
 
 cat <<-EOF >> $HOME/.profile
 
