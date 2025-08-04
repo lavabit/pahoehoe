@@ -16,7 +16,7 @@ To build the code in this repo, clone the repo and execute the `run.sh` script. 
 Note that building the APK using Android Studio will fail unless you manually build the VPN libraries using the command line, before importing the project. Use the `android/scripts/build_deps.sh` to build the binary libraries via the command line.
 
 **Release Checklist**   
-To create a new release, update the `run.sh` and the `android/app/build.gradle` files. Remove the `RC` from the version string, and commit the code base. Then create a matching `git tag`. While finalizing a release build and generating the files for the Play Store, and website, it's critical that the `VERSTR` and `VERCODE` values in the `run.sh` script match up with the values in `android/app/build.gradle`, at least those values used by the Lavabit variant. And then it's also critical that the procelain commit gets tagged with an identical version string. This will ensure the F-Droid store is updated, and that their version strings match those distributed elsewhere.
+To create a new release, update the `run.sh` and the `android/app/build.gradle` files. Remove the `RC` from the version string, and commit the code base. Then create a matching `git tag`. While finalizing a release build and generating the files for the Play Store, and website, it's critical that the `VERSTR` and `VERCODE` values in the `run.sh` script match up with the values in `android/app/build.gradle`, at least those values used by the Lavabit variant. And then it's also critical that the porcelain commit gets tagged with an identical version string. This will ensure the F-Droid store is updated, and that their version strings match those distributed elsewhere.
 
 Once the release files have been generated, increment the version code and version string values used by the `run.sh` and `android/app/build.gradle` files, while also appending `RC` back onto the end of the version string. Please also note that the `android-11-installer.sh` and `debian-10-emulator.sh` should be updated with the new version string values (including the RC), so they can find properly predict the build filenames to install.
 
@@ -25,7 +25,7 @@ For those looking to use the Lavabit proxy servers directly, and without the ass
 
 ### Tasks
   
-- Update the config so the automatic retry window will only grow to a maxium of 10 seconds.
+- Update the config so the automatic retry window will only grow to a maximum of 10 seconds.
 - Randomize which proxy node is used if multiple  nodes are online at a single location.
 - Remove the QUERY_ALL_PACKAGES permission from the manifest, or fix and restore access to the excluder.
 - Allow users to manually switch to using UDP, instead of TCP.
@@ -54,7 +54,7 @@ exit 0
 ```
 
 ### Upstream Code
-While the management, and build scripts for the project were developed by Lavabit, and are unique to this repo, the client and server code wasn't created from nothingness. Rather it is the byproduct of a polygamus relationship between several pre-existing F/OSS projects.
+While the management, and build scripts for the project were developed by Lavabit, and are unique to this repo, the client and server code wasn't created from nothingness. Rather it is the byproduct of a polygamous relationship between several pre-existing F/OSS projects.
 
 Our Android application code is a fork of the [Bitmask codebase](https://0xacab.org/leap/bitmask_android), which acts as a wrapper around the [ICS OpenVPN project](https://github.com/schwabe/ics-openvpn).
 
